@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 enum AppSection: Int {
     case home
+    case papers
     case mistakes
     case statistics
     case settings
@@ -20,6 +21,12 @@ struct RootView: View {
                 }
             }
 
+            Tab("试卷库", systemImage: "doc.on.doc", value: .papers) {
+                NavigationStack {
+                    PaperLibraryView()
+                }
+            }
+
             Tab("错题库", systemImage: "rectangle.stack", value: .mistakes) {
                 NavigationStack {
                     MistakeLibraryView()
@@ -33,12 +40,10 @@ struct RootView: View {
             }
 
             Tab("设置", systemImage: "gearshape", value: .settings) {
-                NavigationStack {
-                    SettingsView()
-                }
+                SettingsView()
             }
         }
-        .tabViewStyle(.sidebarAdaptable)
+        .tabViewStyle(.tabBarOnly)
     }
 }
 
@@ -58,18 +63,7 @@ enum PreferredSubjects {
 // MARK: - Home View（仪表盘：按常用学科的试卷入口）
 
 struct HomeView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query(sort: \PDFDocumentItem.lastOpenDate, order: .reverse) private var documents: [PDFDocumentItem]
     @Query(sort: \MistakeCard.createdAt, order: .reverse) private var cards: [MistakeCard]
-    @AppStorage("preferredSubjects") private var preferredSubjectsRaw = ""
-    @AppStorage("defaultGrade") private var defaultGrade = Grade.grade7.rawValue
-    @AppStorage("defaultSemester") private var defaultSemester = Semester.first.rawValue
-
-    @State private var isImporterPresented = false
-    @State private var selectedDocument: PDFDocumentItem?
-    @State private var alert: AppAlert?
-
-    // MARK: 概况统计
 
     private var unmasteredCount: Int {
         cards.filter { $0.status == MasteryStatus.unmastered.rawValue }.count
@@ -82,27 +76,19 @@ struct HomeView: View {
         return cards.filter { $0.createdAt >= start }.count
     }
 
-    /// 仪表盘展示的学科：常用学科 ∪ 已有试卷的学科。
-    private var visibleSubjects: [Subject] {
-        let withData = Set(documents.map(\.subject))
-        let preferred = Set(PreferredSubjects.parse(preferredSubjectsRaw))
-        let union = withData.union(preferred)
-        return Subject.allCases.filter { union.contains($0.rawValue) }
-    }
-
-    private func paperCount(for subject: Subject) -> Int {
-        documents.filter { $0.subject == subject.rawValue }.count
-    }
-
-    // MARK: Body
-
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 if !cards.isEmpty {
                     dashboardSection
+                } else {
+                    ContentUnavailableView(
+                        "还没有错题",
+                        systemImage: "rectangle.stack",
+                        description: Text("在「试卷库」打开 PDF 做题，框选错题后自动建卡。")
+                    )
+                    .frame(maxWidth: .infinity, minHeight: 320)
                 }
-                papersSection
             }
             .frame(maxWidth: 1_200, alignment: .leading)
             .padding(.horizontal, 28)
@@ -110,29 +96,7 @@ struct HomeView: View {
             .frame(maxWidth: .infinity)
         }
         .navigationTitle("首页")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    isImporterPresented = true
-                } label: {
-                    Label("新增 PDF", systemImage: "plus")
-                }
-            }
-        }
-        .fileImporter(
-            isPresented: $isImporterPresented,
-            allowedContentTypes: [.pdf],
-            allowsMultipleSelection: false
-        ) { result in
-            importPDF(from: result, subject: PreferredSubjects.defaultSubject(preferredSubjectsRaw))
-        }
-        .fullScreenCover(item: $selectedDocument) { document in
-            PDFWorkspaceView(document: document)
-        }
-        .appAlert($alert)
     }
-
-    // MARK: 学习概况（仅总览统计，各科掌握进度移至错题库）
 
     private var dashboardSection: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -150,69 +114,109 @@ struct HomeView: View {
             }
         }
     }
+}
 
-    // MARK: 试卷（按学科入口）
+// MARK: - 试卷库（按学科入口）
 
-    private var papersSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("试卷")
-                .font(.title2.bold())
+struct PaperLibraryView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \PDFDocumentItem.lastOpenDate, order: .reverse) private var documents: [PDFDocumentItem]
+    @AppStorage("preferredSubjects") private var preferredSubjectsRaw = ""
+    @AppStorage("defaultGrade") private var defaultGrade = Grade.grade7.rawValue
+    @AppStorage("defaultSemester") private var defaultSemester = Semester.first.rawValue
 
-            if visibleSubjects.isEmpty {
-                ContentUnavailableView {
-                    Label("还没有试卷", systemImage: "doc")
-                } description: {
-                    Text("点击右上角 + 导入一份 PDF，或在「设置 → 学习设置」中开启常用学科。")
-                } actions: {
-                    Button("导入 PDF", systemImage: "plus") { isImporterPresented = true }
-                        .buttonStyle(.borderedProminent)
-                }
-                .frame(maxWidth: .infinity, minHeight: 280)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
-            } else {
-                LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: 180), spacing: 16)],
-                    spacing: 16
-                ) {
-                    NavigationLink {
-                        PaperSubjectView(subject: nil)
-                    } label: {
-                        PaperSubjectCard(title: "全部试卷", icon: "tray.full", count: documents.count)
-                    }
-                    .buttonStyle(.plain)
+    @State private var isImporterPresented = false
+    @State private var selectedDocument: PDFDocumentItem?
+    @State private var alert: AppAlert?
 
-                    ForEach(visibleSubjects) { subject in
-                        NavigationLink {
-                            PaperSubjectView(subject: subject.rawValue)
-                        } label: {
-                            PaperSubjectCard(
-                                title: subject.rawValue,
-                                icon: subject.sfSymbol,
-                                count: paperCount(for: subject)
-                            )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .frame(maxWidth: 980)
-            }
-        }
+    private var visibleSubjects: [Subject] {
+        let withData = Set(documents.map(\.subject))
+        let preferred = Set(PreferredSubjects.parse(preferredSubjectsRaw))
+        let union = withData.union(preferred)
+        return Subject.allCases.filter { union.contains($0.rawValue) }
     }
 
-    // MARK: 导入
+    private func paperCount(for subject: Subject) -> Int {
+        documents.filter { $0.subject == subject.rawValue }.count
+    }
 
-    private func importPDF(from result: Result<[URL], Error>, subject: String) {
-        do {
-            guard let url = try result.get().first else {
-                throw CocoaError(.fileNoSuchFile)
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                if visibleSubjects.isEmpty {
+                    ContentUnavailableView {
+                        Label("还没有试卷", systemImage: "doc")
+                    } description: {
+                        Text("点击右上角 + 导入一份 PDF，或在「设置 → 学习设置」中开启常用学科。")
+                    } actions: {
+                        Button("导入 PDF", systemImage: "plus") { isImporterPresented = true }
+                            .buttonStyle(.borderedProminent)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 320)
+                } else {
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: 180), spacing: 16)],
+                        spacing: 16
+                    ) {
+                        NavigationLink {
+                            PaperSubjectView(subject: nil)
+                        } label: {
+                            PaperSubjectCard(title: "全部试卷", icon: "tray.full", count: documents.count)
+                        }
+                        .buttonStyle(.plain)
+
+                        ForEach(visibleSubjects) { subject in
+                            NavigationLink {
+                                PaperSubjectView(subject: subject.rawValue)
+                            } label: {
+                                PaperSubjectCard(
+                                    title: subject.rawValue,
+                                    icon: subject.sfSymbol,
+                                    count: paperCount(for: subject)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .frame(maxWidth: 980)
+                }
             }
+            .frame(maxWidth: 1_200, alignment: .leading)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 24)
+            .frame(maxWidth: .infinity)
+        }
+        .navigationTitle("试卷库")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { isImporterPresented = true } label: {
+                    Label("新增 PDF", systemImage: "plus")
+                }
+            }
+        }
+        .fileImporter(
+            isPresented: $isImporterPresented,
+            allowedContentTypes: [.pdf],
+            allowsMultipleSelection: false
+        ) { result in
+            importPDF(from: result)
+        }
+        .fullScreenCover(item: $selectedDocument) { document in
+            PDFWorkspaceView(document: document)
+        }
+        .appAlert($alert)
+    }
+
+    private func importPDF(from result: Result<[URL], Error>) {
+        do {
+            guard let url = try result.get().first else { throw CocoaError(.fileNoSuchFile) }
             let imported = try StorageService.importPDF(from: url)
             let item = PDFDocumentItem(
                 title: imported.title,
                 localFileName: imported.fileName,
                 grade: defaultGrade,
                 semester: defaultSemester,
-                subject: subject
+                subject: PreferredSubjects.defaultSubject(preferredSubjectsRaw)
             )
             modelContext.insert(item)
             try modelContext.save()
@@ -290,13 +294,118 @@ struct PaperSubjectView: View {
     }
 
     var body: some View {
+        NavigationSplitView(columnVisibility: .constant(.all)) {
+            filterSidebar
+                .navigationTitle(subject ?? "全部试卷")
+                .navigationSplitViewColumnWidth(min: 180, ideal: 220)
+                .toolbar(removing: .sidebarToggle)
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button { isImporterPresented = true } label: {
+                            Label("新增 PDF", systemImage: "plus")
+                        }
+                    }
+                }
+        } detail: {
+            documentList
+        }
+        .navigationSplitViewStyle(.balanced)
+        .searchable(text: $searchText, prompt: "搜索试卷")
+        .fileImporter(
+            isPresented: $isImporterPresented,
+            allowedContentTypes: [.pdf],
+            allowsMultipleSelection: false
+        ) { result in
+            importPDF(from: result)
+        }
+        .fullScreenCover(item: $selectedDocument) { document in
+            PDFWorkspaceView(document: document)
+        }
+        .sheet(item: $editingDocument) { document in
+            NavigationStack { PaperEditorView(document: document) }
+        }
+        .confirmationDialog(
+            "删除试卷「\(documentToDelete?.title ?? "")」？",
+            isPresented: Binding(
+                get: { documentToDelete != nil },
+                set: { if !$0 { documentToDelete = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("删除", role: .destructive) {
+                if let doc = documentToDelete { deleteDocument(doc) }
+                documentToDelete = nil
+            }
+            Button("取消", role: .cancel) { documentToDelete = nil }
+        } message: {
+            Text("同时删除该试卷的所有答题记录，无法撤销。")
+        }
+        .appAlert($alert)
+    }
+
+    private var filterSidebar: some View {
+        List {
+            Section("年级") {
+                sidebarRow(label: "全部年级", isActive: selectedGrade.isEmpty) {
+                    selectedGrade = ""
+                }
+                ForEach(Grade.allCases) { grade in
+                    sidebarRow(label: grade.rawValue, isActive: selectedGrade == grade.rawValue) {
+                        selectedGrade = selectedGrade == grade.rawValue ? "" : grade.rawValue
+                    }
+                }
+            }
+            Section("学期") {
+                sidebarRow(label: "全部学期", isActive: selectedSemester.isEmpty) {
+                    selectedSemester = ""
+                }
+                ForEach(Semester.allCases) { semester in
+                    sidebarRow(label: semester.rawValue, isActive: selectedSemester == semester.rawValue) {
+                        selectedSemester = selectedSemester == semester.rawValue ? "" : semester.rawValue
+                    }
+                }
+            }
+            if !selectedGrade.isEmpty || !selectedSemester.isEmpty {
+                Section {
+                    Button(role: .destructive) {
+                        selectedGrade = ""
+                        selectedSemester = ""
+                    } label: {
+                        Label("清除筛选", systemImage: "xmark.circle").foregroundStyle(.red)
+                    }
+                }
+            }
+        }
+    }
+
+    private func sidebarRow(label: String, isActive: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                Text(label)
+                    .foregroundStyle(isActive ? Color.accentColor : .primary)
+                    .fontWeight(isActive ? .semibold : .regular)
+                Spacer()
+                if isActive {
+                    Image(systemName: "checkmark")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.accentColor)
+                }
+            }
+            .contentShape(Rectangle())
+            .padding(.vertical, 2)
+        }
+        .buttonStyle(.plain)
+        .listRowBackground(
+            isActive
+                ? RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color.accentColor.opacity(0.12))
+                : nil
+        )
+    }
+
+    private var documentList: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: 12) { gradePicker; semesterPicker }
-                    VStack(alignment: .leading, spacing: 12) { gradePicker; semesterPicker }
-                }
-
                 if filteredDocuments.isEmpty {
                     ContentUnavailableView {
                         Label(documents.isEmpty ? "还没有试卷" : "没有符合条件的试卷", systemImage: "doc")
@@ -334,61 +443,6 @@ struct PaperSubjectView: View {
             .padding(.vertical, 24)
             .frame(maxWidth: .infinity)
         }
-        .navigationTitle(subject ?? "全部试卷")
-        .searchable(text: $searchText, prompt: "搜索试卷")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button { isImporterPresented = true } label: {
-                    Label("新增 PDF", systemImage: "plus")
-                }
-            }
-        }
-        .fileImporter(
-            isPresented: $isImporterPresented,
-            allowedContentTypes: [.pdf],
-            allowsMultipleSelection: false
-        ) { result in
-            importPDF(from: result)
-        }
-        .fullScreenCover(item: $selectedDocument) { document in
-            PDFWorkspaceView(document: document)
-        }
-        .sheet(item: $editingDocument) { document in
-            NavigationStack { PaperEditorView(document: document) }
-        }
-        .confirmationDialog(
-            "删除试卷「\(documentToDelete?.title ?? "")」？",
-            isPresented: Binding(
-                get: { documentToDelete != nil },
-                set: { if !$0 { documentToDelete = nil } }
-            ),
-            titleVisibility: .visible
-        ) {
-            Button("删除", role: .destructive) {
-                if let doc = documentToDelete { deleteDocument(doc) }
-                documentToDelete = nil
-            }
-            Button("取消", role: .cancel) { documentToDelete = nil }
-        } message: {
-            Text("同时删除该试卷的所有答题记录，无法撤销。")
-        }
-        .appAlert($alert)
-    }
-
-    private var gradePicker: some View {
-        Picker("年级", selection: $selectedGrade) {
-            Text("全部年级").tag("")
-            ForEach(Grade.allCases) { Text($0.rawValue).tag($0.rawValue) }
-        }
-        .frame(maxWidth: 220)
-    }
-
-    private var semesterPicker: some View {
-        Picker("学期", selection: $selectedSemester) {
-            Text("全部学期").tag("")
-            ForEach(Semester.allCases) { Text($0.rawValue).tag($0.rawValue) }
-        }
-        .frame(maxWidth: 220)
     }
 
     private func importPDF(from result: Result<[URL], Error>) {
@@ -433,7 +487,9 @@ struct PaperSubjectView: View {
 // MARK: - 试卷行
 
 private struct PaperRow: View {
-    let document: PDFDocumentItem
+    @Bindable var document: PDFDocumentItem
+    @State private var isRenaming = false
+    @FocusState private var titleFocused: Bool
 
     var body: some View {
         HStack(spacing: 14) {
@@ -442,25 +498,48 @@ private struct PaperRow: View {
                 .foregroundStyle(.red)
                 .frame(width: 50, height: 58)
                 .background(.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+
             VStack(alignment: .leading, spacing: 6) {
-                Text(document.title)
-                    .font(.headline)
-                    .lineLimit(2)
-                Text([document.grade, document.semester, document.subject].joined(separator: " · "))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(document.lastOpenDate, format: .relative(presentation: .named))
-                    .font(.caption2)
+                if isRenaming {
+                    TextField("试卷名称", text: $document.title)
+                        .font(.headline)
+                        .focused($titleFocused)
+                        .onSubmit { isRenaming = false }
+                        .onChange(of: titleFocused) { _, focused in
+                            if !focused { isRenaming = false }
+                        }
+                } else {
+                    Text(document.title)
+                        .font(.headline)
+                        .lineLimit(2)
+                }
+
+                HStack(spacing: 6) {
+                    Text([document.grade, document.semester, document.subject].joined(separator: " · "))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(document.lastOpenDate, format: .dateTime.year().month().day().hour().minute())
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+
+            if !isRenaming {
+                Image(systemName: "chevron.right")
                     .foregroundStyle(.tertiary)
             }
-            Spacer()
-            Image(systemName: "chevron.right")
-                .foregroundStyle(.tertiary)
         }
         .padding()
         .frame(maxWidth: .infinity, minHeight: 90)
         .background(.background, in: RoundedRectangle(cornerRadius: 18))
         .overlay { RoundedRectangle(cornerRadius: 18).stroke(.quaternary) }
+        .contextMenu {
+            Button("重命名", systemImage: "pencil") {
+                isRenaming = true
+                titleFocused = true
+            }
+        }
     }
 }
 

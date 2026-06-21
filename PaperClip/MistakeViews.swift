@@ -20,23 +20,31 @@ struct MistakeLibraryView: View {
     }
 
     var body: some View {
-        List {
-            if !allCards.isEmpty {
-                NavigationLink {
-                    SubjectMistakesView(subject: nil)
-                } label: {
-                    SubjectIndexRow(label: "全部", icon: "tray.full", cards: allCards)
+        ScrollView {
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 160, maximum: 220), spacing: 14)],
+                spacing: 14
+            ) {
+                if !allCards.isEmpty {
+                    NavigationLink {
+                        SubjectMistakesView(subject: nil)
+                    } label: {
+                        SubjectIndexCard(label: "全部", icon: "tray.full", cards: allCards)
+                    }
+                    .buttonStyle(.plain)
                 }
-            }
 
-            ForEach(visibleSubjects) { subject in
-                let subCards = allCards.filter { $0.subject == subject.rawValue }
-                NavigationLink {
-                    SubjectMistakesView(subject: subject.rawValue)
-                } label: {
-                    SubjectIndexRow(label: subject.rawValue, icon: subject.sfSymbol, cards: subCards)
+                ForEach(visibleSubjects) { subject in
+                    let subCards = allCards.filter { $0.subject == subject.rawValue }
+                    NavigationLink {
+                        SubjectMistakesView(subject: subject.rawValue)
+                    } label: {
+                        SubjectIndexCard(label: subject.rawValue, icon: subject.sfSymbol, cards: subCards)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
+            .padding(16)
         }
         .navigationTitle("错题库")
         .overlay {
@@ -51,9 +59,9 @@ struct MistakeLibraryView: View {
     }
 }
 
-// MARK: - SubjectIndexRow
+// MARK: - SubjectIndexCard
 
-private struct SubjectIndexRow: View {
+private struct SubjectIndexCard: View {
     let label: String
     let icon: String
     let cards: [MistakeCard]
@@ -65,40 +73,48 @@ private struct SubjectIndexRow: View {
     private var pct: Double { total > 0 ? Double(masteredCount) / Double(total) : 0 }
 
     var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(Color.accentColor)
-                .frame(width: 32, alignment: .center)
-
-            VStack(alignment: .leading, spacing: 5) {
-                Text(label).font(.headline)
-
-                HStack(spacing: 8) {
-                    Text(total == 0 ? "暂无" : "\(total) 张")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-
-                    if total > 0 {
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                Capsule().fill(Color.secondary.opacity(0.15))
-                                Capsule().fill(Color.green)
-                                    .frame(width: geo.size.width * pct)
-                            }
-                        }
-                        .frame(width: 56, height: 6)
-
-                        Text("\(Int(pct * 100))%")
-                            .font(.caption2.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                    }
-                }
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundStyle(Color.accentColor)
+                Spacer()
+                Text(total == 0 ? "0" : "\(total)")
+                    .font(.title3.monospacedDigit().weight(.semibold))
+                    .foregroundStyle(.primary)
             }
 
-            Spacer()
+            Text(label)
+                .font(.headline)
+                .foregroundStyle(.primary)
+
+            if total > 0 {
+                VStack(alignment: .leading, spacing: 4) {
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(Color.secondary.opacity(0.15))
+                            Capsule().fill(Color.green)
+                                .frame(width: geo.size.width * pct)
+                        }
+                    }
+                    .frame(height: 5)
+
+                    Text("掌握 \(Int(pct * 100))%")
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                Text("暂无错题")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
         }
-        .padding(.vertical, 4)
+        .padding(14)
+        .background(.background.secondary, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color.secondary.opacity(0.12), lineWidth: 0.5)
+        }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(label)，\(total)张，掌握率\(Int(pct * 100))%")
     }
@@ -198,7 +214,6 @@ struct SubjectMistakesView: View {
                     }
                 }
 
-                // 来源试卷筛选（多份试卷时显示）
                 if allSources.count > 1 {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
@@ -237,7 +252,6 @@ struct SubjectMistakesView: View {
                     }
                 }
 
-                // 薄弱知识点（已按学科过滤）
                 if !topTags.isEmpty {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
@@ -287,7 +301,6 @@ struct SubjectMistakesView: View {
                     .padding(.bottom, 4)
                 }
 
-                // 卡片网格
                 if filteredCards.isEmpty {
                     ContentUnavailableView(
                         cards.isEmpty ? "还没有错题" : "没有符合条件的错题",

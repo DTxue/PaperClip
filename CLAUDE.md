@@ -2,6 +2,42 @@
 
 本文件约束 Claude 在此仓库内的所有操作。
 
+## 全局侧边栏规范
+
+凡使用 `NavigationSplitView` 实现的侧边栏，必须遵循以下统一规范：
+
+### 结构要求
+
+```swift
+NavigationSplitView(columnVisibility: .constant(.all)) {
+    // 侧边栏内容
+    .navigationTitle("...")
+    .navigationSplitViewColumnWidth(min: 180, ideal: 220)
+    .toolbar(removing: .sidebarToggle)
+} detail: {
+    // 详情内容
+}
+.navigationSplitViewStyle(.balanced)
+```
+
+- `columnVisibility: .constant(.all)` — 固定展开，不可折叠
+- `min: 180, ideal: 220` — 统一列宽
+- `.toolbar(removing: .sidebarToggle)` — 移除折叠按钮
+- `.navigationSplitViewStyle(.balanced)` — 平衡模式，两栏并排
+
+### 选中样式
+
+- **导航类侧边栏**（选项互斥，如设置页）：使用 `List(data, selection: $binding)`，由系统自动渲染高亮背景
+- **筛选类侧边栏**（多维度独立筛选，如试卷页）：使用自定义行 + `.listRowBackground(isActive ? Color.accentColor.opacity(0.12) : Color.clear)`，文字用 `Color.accentColor` + `.semibold`，右侧加 `checkmark` 图标
+- 两种场景均不得自制高亮组件替代上述方案
+
+### 禁止事项
+
+- 禁止使用 `@State var columnVisibility + .onChange` 替代 `.constant(.all)`
+- 禁止侧边栏宽度与规范值不一致
+- 禁止保留折叠按钮或允许侧边栏折叠
+- 新增带侧边栏的页面必须复用上述结构，不得另起一套实现
+
 ## 修改范围约束
 
 **每次对话只修改用户明确提出的问题，严禁触碰任何未被要求的功能或代码。**

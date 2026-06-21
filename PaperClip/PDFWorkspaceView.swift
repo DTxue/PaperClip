@@ -1033,7 +1033,7 @@ struct FloatingScratchBoard: View {
 
     // 面板布局
     @State private var clearToken = 0
-    @State private var panelSize = CGSize(width: 720, height: 440)
+    @State private var panelSize = CGSize(width: 800, height: 440)
     @State private var panelCenter: CGPoint?
     @GestureState private var moveTranslation: CGSize = .zero
     @GestureState private var resizeTranslation: CGSize = .zero
@@ -1073,7 +1073,6 @@ struct FloatingScratchBoard: View {
         "A","B","C","D","E","F","G","H","I","M","N","O","P","Q","R","S","T","X","Y","Z",
         "α","β","γ","θ","φ","ω","°","′","∠","⊥","∥"
     ]
-    private var canUseGeometricMode: Bool { gridStyle != .none }
 
     // MARK: 快照 / Undo
 
@@ -1440,6 +1439,9 @@ struct FloatingScratchBoard: View {
                     snapResult = nil
                     selectedIDs = []
                     bypassSnapOnce = false
+                    gridStyle = .none
+                } else {
+                    if gridStyle == .none { gridStyle = .square }
                 }
             }
         }
@@ -1463,42 +1465,13 @@ struct FloatingScratchBoard: View {
                 .foregroundStyle(showOpacitySlider ? .blue : .secondary)
                 .accessibilityLabel("透明度调节")
 
-                Menu {
-                    ForEach(ScratchGridStyle.allCases, id: \.self) { style in
-                        Button {
-                            gridStyle = style
-                            if style == .none && isGeometricMode { isGeometricMode = false }
-                        } label: {
-                            HStack {
-                                Text(style.rawValue)
-                                if gridStyle == style { Image(systemName: "checkmark") }
-                            }
-                        }
-                    }
-
-                    Divider()
-
-                    Button {
-                        viewportOrigin = .zero
-                    } label: {
-                        Label("画布归位", systemImage: "scope")
-                    }
-                    .disabled(viewportOrigin == .zero)
-                } label: {
-                    Image(systemName: gridStyle == .none ? "grid" : "grid.circle.fill")
-                        .foregroundStyle(gridStyle != .none ? .blue : .secondary)
-                }
-                .accessibilityLabel("网格样式")
-
                 Button {
-                    guard canUseGeometricMode else { return }
                     withAnimation(.easeInOut(duration: 0.18)) { isGeometricMode.toggle() }
                 } label: {
                     Image(systemName: isGeometricMode ? "triangle.circle.fill" : "triangle.circle")
                 }
                 .foregroundStyle(isGeometricMode ? Color.blue : Color.secondary)
-                .disabled(!canUseGeometricMode)
-                .accessibilityLabel(canUseGeometricMode ? "几何画图模式" : "请先开启网格")
+                .accessibilityLabel("几何画图模式")
 
                 Menu {
                     Button(role: .destructive) { clearToken += 1 } label: {
@@ -1631,6 +1604,37 @@ struct FloatingScratchBoard: View {
                     .accessibilityValue(
                         bypassSnapOnce ? "下一点自由放置" : isSnappingEnabled ? "已启用" : "已关闭"
                     )
+
+                    Menu {
+                        ForEach(ScratchGridStyle.allCases.filter { $0 != .none }, id: \.self) { style in
+                            Button {
+                                gridStyle = style
+                            } label: {
+                                HStack {
+                                    Text(style.rawValue)
+                                    if gridStyle == style { Image(systemName: "checkmark") }
+                                }
+                            }
+                        }
+
+                        Divider()
+
+                        Button {
+                            viewportOrigin = .zero
+                        } label: {
+                            Label("画布归位", systemImage: "scope")
+                        }
+                        .disabled(viewportOrigin == .zero)
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: gridStyle == .none ? "grid" : "grid.circle.fill")
+                                .foregroundStyle(gridStyle != .none ? .blue : .secondary)
+                            Text("网格").font(.system(size: 9))
+                                .foregroundStyle(gridStyle != .none ? .blue : .secondary)
+                        }
+                        .frame(minWidth: 38)
+                    }
+                    .accessibilityLabel("网格样式")
 
                     Divider().frame(height: 28)
 

@@ -1,24 +1,71 @@
 import SwiftUI
 
+// MARK: - 设置分类
+
+private enum SettingsCategory: String, CaseIterable, Identifiable {
+    case appearance = "外观"
+    case learning   = "学习"
+    case ai         = "AI 功能"
+
+    var id: Self { self }
+
+    var icon: String {
+        switch self {
+        case .appearance: return "circle.lefthalf.filled"
+        case .learning:   return "graduationcap"
+        case .ai:         return "brain"
+        }
+    }
+}
+
+// MARK: - 设置主视图
+
 struct SettingsView: View {
+    @State private var selection: SettingsCategory? = .appearance
+
     var body: some View {
-        List {
-            Section("学习") {
-                NavigationLink {
-                    LearningSettingsView()
-                } label: {
-                    Label("学习设置", systemImage: "graduationcap")
-                }
+        NavigationSplitView(columnVisibility: .constant(.all)) {
+            List(SettingsCategory.allCases, selection: $selection) { category in
+                Label(category.rawValue, systemImage: category.icon)
+                    .tag(category)
             }
-            Section("功能") {
-                NavigationLink {
-                    AISettingsView()
-                } label: {
-                    Label("AI 解析设置", systemImage: "brain")
-                }
+            .navigationTitle("设置")
+            .navigationSplitViewColumnWidth(min: 180, ideal: 220)
+            .toolbar(removing: .sidebarToggle)
+        } detail: {
+            switch selection {
+            case .appearance: AppearanceSettingsView()
+            case .learning:   LearningSettingsView()
+            case .ai:         AISettingsView()
+            case nil:         ContentUnavailableView("请选择设置项", systemImage: "gearshape")
             }
         }
-        .navigationTitle("设置")
+        .navigationSplitViewStyle(.balanced)
+    }
+}
+
+// MARK: - 外观设置
+
+private struct AppearanceSettingsView: View {
+    @AppStorage("appColorScheme") private var appColorScheme = "system"
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("主题", selection: $appColorScheme) {
+                    Text("跟随系统").tag("system")
+                    Text("浅色").tag("light")
+                    Text("深色").tag("dark")
+                }
+                .pickerStyle(.segmented)
+            } header: {
+                Text("界面主题")
+            } footer: {
+                Text("选择「跟随系统」时，PaperClip 会随 iPad 系统设置自动切换明暗模式。")
+            }
+        }
+        .navigationTitle("外观")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

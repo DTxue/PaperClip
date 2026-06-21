@@ -61,13 +61,23 @@ struct PaperClipApp: App {
 
 private struct AppRootView: View {
     @State private var startupError: AppAlert?
+    @AppStorage("appColorScheme") private var appColorScheme = "system"
 
     init(startupError: AppAlert?) {
         _startupError = State(initialValue: startupError)
     }
 
+    private var preferredColorScheme: ColorScheme? {
+        switch appColorScheme {
+        case "light": return .light
+        case "dark":  return .dark
+        default:      return nil
+        }
+    }
+
     var body: some View {
         RootView()
             .appAlert($startupError)
+            .preferredColorScheme(preferredColorScheme)
     }
 }

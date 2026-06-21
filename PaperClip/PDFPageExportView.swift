@@ -43,27 +43,37 @@ struct PDFPageExportView: View {
                 } else {
                     ScrollView {
                         LazyVGrid(
-                            columns: [GridItem(.adaptive(minimum: 130), spacing: 14)],
-                            spacing: 14
+                            columns: [GridItem(.adaptive(minimum: 80), spacing: 10)],
+                            spacing: 10
                         ) {
                             ForEach(0..<pageCount, id: \.self) { index in
-                                PDFPageThumbnailCell(
-                                    page: pdfDocument!.page(at: index)!,
-                                    drawing: drawings[index].flatMap { try? PKDrawing(data: $0) },
-                                    pageNumber: index + 1,
-                                    canvasSize: canvasSizes[index],
-                                    isSelected: selectedIndices.contains(index)
-                                )
+                                let selected = selectedIndices.contains(index)
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(selected ? Color.accentColor.opacity(0.15) : Color(uiColor: .systemGray6))
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(selected ? Color.accentColor : Color(uiColor: .systemGray4),
+                                                lineWidth: selected ? 2 : 0.5)
+                                    VStack(spacing: 4) {
+                                        Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                                            .font(.system(size: 18))
+                                            .foregroundStyle(selected ? Color.accentColor : Color(uiColor: .systemGray3))
+                                        Text("第 \(index + 1) 页")
+                                            .font(.subheadline.weight(selected ? .semibold : .regular))
+                                            .foregroundStyle(selected ? Color.accentColor : .primary)
+                                    }
+                                }
+                                .frame(height: 72)
                                 .onTapGesture {
                                     withAnimation(.easeInOut(duration: 0.15)) {
-                                        if selectedIndices.contains(index) {
+                                        if selected {
                                             selectedIndices.remove(index)
                                         } else {
                                             selectedIndices.insert(index)
                                         }
                                     }
                                 }
-                                .accessibilityLabel("第 \(index + 1) 页，\(selectedIndices.contains(index) ? "已选中" : "未选中")")
+                                .accessibilityLabel("第 \(index + 1) 页，\(selected ? "已选中" : "未选中")")
                             }
                         }
                         .padding(16)
@@ -289,98 +299,3 @@ struct PDFPageExportView: View {
     }
 }
 
-// MARK: - 页面缩略图卡片
-
-private struct PDFPageThumbnailCell: View {
-    let page: PDFPage
-    let drawing: PKDrawing?
-    let pageNumber: Int
-    /// 精确 canvas 尺寸；nil 时退回到 mediaBox.size（不做手写叠加缩放）
-    let canvasSize: CGSize?
-    let isSelected: Bool
-
-    @State private var thumbnail: UIImage?
-
-    private var pageBounds: CGSize { page.bounds(for: .mediaBox).size }
-
-    var body: some View {
-        VStack(spacing: 6) {
-            ZStack(alignment: .topTrailing) {
-                Group {
-                    if let thumbnail {
-                        Image(uiImage: thumbnail)
-                            .resizable()
-                            .scaledToFit()
-                    } else {
-                        Color(uiColor: .systemGray5)
-                            .aspectRatio(pageBounds, contentMode: .fit)
-                            .overlay { ProgressView() }
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(
-                            isSelected ? Color.accentColor : Color(uiColor: .systemGray4),
-                            lineWidth: isSelected ? 2.5 : 0.5
-                        )
-                }
-                .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
-
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(isSelected ? Color.accentColor : Color(uiColor: .systemGray3))
-                    .background(Color.white.opacity(0.9), in: Circle())
-                    .offset(x: 4, y: -4)
-            }
-
-            Text("第 \(pageNumber) 页")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .contentShape(Rectangle())
-        .onAppear { loadThumbnail() }
-    }
-
-    private func loadThumbnail() {
-        guard thumbnail == nil else { return }
-        let mediaBox = page.bounds(for: .mediaBox)   // CGRect，有 minX/minY
-        guard mediaBox.width > 0, mediaBox.height > 0 else { return }
-        let targetW: CGFloat = 260
-        let targetH = mediaBox.height * targetW / mediaBox.width
-        let thumbSize = CGSize(width: targetW, height: targetH)
-        // 精确 canvas 尺寸；nil 时退回 mediaBox.size（手写叠加可能有少量偏差，但不影响缩略图）
-        let resolvedCanvasSize = canvasSize ?? mediaBox.size
-
-        Task(priority: .userInitiated) {
-            // PDF 页面渲染
-            let pdfImg = UIGraphicsImageRenderer(size: thumbSize).image { ctx in
-                UIColor.white.setFill()
-                ctx.fill(CGRect(origin: .zero, size: thumbSize))
-                let cgCtx = ctx.cgContext
-                cgCtx.saveGState()
-                let sx = targetW  / mediaBox.width
-                let sy = targetH  / mediaBox.height
-                cgCtx.translateBy(x: 0, y: targetH)
-                cgCtx.scaleBy(x: sx, y: -sy)
-                cgCtx.translateBy(x: -mediaBox.minX, y: -mediaBox.minY)
-                page.draw(with: .mediaBox, to: cgCtx)
-                cgCtx.restoreGState()
-            }
-
-            // 手写叠加
-            guard let drawing, !drawing.strokes.isEmpty else {
-                thumbnail = pdfImg
-                return
-            }
-            let drawImg = drawing.image(
-                from: CGRect(origin: .zero, size: resolvedCanvasSize),
-                scale: 1
-            )
-            thumbnail = UIGraphicsImageRenderer(size: thumbSize).image { _ in
-                pdfImg.draw(in: CGRect(origin: .zero, size: thumbSize))
-                drawImg.draw(in: CGRect(origin: .zero, size: thumbSize))
-            }
-        }
-    }
-}
