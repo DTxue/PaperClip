@@ -9,10 +9,11 @@ struct ShareImageRequest: Identifiable, Transferable, Sendable {
 
     var image: UIImage? { UIImage(data: data) }
 
+    /// 供 ProxyRepresentation 导出的 SwiftUI Image。
+    var shareImage: Image { Image(uiImage: image ?? UIImage()) }
+
     static var transferRepresentation: some TransferRepresentation {
-        DataRepresentation(exportedContentType: .png) { request in
-            request.data
-        }
+        ProxyRepresentation(exporting: \.shareImage)
     }
 }
 
@@ -44,6 +45,8 @@ struct PDFWorkspaceView: View {
     @State private var currentCard: MistakeCard?
     @State private var aiAnalysisRequest: AIAnalysisRequest?
     @State private var shareImageRequest: ShareImageRequest?
+    @State private var isPDFPageExportPresented = false
+    @State private var canvasSizes: [Int: CGSize] = [:]
     @State private var alert: AppAlert?
     @State private var isClearAnswersConfirmationPresented = false
     @State private var pendingSaveTask: Task<Void, Never>?
@@ -79,6 +82,9 @@ struct PDFWorkspaceView: View {
                     onCrop: handleSelectionAction,
                     onError: { message in
                         alert = AppAlert(title: "无法打开 PDF", message: message)
+                    },
+                    onCanvasSizesChanged: { sizes in
+                        canvasSizes = sizes
                     }
                 )
 
@@ -126,6 +132,13 @@ struct PDFWorkspaceView: View {
                 }
 
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        isPDFPageExportPresented = true
+                    } label: {
+                        Image(systemName: "paperplane")
+                    }
+                    .accessibilityLabel("导出页面为长图")
+
                     Button {
                         leaveSelectionMode()
                         isDrawingVisible = true
@@ -294,6 +307,13 @@ struct PDFWorkspaceView: View {
             }
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isPDFPageExportPresented) {
+            PDFPageExportView(
+                documentURL: document.localFileURL,
+                drawings: drawings,
+                canvasSizes: canvasSizes
+            )
         }
         .sheet(isPresented: $isSessionManagerPresented) {
             PracticeSessionManagerView(
@@ -725,61 +745,652 @@ private extension Array {
     var nonEmpty: [Element]? { isEmpty ? nil : self }
 }
 
-/// SwiftUI 与 PencilKit 没有提供可移动、可调整尺寸的浮动画布容器。
-/// 此视图仅自定义容器移动和缩放，书写、工具、橡皮与套索仍由
-/// PKCanvasView/PKToolPicker 提供；拖动手势只附加在标题栏和缩放手柄，
-/// 不拦截画布内 Apple Pencil 输入，也不改变底层 PDF 的滚动与缩放手势。
+
+// MARK: - 几何画板数据模型（点优先架构）
+//
+// 业务需求说明（均无系统等价实现）：
+// 1. 透明度可调的浮动面板
+// 2. 方格/点阵网格背景
+// 3. 点优先几何图形绘制：GeoPoint 是独立实体，GeoShape 通过 pointIDs 引用点
+//    移动点时所有依赖该点的图形自动更新（无需额外代码）
+// 4. 已有点标签修改（A–Z, α–ω 等），不创建独立文字对象
+// 已评估：辅助功能、深色模式、多窗口、系统手势、Apple Pencil 分流。
+
+struct GeoStyle {
+    var color: Color = .blue
+    var lineWidth: CGFloat = 2
+}
+
+struct GeoPoint: Identifiable, Equatable {
+    var id = UUID()
+    var position: CGPoint
+    var label: String
+}
+
+enum GeoShapeKind {
+    case segment           // pointIDs: [p1, p2]
+    case circle            // pointIDs: [center, rim]
+    case polygon           // pointIDs: [v0...vN], 闭合多边形
+    case arrow             // pointIDs: [from, to]
+    case rightAngleMark    // pointIDs: [arm1, vertex, arm2]
+    case angleMark         // pointIDs: [arm1, vertex, arm2]
+}
+
+struct GeoShape: Identifiable {
+    var id = UUID()
+    var kind: GeoShapeKind
+    var pointIDs: [UUID]
+    var style: GeoStyle
+}
+
+struct GeoCanvas {
+    var points: [GeoPoint] = []
+    var shapes: [GeoShape] = []
+
+    func point(_ id: UUID) -> GeoPoint? { points.first { $0.id == id } }
+    func pos(_ id: UUID) -> CGPoint { point(id)?.position ?? .zero }
+
+    private var usedLabels: Set<String> { Set(points.map(\.label)) }
+
+    mutating func nextLabel() -> String {
+        let used = usedLabels
+        for ch in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".map(String.init) {
+            if !used.contains(ch) { return ch }
+        }
+        var n = 1; while used.contains("P\(n)") { n += 1 }; return "P\(n)"
+    }
+
+    @discardableResult
+    mutating func addPoint(at position: CGPoint, automaticallyLabel: Bool = true) -> GeoPoint {
+        let p = GeoPoint(position: position, label: automaticallyLabel ? nextLabel() : "")
+        points.append(p)
+        return p
+    }
+
+    @discardableResult
+    /// 仅复用坐标实际重合的点。是否吸附由手势层决定，避免自由放置时因临近旧点而被隐式合并。
+    mutating func getOrCreatePoint(
+        near position: CGPoint,
+        threshold: CGFloat = 1,
+        automaticallyLabelNewPoint: Bool = true
+    ) -> GeoPoint {
+        if let existing = nearestPoint(to: position, threshold: threshold) { return existing }
+        return addPoint(at: position, automaticallyLabel: automaticallyLabelNewPoint)
+    }
+
+    func nearestPoint(to position: CGPoint, threshold: CGFloat = 22) -> GeoPoint? {
+        points.filter {
+            hypot($0.position.x - position.x, $0.position.y - position.y) < threshold
+        }.min {
+            hypot($0.position.x - position.x, $0.position.y - position.y) <
+            hypot($1.position.x - position.x, $1.position.y - position.y)
+        }
+    }
+
+    mutating func delete(pointIDs delPIDs: Set<UUID>, shapeIDs delSIDs: Set<UUID>) {
+        let cascade = Set(shapes.filter { s in s.pointIDs.contains { delPIDs.contains($0) } }.map(\.id))
+        shapes.removeAll { delSIDs.contains($0.id) || cascade.contains($0.id) }
+        points.removeAll { delPIDs.contains($0.id) }
+    }
+
+    private func distToSeg(_ pt: CGPoint, _ a: CGPoint, _ b: CGPoint) -> CGFloat {
+        let projected = projectedPoint(pt, onSegmentFrom: a, to: b)
+        return hypot(pt.x - projected.x, pt.y - projected.y)
+    }
+
+    private func projectedPoint(_ pt: CGPoint, onSegmentFrom a: CGPoint, to b: CGPoint) -> CGPoint {
+        let dx = b.x - a.x, dy = b.y - a.y, sq = dx * dx + dy * dy
+        guard sq > 0 else { return a }
+        let t = max(0, min(1, ((pt.x - a.x) * dx + (pt.y - a.y) * dy) / sq))
+        return CGPoint(x: a.x + t * dx, y: a.y + t * dy)
+    }
+
+    /// 返回距离触点最近的已有线条位置。包括线段、箭头、多边形边、角的两条边和圆周。
+    func nearestLinePosition(
+        to pt: CGPoint,
+        excludingPoint: UUID? = nil,
+        threshold: CGFloat
+    ) -> CGPoint? {
+        var bestPosition: CGPoint?
+        var bestDistance = threshold
+
+        func consider(_ candidate: CGPoint) {
+            let distance = hypot(candidate.x - pt.x, candidate.y - pt.y)
+            if distance < bestDistance {
+                bestDistance = distance
+                bestPosition = candidate
+            }
+        }
+
+        func considerSegment(_ a: CGPoint, _ b: CGPoint) {
+            consider(projectedPoint(pt, onSegmentFrom: a, to: b))
+        }
+
+        for shape in shapes {
+            if let excludingPoint, shape.pointIDs.contains(excludingPoint) {
+                continue
+            }
+
+            let positions = shape.pointIDs.compactMap { point($0)?.position }
+            switch shape.kind {
+            case .segment, .arrow:
+                guard positions.count >= 2 else { continue }
+                considerSegment(positions[0], positions[1])
+
+            case .polygon:
+                guard positions.count >= 2 else { continue }
+                for index in positions.indices {
+                    considerSegment(positions[index], positions[(index + 1) % positions.count])
+                }
+
+            case .rightAngleMark, .angleMark:
+                guard positions.count >= 3 else { continue }
+                considerSegment(positions[0], positions[1])
+                considerSegment(positions[1], positions[2])
+
+            case .circle:
+                guard positions.count >= 2 else { continue }
+                let center = positions[0]
+                let rim = positions[1]
+                let radius = hypot(rim.x - center.x, rim.y - center.y)
+                let distanceToCenter = hypot(pt.x - center.x, pt.y - center.y)
+                guard radius > 0, distanceToCenter > 0 else { continue }
+                consider(
+                    CGPoint(
+                        x: center.x + (pt.x - center.x) / distanceToCenter * radius,
+                        y: center.y + (pt.y - center.y) / distanceToCenter * radius
+                    )
+                )
+
+            }
+        }
+
+        return bestPosition
+    }
+
+    func hitShape(at pt: CGPoint, threshold: CGFloat = 14) -> UUID? {
+        for shape in shapes.reversed() {
+            let pp = shape.pointIDs.compactMap { point($0)?.position }
+            switch shape.kind {
+            case .segment, .arrow:
+                guard pp.count >= 2, distToSeg(pt, pp[0], pp[1]) < threshold else { continue }
+                return shape.id
+            case .circle:
+                guard pp.count >= 2 else { continue }
+                let r = hypot(pp[1].x - pp[0].x, pp[1].y - pp[0].y)
+                guard abs(hypot(pt.x - pp[0].x, pt.y - pp[0].y) - r) < threshold else { continue }
+                return shape.id
+            case .polygon:
+                let hit = (0..<pp.count).contains { i in
+                    distToSeg(pt, pp[i], pp[(i + 1) % pp.count]) < threshold
+                }
+                if hit { return shape.id }
+            case .rightAngleMark, .angleMark:
+                guard pp.count >= 2, distToSeg(pt, pp[0], pp[1]) < threshold else { continue }
+                return shape.id
+            }
+        }
+        return nil
+    }
+}
+
+enum GeoDrawingTool: String, CaseIterable, Identifiable {
+    case pan        = "pan"
+    case pointer    = "pointer"
+    case point      = "point"
+    case segment    = "segment"
+    case circle     = "circle"
+    case triangle   = "triangle"
+    case arrow      = "arrow"
+    case rightAngle = "rightAngle"
+    case angleMark  = "angleMark"
+    case editLabel  = "editLabel"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .pan:        return "拖动画布"
+        case .pointer:    return "选择"
+        case .point:      return "点"
+        case .segment:    return "线段"
+        case .circle:     return "圆"
+        case .triangle:   return "三角形"
+        case .arrow:      return "箭头"
+        case .rightAngle: return "直角"
+        case .angleMark:  return "角"
+        case .editLabel:  return "改字母"
+        }
+    }
+
+    var sfSymbol: String {
+        switch self {
+        case .pan:        return "hand.draw"
+        case .pointer:    return "cursorarrow"
+        case .point:      return "circle.fill"
+        case .segment:    return "line.diagonal"
+        case .circle:     return "circle"
+        case .triangle:   return "triangle"
+        case .arrow:      return "arrow.up.right"
+        case .rightAngle: return "l.square"
+        case .angleMark:  return "angle"
+        case .editLabel:  return "character.textbox"
+        }
+    }
+
+    var requiredPoints: Int {
+        switch self {
+        case .pan, .pointer, .point, .editLabel: return 0
+        case .segment, .circle, .arrow: return 2
+        case .triangle, .rightAngle, .angleMark: return 3
+        }
+    }
+}
+
+enum GeoInteractionState {
+    case idle
+    case draggingPoint(id: UUID)
+    case staging(positions: [CGPoint], preview: CGPoint?)
+
+    var stagedPositions: [CGPoint] {
+        if case .staging(let p, _) = self { return p }
+        return []
+    }
+    var previewPos: CGPoint? {
+        if case .staging(_, let p) = self { return p }
+        return nil
+    }
+}
+
+enum GeoSnapKind {
+    case none
+    case point
+    case line
+    case grid
+}
+
+struct SnapResult {
+    var position: CGPoint
+    var snapToPointID: UUID?
+    var kind: GeoSnapKind
+}
+
+enum ScratchGridStyle: String, CaseIterable {
+    case none   = "无网格"
+    case square = "方格"
+    case dot    = "点阵"
+}
+
+// MARK: - FloatingScratchBoard
+//
+// 自定义理由：
+// - SwiftUI/PencilKit 无浮动可移动画布
+// - 无内置透明度调节、网格背景、几何图形绘制能力
+// - 点优先架构：GeoPoint 独立存储，图形通过 pointIDs 引用，移动点时图形自动更新
+
 struct FloatingScratchBoard: View {
     let onClose: () -> Void
 
+    // 面板布局
     @State private var clearToken = 0
-    @State private var panelSize = CGSize(width: 560, height: 420)
+    @State private var panelSize = CGSize(width: 720, height: 440)
     @State private var panelCenter: CGPoint?
     @GestureState private var moveTranslation: CGSize = .zero
     @GestureState private var resizeTranslation: CGSize = .zero
+
+    // 背景
+    @State private var backgroundOpacity: Double = 0.92
+    @State private var showOpacitySlider = false
+
+    // 网格
+    @State private var gridStyle: ScratchGridStyle = .none
+    @State private var gridSpacing: CGFloat = 24
+
+    // 几何画板状态
+    @State private var canvas = GeoCanvas()
+    @State private var undoStack: [GeoCanvas] = []
+    @State private var redoStack: [GeoCanvas] = []
+    @State private var isGeometricMode = false
+    @State private var currentTool: GeoDrawingTool = .pointer
+    @State private var interactionState: GeoInteractionState = .idle
+    @State private var snapResult: SnapResult? = nil
+    @State private var selectedIDs: Set<UUID> = []
+    @State private var shapeStyle = GeoStyle()
+    @State private var dragSnapshot: GeoCanvas? = nil
+    @State private var selectedLetter: String = "A"
+    @State private var isSnappingEnabled = true
+    @State private var snapToExistingPoints = true
+    @State private var snapToExistingLines = true
+    @State private var snapToGrid = true
+    @State private var bypassSnapOnce = false
+    @State private var viewportOrigin = CGPoint.zero
+
+    private let lineWidthOptions: [CGFloat] = [1, 1.5, 2, 3, 4]
+    private let pointSnapDistance: CGFloat = 18
+    private let lineSnapDistance: CGFloat = 12
+    private let gridSnapDistance: CGFloat = 7
+    private let geometryLetters: [String] = [
+        "A","B","C","D","E","F","G","H","I","M","N","O","P","Q","R","S","T","X","Y","Z",
+        "α","β","γ","θ","φ","ω","°","′","∠","⊥","∥"
+    ]
+    private var canUseGeometricMode: Bool { gridStyle != .none }
+
+    // MARK: 快照 / Undo
+
+    private func pushUndo() {
+        undoStack.append(canvas)
+        redoStack.removeAll()
+        if undoStack.count > 30 { undoStack.removeFirst() }
+    }
+
+    private func undo() {
+        guard let prev = undoStack.popLast() else { return }
+        redoStack.append(canvas)
+        canvas = prev
+        selectedIDs = []
+        interactionState = .idle
+        snapResult = nil
+    }
+
+    private func redo() {
+        guard let next = redoStack.popLast() else { return }
+        undoStack.append(canvas)
+        canvas = next
+    }
+
+    private func deleteSelected() {
+        guard !selectedIDs.isEmpty else { return }
+        pushUndo()
+        let pids = Set(canvas.points.filter { selectedIDs.contains($0.id) }.map(\.id))
+        let sids = Set(canvas.shapes.filter { selectedIDs.contains($0.id) }.map(\.id))
+        canvas.delete(pointIDs: pids, shapeIDs: sids)
+        selectedIDs = []
+    }
+
+    // MARK: 吸附
+
+    private func computeSnap(for pt: CGPoint, excludingPoint: UUID? = nil) -> SnapResult {
+        guard isSnappingEnabled, !bypassSnapOnce else {
+            return SnapResult(position: pt, snapToPointID: nil, kind: .none)
+        }
+
+        // 1. 已有点吸附（最高优先级）
+        if snapToExistingPoints {
+            let candidates = canvas.points.filter {
+                $0.id != excludingPoint &&
+                hypot($0.position.x - pt.x, $0.position.y - pt.y) < pointSnapDistance
+            }
+            if let nearest = candidates.min(by: {
+                hypot($0.position.x - pt.x, $0.position.y - pt.y) <
+                hypot($1.position.x - pt.x, $1.position.y - pt.y)
+            }) {
+                return SnapResult(position: nearest.position, snapToPointID: nearest.id, kind: .point)
+            }
+        }
+
+        // 2. 已有线条吸附：把新点放到最近线段、圆周或多边形边上。
+        if snapToExistingLines,
+           let linePosition = canvas.nearestLinePosition(
+               to: pt,
+               excludingPoint: excludingPoint,
+               threshold: lineSnapDistance
+           ) {
+            return SnapResult(position: linePosition, snapToPointID: nil, kind: .line)
+        }
+
+        // 3. 网格仅在接近交点时吸附，不再强制将所有坐标取整。
+        if snapToGrid, gridStyle != .none {
+            let snapped = CGPoint(
+                x: round(pt.x / gridSpacing) * gridSpacing,
+                y: round(pt.y / gridSpacing) * gridSpacing
+            )
+            if hypot(snapped.x - pt.x, snapped.y - pt.y) <= gridSnapDistance {
+                return SnapResult(position: snapped, snapToPointID: nil, kind: .grid)
+            }
+        }
+
+        return SnapResult(position: pt, snapToPointID: nil, kind: .none)
+    }
+
+    /// 字母工具只允许修改已有标签，不受绘图吸附设置影响。
+    private func editableLabelPoint(near pt: CGPoint) -> GeoPoint? {
+        canvas.points
+            .filter {
+                !$0.label.isEmpty &&
+                hypot($0.position.x - pt.x, $0.position.y - pt.y) < pointSnapDistance + 6
+            }
+            .min {
+                hypot($0.position.x - pt.x, $0.position.y - pt.y) <
+                hypot($1.position.x - pt.x, $1.position.y - pt.y)
+            }
+    }
+
+    private func modelPoint(from viewportPoint: CGPoint) -> CGPoint {
+        CGPoint(
+            x: viewportPoint.x + viewportOrigin.x,
+            y: viewportPoint.y + viewportOrigin.y
+        )
+    }
+
+    // MARK: 手势路由
+
+    func handleGestureStart(_ pt: CGPoint) {
+        let modelPoint = modelPoint(from: pt)
+
+        if currentTool == .editLabel {
+            if let point = editableLabelPoint(near: modelPoint) {
+                snapResult = SnapResult(position: point.position, snapToPointID: point.id, kind: .point)
+            } else {
+                snapResult = nil
+            }
+            return
+        }
+
+        let snap = computeSnap(for: modelPoint)
+        snapResult = snap
+
+        switch currentTool {
+        case .pointer:
+            if let pid = snap.snapToPointID {
+                selectedIDs = [pid]
+                dragSnapshot = canvas
+                interactionState = .draggingPoint(id: pid)
+            } else if let sid = canvas.hitShape(at: modelPoint) {
+                selectedIDs = [sid]
+                interactionState = .idle
+            } else {
+                selectedIDs = []
+                interactionState = .idle
+            }
+        default:
+            break
+        }
+    }
+
+    func handleGestureMove(_ pt: CGPoint) {
+        let modelPoint = modelPoint(from: pt)
+
+        if currentTool == .editLabel {
+            if let point = editableLabelPoint(near: modelPoint) {
+                snapResult = SnapResult(position: point.position, snapToPointID: point.id, kind: .point)
+            } else {
+                snapResult = nil
+            }
+            interactionState = .idle
+            return
+        }
+
+        var excludeID: UUID? = nil
+        if case .draggingPoint(let id) = interactionState { excludeID = id }
+
+        let snap = computeSnap(for: modelPoint, excludingPoint: excludeID)
+        snapResult = snap
+
+        switch interactionState {
+        case .draggingPoint(let id):
+            if let idx = canvas.points.firstIndex(where: { $0.id == id }) {
+                canvas.points[idx].position = snap.position
+            }
+        case .staging(let positions, _):
+            interactionState = .staging(positions: positions, preview: snap.position)
+        case .idle:
+            if currentTool != .pointer {
+                interactionState = .staging(positions: [], preview: snap.position)
+            }
+        }
+    }
+
+    func handleGestureEnd(_ pt: CGPoint, isTap: Bool) {
+        // 指针工具拖拽结束
+        if case .draggingPoint = interactionState {
+            if let snapshot = dragSnapshot {
+                if canvas.points != snapshot.points {
+                    undoStack.append(snapshot)
+                    redoStack.removeAll()
+                } else {
+                    canvas = snapshot   // 恢复：没有实际移动
+                }
+                dragSnapshot = nil
+            }
+            interactionState = .idle
+            snapResult = nil
+            return
+        }
+
+        guard isTap else {
+            if case .staging(let positions, _) = interactionState {
+                interactionState = .staging(positions: positions, preview: nil)
+            }
+            return
+        }
+
+        let modelPoint = modelPoint(from: pt)
+        let snap = computeSnap(for: modelPoint)
+
+        switch currentTool {
+        case .pan:
+            break
+
+        case .pointer:
+            break   // 选择在 gestureStart 完成
+
+        case .point:
+            if let pointID = snap.snapToPointID {
+                selectedIDs = [pointID]
+            } else {
+                pushUndo()
+                canvas.addPoint(at: snap.position)
+            }
+            interactionState = .idle
+
+        case .segment, .circle, .arrow:
+            let staged = interactionState.stagedPositions
+            if staged.isEmpty {
+                interactionState = .staging(positions: [snap.position], preview: nil)
+            } else {
+                let second = snap.position
+                guard hypot(staged[0].x - second.x, staged[0].y - second.y) > 4 else { break }
+                pushUndo()
+                let automaticallyLabelNewPoints = currentTool != .arrow
+                let p1 = canvas.getOrCreatePoint(
+                    near: staged[0],
+                    automaticallyLabelNewPoint: automaticallyLabelNewPoints
+                )
+                let p2 = canvas.getOrCreatePoint(
+                    near: second,
+                    automaticallyLabelNewPoint: automaticallyLabelNewPoints
+                )
+                let kind: GeoShapeKind = currentTool == .circle ? .circle :
+                                          currentTool == .arrow  ? .arrow  : .segment
+                canvas.shapes.append(GeoShape(kind: kind, pointIDs: [p1.id, p2.id], style: shapeStyle))
+                interactionState = .idle
+            }
+
+        case .triangle, .rightAngle, .angleMark:
+            var newStaged = interactionState.stagedPositions
+            newStaged.append(snap.position)
+            if newStaged.count < currentTool.requiredPoints {
+                interactionState = .staging(positions: newStaged, preview: nil)
+            } else {
+                pushUndo()
+                let automaticallyLabelNewPoints = currentTool == .triangle
+                let pts = newStaged.map {
+                    canvas.getOrCreatePoint(
+                        near: $0,
+                        automaticallyLabelNewPoint: automaticallyLabelNewPoints
+                    )
+                }
+                let kind: GeoShapeKind = currentTool == .triangle   ? .polygon :
+                                          currentTool == .rightAngle ? .rightAngleMark : .angleMark
+                canvas.shapes.append(GeoShape(kind: kind, pointIDs: pts.map(\.id), style: shapeStyle))
+                interactionState = .idle
+            }
+
+        case .editLabel:
+            if let point = editableLabelPoint(near: modelPoint),
+               point.label != selectedLetter,
+               let index = canvas.points.firstIndex(where: { $0.id == point.id }) {
+                pushUndo()
+                canvas.points[index].label = selectedLetter
+                selectedIDs = [point.id]
+            }
+            interactionState = .idle
+        }
+
+        if currentTool != .pointer && currentTool != .editLabel {
+            bypassSnapOnce = false
+        }
+        snapResult = nil
+    }
+
+    // MARK: 主体
 
     var body: some View {
         GeometryReader { geometry in
             let availableSize = geometry.size
             let displayedSize = effectiveSize(in: availableSize)
-            let displayedCenter = effectiveCenter(
-                panelSize: displayedSize,
-                in: availableSize
-            )
+            let displayedCenter = effectiveCenter(panelSize: displayedSize, in: availableSize)
 
             VStack(spacing: 0) {
-                HStack(spacing: 12) {
-                    Image(systemName: "scribble.variable")
-                        .foregroundStyle(.blue)
+                titleBar(in: availableSize)
 
-                    Text("草稿板")
-                        .font(.headline)
-
-                    Spacer()
-
-                    Button {
-                        clearToken += 1
-                    } label: {
-                        Image(systemName: "trash")
-                    }
-                    .accessibilityLabel("清空草稿板")
-
-                    Button(action: onClose) {
-                        Image(systemName: "xmark")
-                    }
-                    .accessibilityLabel("关闭草稿板")
+                if isGeometricMode {
+                    geometricToolBar
                 }
-                .padding(.horizontal, 14)
-                .frame(height: 50)
-                .background(.regularMaterial)
-                .contentShape(Rectangle())
-                .gesture(moveGesture(in: availableSize))
 
                 ZStack(alignment: .bottomTrailing) {
-                    Color.white.opacity(0.78)
+                    Color.white.opacity(backgroundOpacity)
 
-                    ScratchCanvas(clearToken: clearToken)
+                    if gridStyle != .none {
+                        ScratchGridLayer(
+                            style: gridStyle,
+                            spacing: gridSpacing,
+                            viewportOrigin: viewportOrigin
+                        )
+                            .opacity(0.5)
+                            .allowsHitTesting(false)
+                    }
+
+                    ScratchCanvas(
+                        clearToken: clearToken,
+                        viewportOrigin: viewportOrigin
+                    )
                         .background(Color.clear)
+
+                    GeoCanvasLayer(
+                        canvas: canvas,
+                        selectedIDs: selectedIDs,
+                        interactionState: interactionState,
+                        snapResult: snapResult,
+                        currentTool: currentTool,
+                        shapeStyle: shapeStyle,
+                        gridSpacing: gridSpacing,
+                        viewportOrigin: $viewportOrigin,
+                        isActive: isGeometricMode,
+                        onGestureStart: handleGestureStart,
+                        onGestureMove: handleGestureMove,
+                        onGestureEnd: handleGestureEnd
+                    )
 
                     Image(systemName: "arrow.up.left.and.arrow.down.right")
                         .font(.system(size: 13, weight: .bold))
@@ -791,119 +1402,434 @@ struct FloatingScratchBoard: View {
                         .gesture(resizeGesture(in: availableSize))
                         .accessibilityLabel("调整草稿板大小")
                 }
+                .overlay(alignment: .top) {
+                    VStack(spacing: 6) {
+                        constructionStatusOverlay
+                        selectionStatusOverlay
+                    }
+                    .padding(.top, 8)
+                }
             }
             .frame(width: displayedSize.width, height: displayedSize.height)
-            .background(.regularMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .stroke(.quaternary, lineWidth: 1)
             }
-            .shadow(color: .black.opacity(0.16), radius: 18, y: 8)
+            .shadow(color: .black.opacity(0.18), radius: 18, y: 8)
             .position(displayedCenter)
-            .transaction { transaction in
-                transaction.animation = nil
-            }
+            .transaction { $0.animation = nil }
             .onAppear {
                 panelSize = constrainedSize(panelSize, in: availableSize)
-                if panelCenter == nil {
-                    panelCenter = defaultCenter(in: availableSize)
-                }
+                if panelCenter == nil { panelCenter = defaultCenter(in: availableSize) }
             }
             .onChange(of: availableSize) { _, newSize in
                 panelSize = constrainedSize(panelSize, in: newSize)
                 panelCenter = constrainedCenter(
                     panelCenter ?? defaultCenter(in: newSize),
-                    panelSize: panelSize,
-                    in: newSize
+                    panelSize: panelSize, in: newSize
                 )
+            }
+            .onChange(of: currentTool) { _, _ in
+                interactionState = .idle
+                snapResult = nil
+            }
+            .onChange(of: isGeometricMode) { _, isOn in
+                if !isOn {
+                    interactionState = .idle
+                    snapResult = nil
+                    selectedIDs = []
+                    bypassSnapOnce = false
+                }
             }
         }
     }
 
+    // MARK: 标题栏
+
+    @ViewBuilder
+    private func titleBar(in availableSize: CGSize) -> some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
+                Image(systemName: "scribble.variable").foregroundStyle(.blue)
+                Text("草稿板").font(.headline)
+                Spacer()
+
+                Button {
+                    withAnimation(.easeInOut(duration: 0.18)) { showOpacitySlider.toggle() }
+                } label: {
+                    Image(systemName: "circle.lefthalf.filled")
+                }
+                .foregroundStyle(showOpacitySlider ? .blue : .secondary)
+                .accessibilityLabel("透明度调节")
+
+                Menu {
+                    ForEach(ScratchGridStyle.allCases, id: \.self) { style in
+                        Button {
+                            gridStyle = style
+                            if style == .none && isGeometricMode { isGeometricMode = false }
+                        } label: {
+                            HStack {
+                                Text(style.rawValue)
+                                if gridStyle == style { Image(systemName: "checkmark") }
+                            }
+                        }
+                    }
+
+                    Divider()
+
+                    Button {
+                        viewportOrigin = .zero
+                    } label: {
+                        Label("画布归位", systemImage: "scope")
+                    }
+                    .disabled(viewportOrigin == .zero)
+                } label: {
+                    Image(systemName: gridStyle == .none ? "grid" : "grid.circle.fill")
+                        .foregroundStyle(gridStyle != .none ? .blue : .secondary)
+                }
+                .accessibilityLabel("网格样式")
+
+                Button {
+                    guard canUseGeometricMode else { return }
+                    withAnimation(.easeInOut(duration: 0.18)) { isGeometricMode.toggle() }
+                } label: {
+                    Image(systemName: isGeometricMode ? "triangle.circle.fill" : "triangle.circle")
+                }
+                .foregroundStyle(isGeometricMode ? Color.blue : Color.secondary)
+                .disabled(!canUseGeometricMode)
+                .accessibilityLabel(canUseGeometricMode ? "几何画图模式" : "请先开启网格")
+
+                Menu {
+                    Button(role: .destructive) { clearToken += 1 } label: {
+                        Label("清空手写", systemImage: "scribble")
+                    }
+                    Button(role: .destructive) {
+                        pushUndo(); canvas = GeoCanvas()
+                        selectedIDs = []; interactionState = .idle
+                    } label: {
+                        Label("清空几何图形", systemImage: "triangle")
+                    }
+                    Button(role: .destructive) {
+                        clearToken += 1
+                        pushUndo(); canvas = GeoCanvas()
+                        selectedIDs = []; interactionState = .idle
+                    } label: {
+                        Label("全部清空", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "trash").foregroundStyle(.secondary)
+                }
+                .accessibilityLabel("清空草稿板")
+
+                Button(action: onClose) { Image(systemName: "xmark") }
+                    .accessibilityLabel("关闭草稿板")
+            }
+            .padding(.horizontal, 14)
+            .frame(height: 50)
+
+            if showOpacitySlider {
+                HStack(spacing: 10) {
+                    Image(systemName: "sun.min").foregroundStyle(.secondary).font(.caption)
+                    Slider(value: $backgroundOpacity, in: 0.0...1.0, step: 0.01)
+                    Image(systemName: "sun.max").foregroundStyle(.secondary).font(.caption)
+                    Text("\(Int(backgroundOpacity * 100))%")
+                        .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                        .frame(width: 36, alignment: .trailing)
+                }
+                .padding(.horizontal, 14).padding(.bottom, 8)
+            }
+        }
+        .background(.regularMaterial)
+        .contentShape(Rectangle())
+        .gesture(moveGesture(in: availableSize))
+    }
+
+    // MARK: 几何工具栏
+
+    private var geometricToolBar: some View {
+        VStack(spacing: 0) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    // 工具按钮
+                    ForEach(GeoDrawingTool.allCases) { tool in
+                        Button { currentTool = tool } label: {
+                            VStack(spacing: 2) {
+                                Image(systemName: tool.sfSymbol).font(.system(size: 15))
+                                Text(tool.displayName).font(.system(size: 9))
+                            }
+                            .frame(minWidth: 44).padding(.vertical, 6)
+                            .background(
+                                currentTool == tool ? Color.blue.opacity(0.15) : Color.clear,
+                                in: RoundedRectangle(cornerRadius: 8)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(currentTool == tool ? Color.blue : Color.clear, lineWidth: 1)
+                            )
+                        }
+                        .foregroundStyle(currentTool == tool ? .blue : .primary)
+                        .accessibilityLabel(tool.displayName)
+                    }
+
+                    Divider().frame(height: 28)
+
+                    ColorPicker("", selection: $shapeStyle.color, supportsOpacity: false)
+                        .labelsHidden().frame(width: 32, height: 32)
+                        .accessibilityLabel("图形颜色")
+
+                    Menu {
+                        ForEach(lineWidthOptions, id: \.self) { w in
+                            Button { shapeStyle.lineWidth = w } label: {
+                                HStack {
+                                    Text("\(w, specifier: "%.1f") pt")
+                                    if shapeStyle.lineWidth == w { Image(systemName: "checkmark") }
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "lineweight")
+                            Text("\(shapeStyle.lineWidth, specifier: "%.0f")pt").font(.caption)
+                        }.foregroundStyle(.secondary)
+                    }
+                    .accessibilityLabel("线条粗细")
+
+                    Menu {
+                        Toggle("启用智能吸附", isOn: $isSnappingEnabled)
+
+                        Section("吸附目标") {
+                            Toggle("已有点", isOn: $snapToExistingPoints)
+                            Toggle("已有线条与圆周", isOn: $snapToExistingLines)
+                            Toggle("网格或点阵", isOn: $snapToGrid)
+                        }
+
+                        Divider()
+
+                        Button {
+                            bypassSnapOnce.toggle()
+                            snapResult = nil
+                        } label: {
+                            Label(
+                                bypassSnapOnce ? "取消下一点自由放置" : "下一点自由放置",
+                                systemImage: bypassSnapOnce ? "checkmark.circle.fill" : "hand.tap"
+                            )
+                        }
+                        .disabled(!isSnappingEnabled)
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: "scope")
+                            Text(bypassSnapOnce ? "自由" : "吸附")
+                                .font(.system(size: 9))
+                        }
+                        .frame(minWidth: 38)
+                        .foregroundStyle(
+                            bypassSnapOnce || !isSnappingEnabled ? Color.orange : Color.secondary
+                        )
+                    }
+                    .accessibilityLabel("吸附设置")
+                    .accessibilityValue(
+                        bypassSnapOnce ? "下一点自由放置" : isSnappingEnabled ? "已启用" : "已关闭"
+                    )
+
+                    Divider().frame(height: 28)
+
+                    // 撤销
+                    Button { undo() } label: {
+                        Image(systemName: "arrow.uturn.backward")
+                    }
+                    .foregroundStyle(undoStack.isEmpty ? .tertiary : .secondary)
+                    .disabled(undoStack.isEmpty)
+                    .accessibilityLabel("撤销")
+
+                    // 重做
+                    Button { redo() } label: {
+                        Image(systemName: "arrow.uturn.forward")
+                    }
+                    .foregroundStyle(redoStack.isEmpty ? .tertiary : .secondary)
+                    .disabled(redoStack.isEmpty)
+                    .accessibilityLabel("重做")
+                }
+                .padding(.horizontal, 12).padding(.vertical, 6)
+            }
+            .frame(height: 54)
+
+            // 已有点标签修改
+            if currentTool == .editLabel {
+                letterPalette
+            }
+
+        }
+        .background(.ultraThinMaterial)
+    }
+
+    @ViewBuilder
+    private var constructionStatusOverlay: some View {
+        let stagedCount = interactionState.stagedPositions.count
+        if stagedCount > 0 && currentTool != .pointer {
+            HStack(spacing: 8) {
+                Label(constructionHint(staged: stagedCount), systemImage: "info.circle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Divider()
+                    .frame(height: 14)
+
+                Button {
+                    interactionState = .idle
+                    snapResult = nil
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.red)
+                .accessibilityLabel("取消当前图形")
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(.regularMaterial, in: Capsule())
+            .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
+        }
+    }
+
+    @ViewBuilder
+    private var selectionStatusOverlay: some View {
+        if currentTool == .pointer && !selectedIDs.isEmpty {
+            let selPoint = canvas.points.first { selectedIDs.contains($0.id) }
+            let selShape = canvas.shapes.first { selectedIDs.contains($0.id) }
+            HStack(spacing: 8) {
+                if let p = selPoint {
+                    Image(systemName: "circle.fill").font(.caption).foregroundStyle(.orange)
+                    Text(p.label.isEmpty ? "控制点·拖动可移动" : "点 \(p.label)·拖动可移动")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if selShape != nil {
+                    Image(systemName: "checkmark.circle").font(.caption).foregroundStyle(.blue)
+                    Text("已选中图形·拖动可移动").font(.caption).foregroundStyle(.secondary)
+                }
+
+                Divider().frame(height: 14)
+
+                Button(role: .destructive) { deleteSelected() } label: {
+                    Image(systemName: "trash")
+                        .font(.caption.weight(.semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.red)
+                .accessibilityLabel("删除选中元素")
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(.regularMaterial, in: Capsule())
+            .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
+        }
+    }
+
+    private func constructionHint(staged: Int) -> String {
+        switch currentTool {
+        case .segment: return "点击第 2 个点完成线段"
+        case .circle:  return "点击第 2 个点确定半径"
+        case .arrow:   return "点击第 2 个点完成箭头"
+        case .triangle:
+            return staged == 1 ? "已放置 1/3 个顶点" : "已放置 2/3 个顶点，点击第 3 个"
+        case .rightAngle:
+            return staged == 1 ? "点击直角顶点" : "点击第 2 条边的端点"
+        case .angleMark:
+            return staged == 1 ? "点击角的顶点" : "点击第 2 条边的端点"
+        case .editLabel: return "点击已有字母进行替换"
+        default: return ""
+        }
+    }
+
+    private var letterPalette: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                Label("点击已有字母，替换为", systemImage: "hand.tap")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize()
+                ForEach(geometryLetters, id: \.self) { letter in
+                    Button { selectedLetter = letter } label: {
+                        Text(letter)
+                            .font(.system(size: 16, weight: .medium, design: .serif))
+                            .frame(width: 32, height: 32)
+                            .background(
+                                selectedLetter == letter ? Color.blue.opacity(0.15) : Color.clear,
+                                in: RoundedRectangle(cornerRadius: 6)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(
+                                        selectedLetter == letter ? Color.blue : Color.secondary.opacity(0.3),
+                                        lineWidth: 1
+                                    )
+                            )
+                    }
+                    .foregroundStyle(selectedLetter == letter ? .blue : .primary)
+                }
+            }
+            .padding(.horizontal, 12).padding(.vertical, 6)
+        }
+        .frame(height: 48)
+    }
+
+    // MARK: 面板手势
+
     private func moveGesture(in availableSize: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 1, coordinateSpace: .global)
-            .updating($moveTranslation) { value, state, _ in
-                state = value.translation
-            }
+            .updating($moveTranslation) { value, state, _ in state = value.translation }
             .onEnded { value in
                 let displayedSize = effectiveSize(in: availableSize)
                 let start = panelCenter ?? defaultCenter(in: availableSize)
                 panelCenter = constrainedCenter(
-                    CGPoint(
-                        x: start.x + value.translation.width,
-                        y: start.y + value.translation.height
-                    ),
-                    panelSize: displayedSize,
-                    in: availableSize
+                    CGPoint(x: start.x + value.translation.width, y: start.y + value.translation.height),
+                    panelSize: displayedSize, in: availableSize
                 )
             }
     }
 
     private func resizeGesture(in availableSize: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 1, coordinateSpace: .global)
-            .updating($resizeTranslation) { value, state, _ in
-                state = value.translation
-            }
+            .updating($resizeTranslation) { value, state, _ in state = value.translation }
             .onEnded { value in
                 let startSize = panelSize
                 let startCenter = panelCenter ?? defaultCenter(in: availableSize)
                 let newSize = constrainedSize(
-                    CGSize(
-                        width: startSize.width + value.translation.width,
-                        height: startSize.height + value.translation.height
-                    ),
+                    CGSize(width: startSize.width + value.translation.width,
+                           height: startSize.height + value.translation.height),
                     in: availableSize
                 )
-                let sizeDelta = CGSize(
-                    width: newSize.width - startSize.width,
-                    height: newSize.height - startSize.height
-                )
+                let delta = CGSize(width: newSize.width - startSize.width, height: newSize.height - startSize.height)
                 panelSize = newSize
                 panelCenter = constrainedCenter(
-                    CGPoint(
-                        x: startCenter.x + sizeDelta.width / 2,
-                        y: startCenter.y + sizeDelta.height / 2
-                    ),
-                    panelSize: newSize,
-                    in: availableSize
+                    CGPoint(x: startCenter.x + delta.width / 2, y: startCenter.y + delta.height / 2),
+                    panelSize: newSize, in: availableSize
                 )
             }
     }
 
     private func effectiveSize(in availableSize: CGSize) -> CGSize {
         constrainedSize(
-            CGSize(
-                width: panelSize.width + resizeTranslation.width,
-                height: panelSize.height + resizeTranslation.height
-            ),
+            CGSize(width: panelSize.width + resizeTranslation.width,
+                   height: panelSize.height + resizeTranslation.height),
             in: availableSize
         )
     }
 
-    private func effectiveCenter(
-        panelSize displayedSize: CGSize,
-        in availableSize: CGSize
-    ) -> CGPoint {
+    private func effectiveCenter(panelSize displayedSize: CGSize, in availableSize: CGSize) -> CGPoint {
         let baseCenter = panelCenter ?? defaultCenter(in: availableSize)
-        let resizedWidth = displayedSize.width - panelSize.width
-        let resizedHeight = displayedSize.height - panelSize.height
-
         return constrainedCenter(
             CGPoint(
-                x: baseCenter.x + moveTranslation.width + resizedWidth / 2,
-                y: baseCenter.y + moveTranslation.height + resizedHeight / 2
+                x: baseCenter.x + moveTranslation.width + (displayedSize.width - panelSize.width) / 2,
+                y: baseCenter.y + moveTranslation.height + (displayedSize.height - panelSize.height) / 2
             ),
-            panelSize: displayedSize,
-            in: availableSize
+            panelSize: displayedSize, in: availableSize
         )
     }
 
     private func defaultCenter(in availableSize: CGSize) -> CGPoint {
-        CGPoint(
-            x: availableSize.width * 0.68,
-            y: availableSize.height * 0.34
-        )
+        CGPoint(x: availableSize.width * 0.68, y: availableSize.height * 0.34)
     }
 
     private func constrainedSize(_ size: CGSize, in availableSize: CGSize) -> CGSize {
@@ -913,22 +1839,463 @@ struct FloatingScratchBoard: View {
         )
     }
 
-    private func constrainedCenter(
-        _ center: CGPoint,
-        panelSize: CGSize,
-        in availableSize: CGSize
-    ) -> CGPoint {
-        let halfWidth = panelSize.width / 2
-        let halfHeight = panelSize.height / 2
-        return CGPoint(
-            x: min(max(center.x, halfWidth + 12), availableSize.width - halfWidth - 12),
-            y: min(max(center.y, halfHeight + 12), availableSize.height - halfHeight - 12)
+    private func constrainedCenter(_ center: CGPoint, panelSize: CGSize, in availableSize: CGSize) -> CGPoint {
+        CGPoint(
+            x: min(max(center.x, panelSize.width / 2 + 12), availableSize.width - panelSize.width / 2 - 12),
+            y: min(max(center.y, panelSize.height / 2 + 12), availableSize.height - panelSize.height / 2 - 12)
         )
     }
 }
 
+// MARK: - 网格背景层
+// SwiftUI Canvas 是官方推荐的自定义 2D 绘制 API，无 UIKit 包装，
+// 支持深色模式（Color.primary）和任意尺寸缩放。
+
+private struct ScratchGridLayer: View {
+    let style: ScratchGridStyle
+    let spacing: CGFloat
+    let viewportOrigin: CGPoint
+
+    var body: some View {
+        GeometryReader { geo in
+            Canvas { context, _ in
+                let size = geo.size
+                switch style {
+                case .none: break
+                case .square: drawSquare(context: context, size: size)
+                case .dot:    drawDot(context: context, size: size)
+                }
+            }
+        }
+    }
+
+    private func drawSquare(context: GraphicsContext, size: CGSize) {
+        var path = Path()
+        var x = firstGridPosition(for: viewportOrigin.x)
+        while x < size.width { path.move(to: CGPoint(x: x, y: 0)); path.addLine(to: CGPoint(x: x, y: size.height)); x += spacing }
+        var y = firstGridPosition(for: viewportOrigin.y)
+        while y < size.height { path.move(to: CGPoint(x: 0, y: y)); path.addLine(to: CGPoint(x: size.width, y: y)); y += spacing }
+        context.stroke(path, with: .color(.init(white: 0, opacity: 0.18)), lineWidth: 0.5)
+    }
+
+    private func drawDot(context: GraphicsContext, size: CGSize) {
+        var path = Path()
+        var x = firstGridPosition(for: viewportOrigin.x)
+        while x < size.width {
+            var y = firstGridPosition(for: viewportOrigin.y)
+            while y < size.height { path.addEllipse(in: CGRect(x: x - 1.5, y: y - 1.5, width: 3, height: 3)); y += spacing }
+            x += spacing
+        }
+        context.fill(path, with: .color(.init(white: 0, opacity: 0.3)))
+    }
+
+    private func firstGridPosition(for origin: CGFloat) -> CGFloat {
+        var position = (-origin).truncatingRemainder(dividingBy: spacing)
+        if position <= 0 { position += spacing }
+        return position
+    }
+}
+
+// MARK: - 几何图形渲染层
+// 业务需求：点优先几何图形绘制。PencilKit 无预设形状 API。
+// drawingPolicy = .pencilOnly 保证 Pencil 由 PK 处理，手指由此层处理。
+// GeoPoint 是独立实体，图形通过 pointIDs 引用；渲染时动态解析坐标。
+
+private struct GeoCanvasLayer: View {
+    let canvas: GeoCanvas
+    let selectedIDs: Set<UUID>
+    let interactionState: GeoInteractionState
+    let snapResult: SnapResult?
+    let currentTool: GeoDrawingTool
+    let shapeStyle: GeoStyle
+    let gridSpacing: CGFloat
+    @Binding var viewportOrigin: CGPoint
+    let isActive: Bool
+    let onGestureStart: (CGPoint) -> Void
+    let onGestureMove: (CGPoint) -> Void
+    let onGestureEnd: (CGPoint, Bool) -> Void
+
+    @State private var gestureActive = false
+    @State private var panOriginAtStart: CGPoint?
+
+    private let viewportLimit: CGFloat = 2_048
+
+    var body: some View {
+        Canvas { context, size in
+            context.translateBy(x: -viewportOrigin.x, y: -viewportOrigin.y)
+            renderShapes(ctx: &context)
+            renderPoints(ctx: &context)
+            renderPreview(ctx: &context)
+            renderSnapIndicator(ctx: &context)
+        }
+        .contentShape(Rectangle())
+        .allowsHitTesting(isActive)
+        .gesture(
+            DragGesture(minimumDistance: 0, coordinateSpace: .local)
+                .onChanged { value in
+                    if currentTool == .pan {
+                        let startOrigin = panOriginAtStart ?? viewportOrigin
+                        if panOriginAtStart == nil {
+                            panOriginAtStart = viewportOrigin
+                        }
+                        viewportOrigin = constrainedViewportOrigin(
+                            CGPoint(
+                                x: startOrigin.x - value.translation.width,
+                                y: startOrigin.y - value.translation.height
+                            )
+                        )
+                        return
+                    }
+
+                    if !gestureActive {
+                        gestureActive = true
+                        onGestureStart(value.startLocation)
+                    }
+                    onGestureMove(value.location)
+                }
+                .onEnded { value in
+                    if currentTool == .pan {
+                        let startOrigin = panOriginAtStart ?? viewportOrigin
+                        viewportOrigin = constrainedViewportOrigin(
+                            CGPoint(
+                                x: startOrigin.x - value.translation.width,
+                                y: startOrigin.y - value.translation.height
+                            )
+                        )
+                        panOriginAtStart = nil
+                        gestureActive = false
+                        return
+                    }
+
+                    let isTap = hypot(value.translation.width, value.translation.height) < 8
+                    onGestureEnd(value.location, isTap)
+                    gestureActive = false
+                },
+            including: isActive ? .all : .none
+        )
+        .accessibilityLabel("几何绘图区域")
+        .accessibilityHint(
+            currentTool == .pan
+                ? "单指拖动以移动画布"
+                : "使用手指放置或移动控制点，Apple Pencil 用于手写"
+        )
+        .onChange(of: currentTool) { _, _ in
+            panOriginAtStart = nil
+            gestureActive = false
+        }
+    }
+
+    // MARK: 图形渲染
+
+    private func renderShapes(ctx: inout GraphicsContext) {
+        for shape in canvas.shapes {
+            renderShape(shape, ctx: &ctx)
+        }
+    }
+
+    private func renderShape(_ shape: GeoShape, ctx: inout GraphicsContext) {
+        let isSelected = selectedIDs.contains(shape.id)
+        let style = shape.style
+        let lw = isSelected ? style.lineWidth + 1 : style.lineWidth
+        let shading = GraphicsContext.Shading.color(style.color)
+        let pp = shape.pointIDs.compactMap { canvas.point($0)?.position }
+
+        switch shape.kind {
+        case .segment:
+            guard pp.count >= 2 else { return }
+            var path = Path()
+            path.move(to: pp[0]); path.addLine(to: pp[1])
+            ctx.stroke(path, with: shading, lineWidth: lw)
+            if isSelected { renderSegmentMeasure(pp[0], pp[1], ctx: &ctx) }
+
+        case .arrow:
+            guard pp.count >= 2 else { return }
+            var path = Path()
+            path.move(to: pp[0]); path.addLine(to: pp[1])
+            let len = hypot(pp[1].x - pp[0].x, pp[1].y - pp[0].y)
+            if len > 0 {
+                let ux = (pp[1].x - pp[0].x) / len, uy = (pp[1].y - pp[0].y) / len
+                let wl = min(16, len * 0.35), a: CGFloat = .pi / 6
+                let ca = cos(a), sa = sin(a)
+                path.move(to: pp[1])
+                path.addLine(to: CGPoint(x: pp[1].x - wl*(ux*ca - uy*sa), y: pp[1].y - wl*(uy*ca + ux*sa)))
+                path.move(to: pp[1])
+                path.addLine(to: CGPoint(x: pp[1].x - wl*(ux*ca + uy*sa), y: pp[1].y - wl*(uy*ca - ux*sa)))
+            }
+            ctx.stroke(path, with: shading, lineWidth: lw)
+
+        case .circle:
+            guard pp.count >= 2 else { return }
+            let r = hypot(pp[1].x - pp[0].x, pp[1].y - pp[0].y)
+            var path = Path()
+            path.addEllipse(in: CGRect(x: pp[0].x - r, y: pp[0].y - r, width: r * 2, height: r * 2))
+            ctx.stroke(path, with: shading, lineWidth: lw)
+            if isSelected { renderCircleMeasure(center: pp[0], rim: pp[1], ctx: &ctx) }
+
+        case .polygon:
+            guard pp.count >= 3 else { return }
+            var path = Path()
+            path.move(to: pp[0])
+            pp.dropFirst().forEach { path.addLine(to: $0) }
+            path.closeSubpath()
+            ctx.stroke(path, with: shading, lineWidth: lw)
+
+        case .rightAngleMark:
+            guard pp.count >= 3 else { return }
+            let arm1 = pp[0], vertex = pp[1], arm2 = pp[2]
+            var path = Path()
+            path.move(to: arm1); path.addLine(to: vertex)
+            path.move(to: arm2); path.addLine(to: vertex)
+            ctx.stroke(path, with: shading, lineWidth: lw)
+            // 直角小方块
+            let sq: CGFloat = 11
+            let d1 = normalize(arm1, from: vertex)
+            let d2 = normalize(arm2, from: vertex)
+            var sqPath = Path()
+            sqPath.move(to: CGPoint(x: vertex.x + d1.x * sq, y: vertex.y + d1.y * sq))
+            sqPath.addLine(to: CGPoint(x: vertex.x + d1.x * sq + d2.x * sq, y: vertex.y + d1.y * sq + d2.y * sq))
+            sqPath.addLine(to: CGPoint(x: vertex.x + d2.x * sq, y: vertex.y + d2.y * sq))
+            ctx.stroke(sqPath, with: shading, lineWidth: lw)
+
+        case .angleMark:
+            guard pp.count >= 3 else { return }
+            let arm1 = pp[0], vertex = pp[1], arm2 = pp[2]
+            var path = Path()
+            path.move(to: arm1); path.addLine(to: vertex)
+            path.move(to: arm2); path.addLine(to: vertex)
+            ctx.stroke(path, with: shading, lineWidth: lw)
+            let r1 = hypot(arm1.x - vertex.x, arm1.y - vertex.y)
+            let r2 = hypot(arm2.x - vertex.x, arm2.y - vertex.y)
+            let arcR = min(r1, r2) * 0.35
+            if arcR > 4 {
+                let a1 = atan2(arm1.y - vertex.y, arm1.x - vertex.x)
+                let a2 = atan2(arm2.y - vertex.y, arm2.x - vertex.x)
+                var sweep = a2 - a1
+                while sweep > .pi { sweep -= 2 * .pi }
+                while sweep <= -.pi { sweep += 2 * .pi }
+                var arcPath = Path()
+                arcPath.addArc(center: vertex, radius: arcR,
+                               startAngle: .radians(a1), endAngle: .radians(a2),
+                               clockwise: sweep < 0)
+                ctx.stroke(arcPath, with: shading, lineWidth: lw)
+                // 角度标注
+                if isSelected {
+                    let deg = abs(sweep) * 180 / .pi
+                    let midA = a1 + sweep / 2
+                    let labelPt = CGPoint(x: vertex.x + (arcR + 10) * cos(midA),
+                                         y: vertex.y + (arcR + 10) * sin(midA))
+                    ctx.draw(
+                        Text("\(Int(deg.rounded()))°")
+                            .font(.system(size: 11).monospacedDigit())
+                            .foregroundStyle(style.color),
+                        at: labelPt, anchor: .center
+                    )
+                }
+            }
+
+        }
+
+        // 选中高亮：控制点小方块
+        if isSelected {
+            for pos in pp {
+                var h = Path()
+                h.addRect(CGRect(x: pos.x - 4, y: pos.y - 4, width: 8, height: 8))
+                ctx.fill(h, with: .color(.white))
+                ctx.stroke(h, with: shading, lineWidth: 1.5)
+            }
+        }
+    }
+
+    private func renderSegmentMeasure(_ p1: CGPoint, _ p2: CGPoint, ctx: inout GraphicsContext) {
+        let len = hypot(p2.x - p1.x, p2.y - p1.y) / gridSpacing
+        let dx = p2.x - p1.x, dy = p2.y - p1.y
+        let d = hypot(dx, dy)
+        guard d > 0 else { return }
+        let nx = -dy / d, ny = dx / d
+        let mid = CGPoint(x: (p1.x + p2.x) / 2 + nx * 13, y: (p1.y + p2.y) / 2 + ny * 13)
+        ctx.draw(
+            Text(String(format: "%.1f", len))
+                .font(.system(size: 11).monospacedDigit())
+                .foregroundStyle(Color.secondary),
+            at: mid, anchor: .center
+        )
+    }
+
+    private func renderCircleMeasure(center: CGPoint, rim: CGPoint, ctx: inout GraphicsContext) {
+        let r = hypot(rim.x - center.x, rim.y - center.y) / gridSpacing
+        ctx.draw(
+            Text("r=\(String(format: "%.1f", r))")
+                .font(.system(size: 11).monospacedDigit())
+                .foregroundStyle(Color.secondary),
+            at: CGPoint(x: rim.x + 6, y: rim.y - 6), anchor: .bottomLeading
+        )
+    }
+
+    // MARK: 点渲染
+
+    private func renderPoints(ctx: inout GraphicsContext) {
+        for point in canvas.points {
+            let isSelected = selectedIDs.contains(point.id)
+            let pos = point.position
+            let r: CGFloat = isSelected ? 6 : 5
+
+            // 白色外圈保证控制点不会被深色线条或网格吞没。
+            var halo = Path()
+            halo.addEllipse(
+                in: CGRect(
+                    x: pos.x - r - 2,
+                    y: pos.y - r - 2,
+                    width: (r + 2) * 2,
+                    height: (r + 2) * 2
+                )
+            )
+            ctx.fill(halo, with: .color(.white.opacity(0.95)))
+            ctx.stroke(halo, with: .color(.black.opacity(0.22)), lineWidth: 1)
+
+            var dot = Path()
+            dot.addEllipse(in: CGRect(x: pos.x - r, y: pos.y - r, width: r * 2, height: r * 2))
+            ctx.fill(dot, with: .color(isSelected ? .orange : .blue))
+
+            // 选中圆环
+            if isSelected {
+                var ring = Path()
+                ring.addEllipse(in: CGRect(x: pos.x - 9, y: pos.y - 9, width: 18, height: 18))
+                ctx.stroke(ring, with: .color(.orange), lineWidth: 1.5)
+            }
+
+            // 标签
+            if !point.label.isEmpty {
+                ctx.draw(
+                    Text(point.label)
+                        .font(.system(size: 12, weight: .medium, design: .serif))
+                        .foregroundStyle(Color.black),
+                    at: CGPoint(x: pos.x + 7, y: pos.y - 7), anchor: .bottomLeading
+                )
+            }
+        }
+    }
+
+    // MARK: 预览虚线
+
+    private func renderPreview(ctx: inout GraphicsContext) {
+        let staged = interactionState.stagedPositions
+        let previewShading = GraphicsContext.Shading.color(shapeStyle.color.opacity(0.5))
+        let dashed = StrokeStyle(lineWidth: shapeStyle.lineWidth, dash: [5, 3])
+
+        // 临时顶点必须在抬手后继续显示，否则多点图形无法准确放置后续顶点。
+        for (index, point) in staged.enumerated() {
+            var halo = Path()
+            halo.addEllipse(in: CGRect(x: point.x - 8, y: point.y - 8, width: 16, height: 16))
+            ctx.fill(halo, with: .color(.white.opacity(0.95)))
+            ctx.stroke(halo, with: .color(shapeStyle.color.opacity(0.9)), lineWidth: 2)
+
+            var dot = Path()
+            dot.addEllipse(in: CGRect(x: point.x - 4, y: point.y - 4, width: 8, height: 8))
+            ctx.fill(dot, with: .color(shapeStyle.color))
+
+            ctx.draw(
+                Text("\(index + 1)")
+                    .font(.system(size: 10, weight: .bold).monospacedDigit())
+                    .foregroundStyle(Color.black),
+                at: CGPoint(x: point.x + 10, y: point.y - 10),
+                anchor: .bottomLeading
+            )
+        }
+
+        guard let preview = interactionState.previewPos else { return }
+        var path = Path()
+
+        switch currentTool {
+        case .segment, .arrow, .circle:
+            guard staged.count == 1 else { return }
+            path.move(to: staged[0]); path.addLine(to: preview)
+            ctx.stroke(path, with: previewShading, style: dashed)
+
+        case .triangle:
+            if staged.count == 1 {
+                path.move(to: staged[0]); path.addLine(to: preview)
+            } else if staged.count == 2 {
+                path.move(to: staged[0]); path.addLine(to: staged[1])
+                path.move(to: staged[1]); path.addLine(to: preview)
+                path.move(to: preview);   path.addLine(to: staged[0])
+            }
+            ctx.stroke(path, with: previewShading, style: dashed)
+
+        case .rightAngle, .angleMark:
+            if staged.count >= 1 {
+                path.move(to: staged[0]); path.addLine(to: preview)
+            }
+            if staged.count >= 2 {
+                path.move(to: staged[1]); path.addLine(to: preview)
+            }
+            ctx.stroke(path, with: previewShading, style: dashed)
+
+        default: break
+        }
+
+        // 当前待放置点使用空心圆，和已经确认的临时顶点区分。
+        var cursor = Path()
+        cursor.addEllipse(in: CGRect(x: preview.x - 6, y: preview.y - 6, width: 12, height: 12))
+        ctx.fill(cursor, with: .color(.white.opacity(0.8)))
+        ctx.stroke(cursor, with: .color(shapeStyle.color.opacity(0.85)), lineWidth: 2)
+    }
+
+    // MARK: 吸附指示器
+
+    private func renderSnapIndicator(ctx: inout GraphicsContext) {
+        guard let snap = snapResult else { return }
+        let pos = snap.position
+        switch snap.kind {
+        case .point:
+            var ring = Path()
+            ring.addEllipse(in: CGRect(x: pos.x - 11, y: pos.y - 11, width: 22, height: 22))
+            ctx.stroke(ring, with: .color(.yellow.opacity(0.85)), lineWidth: 2)
+
+        case .line:
+            var diamond = Path()
+            diamond.move(to: CGPoint(x: pos.x, y: pos.y - 8))
+            diamond.addLine(to: CGPoint(x: pos.x + 8, y: pos.y))
+            diamond.addLine(to: CGPoint(x: pos.x, y: pos.y + 8))
+            diamond.addLine(to: CGPoint(x: pos.x - 8, y: pos.y))
+            diamond.closeSubpath()
+            ctx.stroke(diamond, with: .color(.green.opacity(0.9)), lineWidth: 2)
+
+        case .grid:
+            var cross = Path()
+            cross.move(to: CGPoint(x: pos.x - 6, y: pos.y)); cross.addLine(to: CGPoint(x: pos.x + 6, y: pos.y))
+            cross.move(to: CGPoint(x: pos.x, y: pos.y - 6)); cross.addLine(to: CGPoint(x: pos.x, y: pos.y + 6))
+            ctx.stroke(cross, with: .color(.blue.opacity(0.55)), lineWidth: 1.5)
+
+        case .none:
+            break
+        }
+    }
+
+    // MARK: 辅助
+
+    private func normalize(_ point: CGPoint, from origin: CGPoint) -> CGPoint {
+        let dx = point.x - origin.x, dy = point.y - origin.y
+        let len = hypot(dx, dy)
+        guard len > 0 else { return .zero }
+        return CGPoint(x: dx / len, y: dy / len)
+    }
+
+    private func constrainedViewportOrigin(_ origin: CGPoint) -> CGPoint {
+        CGPoint(
+            x: min(max(origin.x, -viewportLimit), viewportLimit),
+            y: min(max(origin.y, -viewportLimit), viewportLimit)
+        )
+    }
+}
+
+// MARK: - PencilKit 手写画布
+
 private struct ScratchCanvas: UIViewRepresentable {
     let clearToken: Int
+    let viewportOrigin: CGPoint
+
+    private let virtualCanvasOrigin = CGPoint(x: 2_048, y: 2_048)
+    private let virtualCanvasSize = CGSize(width: 6_144, height: 6_144)
 
     func makeUIView(context: Context) -> PKCanvasView {
         let canvas = PKCanvasView()
@@ -936,12 +2303,28 @@ private struct ScratchCanvas: UIViewRepresentable {
         canvas.isOpaque = false
         canvas.drawingPolicy = .pencilOnly
         canvas.isScrollEnabled = false
+        canvas.bounces = false
+        canvas.contentInsetAdjustmentBehavior = .never
+        canvas.contentSize = virtualCanvasSize
+        canvas.contentOffset = virtualCanvasOrigin
         canvas.tool = PKInkingTool(.pen, color: .systemBlue, width: 3)
         context.coordinator.attach(to: canvas)
         return canvas
     }
 
     func updateUIView(_ canvas: PKCanvasView, context: Context) {
+        canvas.contentSize = virtualCanvasSize
+        let targetOffset = CGPoint(
+            x: virtualCanvasOrigin.x + viewportOrigin.x,
+            y: virtualCanvasOrigin.y + viewportOrigin.y
+        )
+        if hypot(
+            canvas.contentOffset.x - targetOffset.x,
+            canvas.contentOffset.y - targetOffset.y
+        ) > 0.5 {
+            canvas.setContentOffset(targetOffset, animated: false)
+        }
+
         context.coordinator.showToolPicker(for: canvas)
         if context.coordinator.lastClearToken != clearToken {
             canvas.drawing = PKDrawing()
@@ -961,9 +2344,7 @@ private struct ScratchCanvas: UIViewRepresentable {
         private let toolPicker = PKToolPicker()
         private weak var canvas: PKCanvasView?
 
-        init() {
-            toolPicker.stateAutosaveName = "PaperClip.ScratchTools"
-        }
+        init() { toolPicker.stateAutosaveName = "PaperClip.ScratchTools" }
 
         func attach(to canvas: PKCanvasView) {
             self.canvas = canvas

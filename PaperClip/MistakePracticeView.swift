@@ -100,39 +100,57 @@ struct MistakePracticeView: View {
     // MARK: Body
 
     var body: some View {
-        Group {
-            if cards.isEmpty {
-                ContentUnavailableView(
-                    "没有可练习的错题",
-                    systemImage: "rectangle.stack",
-                    description: Text("返回错题库后重新选择练习范围。")
-                )
-            } else if showSummary {
-                PracticeSummaryView(
-                    cards: cards,
-                    marks: marks,
-                    practiceGroupID: practiceGroupID,
-                    round: round,
-                    onSubmit: submitAndDismiss,
-                    onClose: { dismiss() }
-                )
-            } else {
-                practiceBody
-                    .confirmationDialog("结束本次练习？", isPresented: $showExitConfirm) {
-                        Button("结束练习", role: .destructive) { dismiss() }
-                        Button("取消", role: .cancel) {}
-                    } message: {
-                        Text("已标记内容将不会同步到错题库。")
-                    }
+        NavigationStack {
+            Group {
+                if cards.isEmpty {
+                    ContentUnavailableView(
+                        "没有可练习的错题",
+                        systemImage: "rectangle.stack",
+                        description: Text("返回错题库后重新选择练习范围。")
+                    )
+                } else if showSummary {
+                    PracticeSummaryView(
+                        cards: cards,
+                        marks: marks,
+                        practiceGroupID: practiceGroupID,
+                        round: round,
+                        onAutoSubmit: submitMarks,
+                        onClose: dismiss.callAsFunction
+                    )
+                    .navigationTitle("练习完成")
+                    .navigationBarTitleDisplayMode(.inline)
+                } else {
+                    practiceBody
+                        .navigationTitle(
+                            round > 1
+                                ? "第 \(currentIndex + 1) / \(cards.count) 题  ·  第 \(round) 轮"
+                                : "第 \(currentIndex + 1) / \(cards.count) 题"
+                        )
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("结束") { showExitConfirm = true }
+                                    .foregroundStyle(.secondary)
+                            }
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                Button {
+                                    goBack()
+                                } label: {
+                                    Image(systemName: "chevron.left")
+                                }
+                                .disabled(currentIndex == 0)
+                            }
+                        }
+                        .confirmationDialog("结束本次练习？", isPresented: $showExitConfirm) {
+                            Button("结束练习", role: .destructive) { dismiss() }
+                            Button("取消", role: .cancel) {}
+                        } message: {
+                            Text("已标记内容将不会同步到错题库。")
+                        }
+                }
             }
         }
-        .alert(item: $alert) { alert in
-            Alert(
-                title: Text(alert.title),
-                message: Text(alert.message),
-                dismissButton: .default(Text("好"))
-            )
-        }
+        .appAlert($alert)
     }
 
     // MARK: Practice Layout
@@ -140,8 +158,12 @@ struct MistakePracticeView: View {
     @ViewBuilder
     private var practiceBody: some View {
         VStack(spacing: 0) {
-            topBar
-            progressStrip
+            ProgressView(value: progress)
+                .progressViewStyle(.linear)
+                .tint(.accentColor)
+                .animation(.spring(duration: 0.3), value: currentIndex)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
             markCountRow
 
             GeometryReader { geo in
@@ -180,56 +202,6 @@ struct MistakePracticeView: View {
 
     // MARK: Sub-views
 
-    private var topBar: some View {
-        HStack {
-            Button {
-                showExitConfirm = true
-            } label: {
-                Label("结束", systemImage: "xmark")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            VStack(spacing: 2) {
-                Text("第 \(currentIndex + 1) / \(cards.count) 题")
-                    .font(.subheadline.weight(.semibold))
-                if round > 1 {
-                    Text("第 \(round) 轮")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Spacer()
-            // 前一题
-            Button {
-                goBack()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .foregroundStyle(.secondary)
-                    .opacity(currentIndex > 0 ? 1 : 0)
-            }
-            .disabled(currentIndex == 0)
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 8)
-    }
-
-    private var progressStrip: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .leading) {
-                Capsule().fill(Color.secondary.opacity(0.15)).frame(height: 4)
-                Capsule()
-                    .fill(Color.accentColor)
-                    .frame(width: proxy.size.width * progress, height: 4)
-                    .animation(.spring(duration: 0.3), value: currentIndex)
-            }
-        }
-        .frame(height: 4)
-        .padding(.horizontal, 20)
-        .padding(.bottom, 8)
-    }
-
     private var markCountRow: some View {
         let gotCount = marks.values.filter { $0 == PracticeMark.gotIt.rawValue }.count
         let notCount = marks.values.filter { $0 == PracticeMark.notYet.rawValue }.count
@@ -247,16 +219,9 @@ struct MistakePracticeView: View {
         .padding(.bottom, 8)
     }
 
-    @ViewBuilder
     private var cardImageView: some View {
-        if let image = UIImage(contentsOfFile: card.imageURL.path) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity)
-        } else {
-            ContentUnavailableView("图片加载失败", systemImage: "photo")
-        }
+        CardImage(url: card.imageURL, maxPixelSize: 1200)
+            .frame(maxWidth: .infinity)
     }
 
     private var subjectTag: some View {
@@ -386,8 +351,8 @@ struct MistakePracticeView: View {
         }
     }
 
-    /// 提交：将标记结果同步到错题库，然后关闭
-    private func submitAndDismiss() {
+    /// 将标记结果同步到错题库（不关闭界面，供 Summary 自动调用）
+    func submitMarks() {
         for c in cards {
             switch marks[c.id] {
             case PracticeMark.gotIt.rawValue:
@@ -402,7 +367,6 @@ struct MistakePracticeView: View {
         }
         do {
             try modelContext.save()
-            dismiss()
         } catch {
             alert = AppAlert(title: "无法同步练习结果", error: error)
         }
@@ -416,7 +380,8 @@ struct PracticeSummaryView: View {
     let marks: [UUID: String]
     let practiceGroupID: UUID
     let round: Int
-    let onSubmit: () -> Void
+    /// 进入 Summary 后立即自动调用，同步标记到错题库
+    let onAutoSubmit: () -> Void
     let onClose: () -> Void
 
     @State private var showRetry = false
@@ -471,14 +436,10 @@ struct PracticeSummaryView: View {
                             .foregroundStyle(.red)
                         ForEach(notYetCards) { c in
                             HStack(spacing: 12) {
-                                if let img = UIImage(contentsOfFile: c.imageURL.path) {
-                                    Image(uiImage: img)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 72, height: 52)
-                                        .background(.white)
-                                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                                }
+                                CardImage(url: c.imageURL, maxPixelSize: 200)
+                                    .frame(width: 72, height: 52)
+                                    .background(.white)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6))
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text(c.subject)
                                         .font(.subheadline.weight(.medium))
@@ -498,40 +459,23 @@ struct PracticeSummaryView: View {
                     }
                 }
 
+                // 已自动同步标记
+                Label("已自动同步到错题库", systemImage: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(.subheadline.weight(.medium))
+
                 // 操作按钮
                 VStack(spacing: 14) {
-                    if !isSubmitted {
-                        Button {
-                            isSubmitted = true
-                            onSubmit()
-                        } label: {
-                            Label("确认提交，同步到错题库", systemImage: "arrow.up.circle.fill")
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 14))
-                        }
-                        .buttonStyle(.plain)
-                    } else {
-                        Label("已同步到错题库", systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(.green.opacity(0.1), in: RoundedRectangle(cornerRadius: 14))
-                    }
-
                     if !notYetCards.isEmpty {
                         Button {
                             showRetry = true
                         } label: {
-                            Label("针对不会的再练一轮（\(notYetCards.count) 题）", systemImage: "arrow.clockwise")
-                                .font(.subheadline.weight(.medium))
+                            Label("再练一轮不会的 \(notYetCards.count) 道题", systemImage: "arrow.clockwise")
+                                .font(.headline)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(.quaternary, in: RoundedRectangle(cornerRadius: 14))
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
                     }
 
                     Button("关闭", action: onClose)
@@ -541,6 +485,12 @@ struct PracticeSummaryView: View {
                 .padding(.bottom, 40)
             }
             .padding(.horizontal, 28)
+        }
+        .task {
+            // 进入 Summary 时立即同步，无需手动点击"确认提交"
+            guard !isSubmitted else { return }
+            isSubmitted = true
+            onAutoSubmit()
         }
         .fullScreenCover(isPresented: $showRetry) {
             MistakePracticeView(

@@ -6,6 +6,34 @@ struct AIQuestionRecognition: Decodable, Sendable {
     let subject: String
     let questionType: String
     let knowledgePoints: [String]
+    let correctAnswer: String
+
+    private enum CodingKeys: String, CodingKey {
+        case recognizedQuestion, subject, questionType, knowledgePoints, correctAnswer
+    }
+
+    init(
+        recognizedQuestion: String,
+        subject: String,
+        questionType: String,
+        knowledgePoints: [String],
+        correctAnswer: String = ""
+    ) {
+        self.recognizedQuestion = recognizedQuestion
+        self.subject = subject
+        self.questionType = questionType
+        self.knowledgePoints = knowledgePoints
+        self.correctAnswer = correctAnswer
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        recognizedQuestion = try container.decode(String.self, forKey: .recognizedQuestion)
+        subject = try container.decode(String.self, forKey: .subject)
+        questionType = try container.decode(String.self, forKey: .questionType)
+        knowledgePoints = (try? container.decode([String].self, forKey: .knowledgePoints)) ?? []
+        correctAnswer = (try? container.decode(String.self, forKey: .correctAnswer)) ?? ""
+    }
 }
 
 struct AIQuestionSolution: Decodable, Sendable {
@@ -119,12 +147,12 @@ private enum AIRecognitionPrompt {
     /// 动态构建，加入各科标准知识点词表，引导模型使用统一术语。
     static var instructions: String {
         """
-        你是一名严谨的题目识别助手。只负责识别图片中的一道主要题目，不要解题。
+        你是一名严谨的题目识别与答案生成助手。识别图片中的一道主要题目，并给出可用于批改的正确答案。
 
         规则：
         1. recognizedQuestion 必须忠实保留题号、题干、公式、图表文字和全部选项。
-        2. 不得修正题目、推断答案或补充图片中不存在的条件。
-        3. 图片不清晰或信息不完整时，在 recognizedQuestion 中明确标注。
+        2. 不得修正题目或补充图片中不存在的条件；但必须根据识别到的题目独立求出 correctAnswer。
+        3. 图片不清晰或条件不足时，在 recognizedQuestion 中明确标注，并将 correctAnswer 设为空字符串，不得猜测。
         4. 数学公式使用 LaTeX：行内使用 $...$，独立公式使用 $$...$$。
         5. 所有内容使用简体中文。
         6. 只输出一个合法 JSON 对象，不要输出 Markdown 代码块或额外文字。
@@ -133,9 +161,16 @@ private enum AIRecognitionPrompt {
           "recognizedQuestion": "string",
           "subject": "string",
           "questionType": "string",
-          "knowledgePoints": ["string"]
+          "knowledgePoints": ["string"],
+          "correctAnswer": "string"
         }
-        8. knowledgePoints 优先从下列标准词汇中选取（按识别到的学科选对应列），最多 5 个；若涉及词表以外的知识点可补充：
+        8. questionType 必须且只能是以下值之一：选择题、填空题、判断题、计算题、阅读理解、简答题、证明题、作文题、其他。
+        9. correctAnswer 只写最终答案，不写推导过程，并严格按题型输出：
+           - 选择题：只输出选项字母；多选用英文逗号分隔，例如 A,C。
+           - 判断题：只输出“正确”或“错误”。
+           - 填空题：按空格顺序输出答案，多个空用中文分号分隔。
+           - 计算题、证明题、简答题、阅读理解、作文题和其他：输出简洁、可核对的标准答案或参考答案。
+        10. knowledgePoints 优先从下列标准词汇中选取（按识别到的学科选对应列），最多 5 个；若涉及词表以外的知识点可补充：
         \(KnowledgePointVocabulary.promptHint())
         """
     }

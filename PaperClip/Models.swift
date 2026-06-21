@@ -23,17 +23,27 @@ final class PDFDocumentItem {
     var localFileName: String
     var importDate: Date
     var lastOpenDate: Date
+    // 试卷分类字段；带默认值以支持 SwiftData 轻量迁移（旧数据自动填入默认值）。
+    var grade: String = Grade.grade7.rawValue
+    var semester: String = Semester.first.rawValue
+    var subject: String = Subject.math.rawValue
 
     init(
         id: UUID = UUID(),
         title: String,
         localFileName: String,
+        grade: String = Grade.grade7.rawValue,
+        semester: String = Semester.first.rawValue,
+        subject: String = Subject.math.rawValue,
         importDate: Date = .now,
         lastOpenDate: Date = .now
     ) {
         self.id = id
         self.title = title
         self.localFileName = localFileName
+        self.grade = grade
+        self.semester = semester
+        self.subject = subject
         self.importDate = importDate
         self.lastOpenDate = lastOpenDate
     }
@@ -95,8 +105,14 @@ final class MistakeCard {
     // AI 后台识别字段：默认 completed 保证旧数据不被重新识别
     var recognitionStatus: String = RecognitionStatus.completed.rawValue
     var recognizedText: String = ""
+    /// AI 识别的题型，例如“选择题”；旧数据默认为空并由题目文本回退判断
+    var questionType: String = ""
+    /// AI 生成或用户修订的标准答案；旧数据保持为空并在交卷时转为人工自评
+    var correctAnswer: String = ""
     /// 错题卡所在试卷的标题（创建时写入，之后只读）
     var sourceDocumentTitle: String = ""
+    /// 题目图片在原始截图中的归一化裁剪区域，格式 "x,y,w,h"（0–1），nil 表示未框选
+    var questionCrop: String? = nil
 
     init(
         id: UUID = UUID(),
@@ -113,6 +129,8 @@ final class MistakeCard {
         note: String = "",
         recognitionStatus: String = RecognitionStatus.completed.rawValue,
         recognizedText: String = "",
+        questionType: String = "",
+        correctAnswer: String = "",
         sourceDocumentTitle: String = "",
         createdAt: Date = .now,
         updatedAt: Date = .now
@@ -134,6 +152,8 @@ final class MistakeCard {
         self.note = note
         self.recognitionStatus = recognitionStatus
         self.recognizedText = recognizedText
+        self.questionType = questionType
+        self.correctAnswer = correctAnswer
         self.sourceDocumentTitle = sourceDocumentTitle
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -148,6 +168,10 @@ final class MistakeCard {
             .split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
+    }
+
+    var resolvedQuestionType: QuestionType {
+        QuestionType.resolve(questionType, questionText: recognizedText)
     }
 }
 
@@ -227,6 +251,95 @@ enum MasteryStatus: String, CaseIterable, Identifiable {
         case review.rawValue: return .mastered
         default: return .mastered
         }
+    }
+}
+
+enum QuestionType: String, CaseIterable, Identifiable {
+    case choice = "选择题"
+    case fillBlank = "填空题"
+    case trueFalse = "判断题"
+    case calculation = "计算题"
+    case reading = "阅读理解"
+    case shortAnswer = "简答题"
+    case proof = "证明题"
+    case composition = "作文题"
+    case other = "其他"
+
+    var id: String { rawValue }
+
+    var systemImage: String {
+        switch self {
+        case .choice: "list.bullet.circle"
+        case .fillBlank: "rectangle.and.pencil.and.ellipsis"
+        case .trueFalse: "checkmark.circle"
+        case .calculation: "function"
+        case .reading: "text.book.closed"
+        case .shortAnswer: "text.alignleft"
+        case .proof: "checkmark.seal"
+        case .composition: "doc.richtext"
+        case .other: "square.grid.2x2"
+        }
+    }
+
+    static func resolve(_ value: String, questionText: String = "") -> QuestionType {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let exact = allCases.first(where: { $0.rawValue == trimmed }) {
+            return exact
+        }
+        let normalized = trimmed.lowercased()
+
+        if normalized.contains("选择") || normalized.contains("单选") || normalized.contains("多选") {
+            return .choice
+        }
+        if normalized.contains("填空") {
+            return .fillBlank
+        }
+        if normalized.contains("判断") || normalized.contains("是非") {
+            return .trueFalse
+        }
+        if normalized.contains("计算") || normalized.contains("运算") || normalized.contains("解方程") {
+            return .calculation
+        }
+        if normalized.contains("阅读") || normalized.contains("材料分析") {
+            return .reading
+        }
+        if normalized.contains("简答") || normalized.contains("问答") {
+            return .shortAnswer
+        }
+        if normalized.contains("证明") {
+            return .proof
+        }
+        if normalized.contains("作文") || normalized.contains("写作") {
+            return .composition
+        }
+
+        let text = questionText.lowercased()
+        if hasChoiceMarkers(in: text) { return .choice }
+        if text.contains("判断下列") || text.contains("判断正误") || text.contains("正确还是错误") {
+            return .trueFalse
+        }
+        if text.contains("填空") || text.contains("横线上") || text.contains("空格中") {
+            return .fillBlank
+        }
+        if text.contains("阅读材料") || text.contains("阅读下面") || text.contains("阅读短文") {
+            return .reading
+        }
+        if text.contains("计算") || text.contains("求值") || text.contains("解方程") {
+            return .calculation
+        }
+        if text.contains("证明") { return .proof }
+        if text.contains("作文") || text.contains("写作") { return .composition }
+
+        return .other
+    }
+
+    private static func hasChoiceMarkers(in text: String) -> Bool {
+        let pattern = #"(?:^|[\s\n])[（(]?[A-Da-dＡ-Ｄａ-ｄ][）)]?\s*[\.．、:：]"#
+        guard let expression = try? NSRegularExpression(pattern: pattern) else {
+            return false
+        }
+        let range = NSRange(text.startIndex..<text.endIndex, in: text)
+        return expression.numberOfMatches(in: text, range: range) >= 2
     }
 }
 

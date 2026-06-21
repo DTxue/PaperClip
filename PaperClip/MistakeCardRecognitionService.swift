@@ -165,6 +165,13 @@ final class MistakeCardRecognitionService {
             let recognition = try await AIService.recognize(image: image)
 
             card.recognizedText = recognition.recognizedQuestion
+            card.questionType = QuestionType.resolve(
+                recognition.questionType,
+                questionText: recognition.recognizedQuestion
+            ).rawValue
+            card.correctAnswer = recognition.correctAnswer.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
 
             // 仅在识别结果可信时覆盖学科（避免覆盖用户已手动设置的值）
             if let mappedSubject = Subject.from(aiString: recognition.subject) {

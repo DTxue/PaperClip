@@ -52,27 +52,37 @@ struct ExportView: View {
                 Button("关闭") { dismiss() }
             }
             ToolbarItemGroup(placement: .primaryAction) {
-                Button {
-                    generatePDF()
-                } label: {
-                    Label("生成 PDF", systemImage: "doc.badge.plus")
+                // 全选 / 全不选
+                if !cards.isEmpty {
+                    Button(selectedIDs.count == cards.count ? "全不选" : "全选") {
+                        if selectedIDs.count == cards.count {
+                            selectedIDs.removeAll()
+                        } else {
+                            selectedIDs = Set(cards.map(\.id))
+                        }
+                    }
                 }
-                .disabled(selectedIDs.isEmpty)
 
+                // 生成并分享：一步触发生成，生成后立即呈现分享
                 if let generatedURL {
                     ShareLink(item: generatedURL) {
                         Label("分享 PDF", systemImage: "square.and.arrow.up")
                     }
+                } else {
+                    Button {
+                        generatePDF()
+                    } label: {
+                        Label("生成 PDF", systemImage: "doc.badge.plus")
+                    }
+                    .disabled(selectedIDs.isEmpty)
                 }
             }
         }
-        .alert(item: $alert) { alert in
-            Alert(
-                title: Text(alert.title),
-                message: Text(alert.message),
-                dismissButton: .default(Text("好"))
-            )
-        }
+        .appAlert($alert)
+        // 选择变化时清空已生成的 PDF，避免分享旧版本
+        .onChange(of: selectedIDs) { generatedURL = nil }
+        .onChange(of: layout)      { generatedURL = nil }
+        .onChange(of: kind)        { generatedURL = nil }
     }
 
     private var kindPicker: some View {
@@ -173,18 +183,10 @@ private struct SelectableCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             ZStack(alignment: .topTrailing) {
-                if let image = UIImage(contentsOfFile: card.imageURL.path) {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 150)
-                        .background(.white)
-                } else {
-                    ContentUnavailableView("图片不可用", systemImage: "photo")
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 150)
-                }
+                CardImage(url: card.imageURL, maxPixelSize: 600)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 150)
+                    .background(.white)
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
                     .foregroundStyle(isSelected ? Color.accentColor : .secondary)

@@ -212,12 +212,17 @@ struct AIAnalysisView: View {
                         .buttonStyle(.bordered)
                     }
 
-                    // 选择解析模型，与上方缩小间距
-                    AnalysisSection(title: "选择解析模型", systemImage: "brain") {
-                        VStack(spacing: 10) {
-                            modelButton(.doubao, isEnabled: true)
-                            modelButton(.deepSeek, isEnabled: AIService.isDeepSeekConfigured)
-                        }
+                    Divider()
+                        .padding(.vertical, 4)
+
+                    // 模型选择：常驻左侧面板，解析进行中禁用切换
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("解析模型", systemImage: "cpu")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+
+                        modelButton(.doubao, isEnabled: true)
+                        modelButton(.deepSeek, isEnabled: AIService.isDeepSeekConfigured)
                     }
                 }
             }
@@ -232,11 +237,12 @@ struct AIAnalysisView: View {
         Group {
             switch phase {
             case .review:
-                ContentUnavailableView(
-                    "尚未解析",
-                    systemImage: "text.bubble",
-                    description: Text("在左侧选择解析模型后，解析结果将在此处显示。")
-                )
+                ContentUnavailableView {
+                    Label("选择解析模型", systemImage: "cpu")
+                } description: {
+                    Text("在左侧选择模型后开始解析")
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             case .solving:
                 VStack(spacing: 16) {
                     ProgressView("\(selectedModel.shortTitle)正在解析题目…")
@@ -264,14 +270,6 @@ struct AIAnalysisView: View {
                                     solution: solution
                                 )
                             )
-
-                            Button {
-                                phase = .review
-                            } label: {
-                                Label("更换模型重新解析", systemImage: "arrow.triangle.2.circlepath")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.bordered)
                         }
                         .padding()
                     }
@@ -287,7 +285,13 @@ struct AIAnalysisView: View {
         _ model: AIAnswerModel,
         isEnabled: Bool
     ) -> some View {
-        Button {
+        // 当前正在用此模型解析时显示进度圈；解析完成后显示选中标记。
+        let isSolvingThis = phase == .solving && selectedModel == model
+        let isSelected = selectedModel == model && (phase == .solving || phase == .result)
+        // 解析进行中禁用所有切换，避免并发请求。
+        let canTap = isEnabled && phase != .solving
+
+        return Button {
             selectedModel = model
             Task { await solve(using: model) }
         } label: {
@@ -310,15 +314,23 @@ struct AIAnalysisView: View {
                 }
 
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.tertiary)
+
+                if isSolvingThis {
+                    ProgressView().controlSize(.small)
+                } else if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Color.accentColor)
+                } else {
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(.tertiary)
+                }
             }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .disabled(!isEnabled)
-        .opacity(isEnabled ? 1 : 0.55)
-        .accessibilityHint("确认识别内容无误后，使用该模型解析")
+        .disabled(!canTap)
+        .opacity(isEnabled && !isSolvingThis && phase == .solving ? 0.4 : isEnabled ? 1 : 0.55)
+        .accessibilityHint(isEnabled ? "使用该模型解析题目" : "需要先在设置中配置推理接入点")
     }
 
     private var failureView: some View {
@@ -354,6 +366,7 @@ struct AIAnalysisView: View {
             confirmedQuestion = value.recognizedQuestion
             solution = nil
             phase = .review
+            // 识别完成后停留在 review 阶段，等待用户在左侧面板选择模型后再开始解析。
         } catch is CancellationError {
             return
         } catch {

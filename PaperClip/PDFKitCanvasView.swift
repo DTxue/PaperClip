@@ -26,6 +26,8 @@ struct PDFKitCanvasView: UIViewRepresentable {
     let onSelectionRectChanged: (CGRect?) -> Void
     let onCrop: (UIImage, Double, Double, PDFSelectionAction) -> Void
     let onError: (String) -> Void
+    /// 每页画布的精确尺寸（页面索引 → canvas.frame.size），布局完成后回调，供导出合成使用。
+    var onCanvasSizesChanged: (([Int: CGSize]) -> Void)? = nil
 
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -217,12 +219,29 @@ struct PDFKitCanvasView: UIViewRepresentable {
                     object: host.pdfView
                 )
             }
+            // App 回到前台（从其他 App 切回）时强制重新布局，
+            // 避免 Stage Manager / Slide Over 窗口尺寸变化导致 PDF 显示不全。
+            center.addObserver(
+                self,
+                selector: #selector(handleAppDidBecomeActive),
+                name: UIApplication.didBecomeActiveNotification,
+                object: nil
+            )
 
             configurePDFInteraction()
             scheduleCanvasLayout()
         }
 
         @objc private func handlePDFViewChange() {
+            scheduleCanvasLayout()
+        }
+
+        @objc private func handleAppDidBecomeActive() {
+            // 不直接操作 pdfView：didBecomeActive 触发时 UIKit 布局管道尚未稳定，
+            // 此时 toggle autoScales 会与 PDFKit 自身的唤醒流程竞争，导致重算结果被覆盖。
+            // 正确做法：通过 setNeedsLayout 将重算推迟到下一个 layoutSubviews，
+            // 那里可以保证 pdfView.frame 已是最终值。
+            host?.scheduleScaleReset()
             scheduleCanvasLayout()
         }
 
@@ -299,6 +318,7 @@ struct PDFKitCanvasView: UIViewRepresentable {
                   let documentView = pdfView.documentView
             else { return }
 
+            var sizes: [Int: CGSize] = [:]
             for (page, canvas) in canvases {
                 let pageRect = pdfView.convert(page.bounds(for: .mediaBox), from: page)
                 let frame = documentView.convert(pageRect, from: pdfView).standardized
@@ -308,6 +328,17 @@ struct PDFKitCanvasView: UIViewRepresentable {
                 canvas.contentSize = frame.size
                 documentView.bringSubviewToFront(canvas)
                 configure(canvas)
+
+                // 记录精确 canvas 尺寸（frame.size = mediaBox × scaleFactor）
+                if let idx = pdfView.document?.index(for: page) {
+                    sizes[idx] = frame.size
+                }
+            }
+
+            // 上报每页精确 canvas 尺寸，供导出叠加使用
+            let onCanvasSizesChanged = parent.onCanvasSizesChanged
+            DispatchQueue.main.async {
+                onCanvasSizesChanged?(sizes)
             }
         }
 
@@ -749,6 +780,11 @@ final class PDFDrawingHostView: UIView {
     let pdfView = PDFView()
     var onLayout: (() -> Void)?
 
+    private var lastBounds: CGRect = .zero
+    /// 标记需要在下一次 layoutSubviews 中重算 PDF 缩放比例。
+    /// 由 scheduleScaleReset() 设置，确保重算在 frame 稳定后执行。
+    private var pendingScaleReset = false
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .secondarySystemBackground
@@ -762,7 +798,28 @@ final class PDFDrawingHostView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         pdfView.frame = bounds
+
+        // 在 layoutSubviews 内执行 autoScales toggle 是唯一能保证
+        // pdfView.frame 已为最终值的时机（UIKit 在此之前完成所有 frame 更新）。
+        // 触发条件：bounds 变化（旋转/分屏）或外部显式请求（App 回到前台）。
+        if pendingScaleReset || bounds != lastBounds {
+            pendingScaleReset = false
+            lastBounds = bounds
+            if pdfView.autoScales {
+                pdfView.autoScales = false
+                pdfView.autoScales = true
+            }
+        }
+
         onLayout?()
+    }
+
+    /// 请求在下一个布局周期重算 PDF 缩放比例。
+    /// 使用 setNeedsLayout() 将重算推迟到 layoutSubviews，
+    /// 避免在 UIKit 布局管道尚未稳定时与 PDFKit 内部唤醒流程竞争。
+    func scheduleScaleReset() {
+        pendingScaleReset = true
+        setNeedsLayout()
     }
 }
 
