@@ -14,8 +14,6 @@
 		A10000000000000000000005 /* PDFWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* PDFWorkspaceView.swift */; };
 		A10000000000000000000006 /* PDFKitCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* PDFKitCanvasView.swift */; };
 		A10000000000000000000007 /* MistakeViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* MistakeViews.swift */; };
-		A10000000000000000000008 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* ExportView.swift */; };
-		A10000000000000000000009 /* MistakePDFExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* MistakePDFExporter.swift */; };
 		A10000000000000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000010 /* Assets.xcassets */; };
 		A10000000000000000000011 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000012 /* KeychainService.swift */; };
 		A10000000000000000000012 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000013 /* SettingsView.swift */; };
@@ -24,7 +22,6 @@
 		A10000000000000000000015 /* LaTeXView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000016 /* LaTeXView.swift */; };
 		A10000000000000000000016 /* KnowledgePointVocabulary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000017 /* KnowledgePointVocabulary.swift */; };
 		A10000000000000000000017 /* MistakeCardRecognitionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000018 /* MistakeCardRecognitionService.swift */; };
-		A10000000000000000000018 /* MistakePracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000019 /* MistakePracticeView.swift */; };
 		A10000000000000000000019 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000020 /* StatisticsView.swift */; };
 		A1000000000000000000001A /* InteractivePaperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000021 /* InteractivePaperView.swift */; };
 		A1000000000000000000001B /* ReviewSubmissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000022 /* ReviewSubmissionView.swift */; };
@@ -41,8 +38,6 @@
 		A20000000000000000000005 /* PDFWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceView.swift; sourceTree = "<group>"; };
 		A20000000000000000000006 /* PDFKitCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitCanvasView.swift; sourceTree = "<group>"; };
 		A20000000000000000000007 /* MistakeViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MistakeViews.swift; sourceTree = "<group>"; };
-		A20000000000000000000008 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
-		A20000000000000000000009 /* MistakePDFExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MistakePDFExporter.swift; sourceTree = "<group>"; };
 		A20000000000000000000010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A20000000000000000000012 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		A20000000000000000000013 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -51,7 +46,6 @@
 		A20000000000000000000016 /* LaTeXView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaTeXView.swift; sourceTree = "<group>"; };
 		A20000000000000000000017 /* KnowledgePointVocabulary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgePointVocabulary.swift; sourceTree = "<group>"; };
 		A20000000000000000000018 /* MistakeCardRecognitionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MistakeCardRecognitionService.swift; sourceTree = "<group>"; };
-		A20000000000000000000019 /* MistakePracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MistakePracticeView.swift; sourceTree = "<group>"; };
 		A20000000000000000000020 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 		A20000000000000000000021 /* InteractivePaperView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractivePaperView.swift; sourceTree = "<group>"; };
 		A20000000000000000000022 /* ReviewSubmissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionView.swift; sourceTree = "<group>"; };
@@ -89,8 +83,6 @@
 				A20000000000000000000005 /* PDFWorkspaceView.swift */,
 				A20000000000000000000006 /* PDFKitCanvasView.swift */,
 				A20000000000000000000007 /* MistakeViews.swift */,
-				A20000000000000000000008 /* ExportView.swift */,
-				A20000000000000000000009 /* MistakePDFExporter.swift */,
 				A20000000000000000000010 /* Assets.xcassets */,
 				A20000000000000000000012 /* KeychainService.swift */,
 				A20000000000000000000013 /* SettingsView.swift */,
@@ -99,7 +91,6 @@
 				A20000000000000000000016 /* LaTeXView.swift */,
 				A20000000000000000000017 /* KnowledgePointVocabulary.swift */,
 				A20000000000000000000018 /* MistakeCardRecognitionService.swift */,
-				A20000000000000000000019 /* MistakePracticeView.swift */,
 				A20000000000000000000020 /* StatisticsView.swift */,
 				A20000000000000000000021 /* InteractivePaperView.swift */,
 				A20000000000000000000022 /* ReviewSubmissionView.swift */,
@@ -194,8 +185,6 @@
 				A10000000000000000000005 /* PDFWorkspaceView.swift in Sources */,
 				A10000000000000000000006 /* PDFKitCanvasView.swift in Sources */,
 				A10000000000000000000007 /* MistakeViews.swift in Sources */,
-				A10000000000000000000008 /* ExportView.swift in Sources */,
-				A10000000000000000000009 /* MistakePDFExporter.swift in Sources */,
 				A10000000000000000000011 /* KeychainService.swift in Sources */,
 				A10000000000000000000012 /* SettingsView.swift in Sources */,
 				A10000000000000000000013 /* AIService.swift in Sources */,
@@ -203,7 +192,6 @@
 				A10000000000000000000015 /* LaTeXView.swift in Sources */,
 				A10000000000000000000016 /* KnowledgePointVocabulary.swift in Sources */,
 				A10000000000000000000017 /* MistakeCardRecognitionService.swift in Sources */,
-				A10000000000000000000018 /* MistakePracticeView.swift in Sources */,
 				A10000000000000000000019 /* StatisticsView.swift in Sources */,
 				A1000000000000000000001A /* InteractivePaperView.swift in Sources */,
 				A1000000000000000000001B /* ReviewSubmissionView.swift in Sources */,

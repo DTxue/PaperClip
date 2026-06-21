@@ -355,20 +355,6 @@ enum ErrorReason: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-enum ExportLayout: Int, CaseIterable, Identifiable {
-    case one = 1
-    case two = 2
-    case four = 4
-    var id: Int { rawValue }
-    var title: String { "每页 \(rawValue) 题" }
-}
-
-enum ExportKind: String, CaseIterable, Identifiable {
-    case practice = "练习版"
-    case review = "复习版"
-    var id: String { rawValue }
-}
-
 enum RecognitionStatus: String {
     case pending = "pending"
     case processing = "processing"

@@ -611,11 +611,10 @@ private struct PaperQuestionItemView: View {
 
     private var isMultipleChoice: Bool {
         guard questionType == .choice else { return false }
-        let text = card.recognizedText
-        let answerLabels = card.correctAnswer.uppercased().filter {
-            ("A" ... "H").contains(String($0))
-        }
-        return text.contains("多选") || Set(answerLabels).count > 1
+        return PaperChoiceParser.isMultipleChoice(
+            questionText: card.recognizedText,
+            correctAnswer: card.correctAnswer
+        )
     }
 
     var body: some View {
@@ -816,11 +815,47 @@ private struct PaperQuestionItemView: View {
 // 此解析器只识别常见 A–H 标记，业务交互仍由 SwiftUI Picker 承担；
 // 不引入自定义手势，VoiceOver 使用 Picker 和选项文本的系统语义。
 private enum PaperChoiceParser {
+    private static let multipleChoiceKeywords = ["多选", "多项选择", "不定项选择"]
+    private static let answerPrefixes = ["正确答案", "参考答案", "答案", "选项"]
+    private static let answerSeparators = CharacterSet(
+        charactersIn: " \t\r\n,，、;；/／|和及与"
+    )
     private static let patterns = [
         #"(?m)(?:^|[\r\n])\s*[（(]?([A-Ha-hＡ-Ｈａ-ｈ])[）)]?\s*[\.．、:：]"#,
         #"[（(]([A-Ha-hＡ-Ｈａ-ｈ])[）)]\s*"#,
         #"(?:^|\s)([A-Ha-hＡ-Ｈａ-ｈ])\s*[\.．、:：]\s*"#
     ]
+
+    static func isMultipleChoice(questionText: String, correctAnswer: String) -> Bool {
+        if multipleChoiceKeywords.contains(where: { questionText.contains($0) }) {
+            return true
+        }
+
+        var answer = correctAnswer.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !answer.isEmpty else { return false }
+
+        for prefix in answerPrefixes where answer.hasPrefix(prefix) {
+            answer.removeFirst(prefix.count)
+            break
+        }
+        answer = answer.trimmingCharacters(
+            in: CharacterSet.whitespacesAndNewlines.union(
+                CharacterSet(charactersIn: ":：")
+            )
+        )
+
+        var labels: [String] = []
+        for character in answer {
+            if let label = normalizedLabel(String(character)) {
+                labels.append(label)
+                continue
+            }
+            guard character.unicodeScalars.allSatisfy(answerSeparators.contains) else {
+                return false
+            }
+        }
+        return Set(labels).count > 1
+    }
 
     static func optionLabels(in text: String, questionType: QuestionType) -> [String] {
         guard !text.isEmpty else {

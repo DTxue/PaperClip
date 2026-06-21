@@ -135,9 +135,6 @@ struct SubjectMistakesView: View {
     @State private var selectedTag = ""
     @State private var selectedSource = ""
     @State private var editingCard: MistakeCard?
-    @State private var isExportPresented = false
-    @State private var isBulkUpgradeConfirmPresented = false
-    @State private var isPracticePresented = false
     @State private var isPaperSelectionPresented = false
     @State private var alert: AppAlert?
 
@@ -353,58 +350,16 @@ struct SubjectMistakesView: View {
         .navigationTitle(subject ?? "全部错题")
         .searchable(text: $searchText, prompt: "搜索标签、备注或试卷名")
         .toolbar {
-            ToolbarItemGroup(placement: .primaryAction) {
-                let upgradable = filteredCards.filter {
-                    $0.status != MasteryStatus.mastered.rawValue
-                }
-                if !upgradable.isEmpty {
-                    Button { isBulkUpgradeConfirmPresented = true } label: {
-                        Label("批量升级", systemImage: "arrow.up.circle")
-                    }
-                    .tint(.green)
-                }
-                Button { isPracticePresented = true } label: {
-                    Label("开始练习", systemImage: "play.circle.fill")
-                }
-                .tint(.orange)
-                .disabled(filteredCards.isEmpty)
-
+            ToolbarItem(placement: .primaryAction) {
                 Button { isPaperSelectionPresented = true } label: {
                     Label("出卷", systemImage: "doc.text.below.ecg")
                 }
                 .disabled(filteredCards.isEmpty)
-
-                Button { isExportPresented = true } label: {
-                    Label("生成错题集", systemImage: "doc.badge.plus")
-                }
-                .disabled(cards.isEmpty)
             }
-        }
-        .confirmationDialog(
-            "将 \(filteredCards.filter { $0.status != MasteryStatus.mastered.rawValue }.count) 张错题的掌握状态升一级？",
-            isPresented: $isBulkUpgradeConfirmPresented,
-            titleVisibility: .visible
-        ) {
-            Button("升级") {
-                for card in filteredCards where card.status != MasteryStatus.mastered.rawValue {
-                    card.status = MasteryStatus.nextLevel(after: card.status).rawValue
-                    card.updatedAt = .now
-                }
-                saveChanges()
-            }
-            Button("取消", role: .cancel) {}
-        } message: {
-            Text("未掌握 → 待复习 → 已掌握。此操作仅影响当前筛选结果。")
         }
         .sheet(item: $editingCard) { card in
             NavigationStack { MistakeCardEditorView(card: card) }
                 .presentationDetents([.large])
-        }
-        .sheet(isPresented: $isExportPresented) {
-            NavigationStack { ExportView() }
-        }
-        .fullScreenCover(isPresented: $isPracticePresented) {
-            MistakePracticeView(cards: filteredCards, practiceGroupID: UUID(), round: 1)
         }
         .sheet(isPresented: $isPaperSelectionPresented) {
             PaperCardSelectionView(availableCards: filteredCards, subject: subject)
