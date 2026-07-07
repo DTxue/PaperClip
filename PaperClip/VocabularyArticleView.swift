@@ -12,7 +12,7 @@ struct VocabularyArticleView: View {
     @State private var article: VocabularyGeneratedArticle?
     @State private var recitation = VocabularyArticleRecitationState(sentences: [])
     @State private var viewMode: VocabularyArticleViewMode = .reading
-    @State private var processedSpeechWordCount = 0
+    @State private var listeningBaseline: VocabularyArticleRecitationState?
     @State private var isGenerating = false
     @State private var alert: AppAlert?
 
@@ -139,7 +139,7 @@ struct VocabularyArticleView: View {
 
                 Button("重置", systemImage: "arrow.counterclockwise") {
                     speechRecognizer.stop()
-                    processedSpeechWordCount = 0
+                    listeningBaseline = nil
                     recitation.reset()
                 }
                 .buttonStyle(.bordered)
@@ -204,7 +204,7 @@ struct VocabularyArticleView: View {
 
     private func resetRecitation() {
         speechRecognizer.stop()
-        processedSpeechWordCount = 0
+        listeningBaseline = nil
         recitation = VocabularyArticleRecitationState(
             sentences: VocabularyArticleSentence.split(article?.articleText ?? "")
         )
@@ -213,26 +213,26 @@ struct VocabularyArticleView: View {
     private func startListening() async {
         guard !speechRecognizer.isRecording, !speechRecognizer.isStarting else { return }
         do {
-            processedSpeechWordCount = 0
+            listeningBaseline = recitation
             try await speechRecognizer.start()
         } catch {
+            listeningBaseline = nil
             alert = AppAlert(title: "无法开始语音识别", error: error)
         }
     }
 
     private func processTranscript(_ transcript: String) {
-        let words = VocabularyArticleTextNormalizer.words(from: transcript)
-        guard words.count >= processedSpeechWordCount else {
-            processedSpeechWordCount = words.count
-            return
-        }
+        let baseline = listeningBaseline ?? recitation
+        let nextRecitation = VocabularyArticleTranscriptMatcher.apply(
+            transcript: transcript,
+            baseline: baseline,
+            current: recitation
+        )
+        guard nextRecitation != recitation else { return }
 
-        let newWords = Array(words.dropFirst(processedSpeechWordCount))
-        processedSpeechWordCount = words.count
-        guard !newWords.isEmpty else { return }
-
-        recitation.process(words: newWords)
+        recitation = nextRecitation
         if recitation.isComplete {
+            listeningBaseline = nil
             speechRecognizer.stop()
         }
     }

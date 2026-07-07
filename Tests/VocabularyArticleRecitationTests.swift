@@ -25,10 +25,37 @@ struct VocabularyArticleRecitationTests {
         complete.process(words: VocabularyArticleTextNormalizer.words(from: "I am ready to learn Focus helps memory"))
         expect(complete.isComplete)
 
+        let baseline = VocabularyArticleRecitationState(sentences: sentences)
+        var revisedTranscript = VocabularyArticleTranscriptMatcher.apply(
+            transcript: "I am ready to",
+            baseline: baseline,
+            current: baseline
+        )
+        expect(revisedTranscript.currentWordIndex == 4)
+        revisedTranscript = VocabularyArticleTranscriptMatcher.apply(
+            transcript: "I am ready two learn",
+            baseline: baseline,
+            current: revisedTranscript
+        )
+        expect(revisedTranscript.currentWordIndex == 4)
+        revisedTranscript = VocabularyArticleTranscriptMatcher.apply(
+            transcript: "I am ready to learn",
+            baseline: baseline,
+            current: revisedTranscript
+        )
+        expect(revisedTranscript.revealedSentenceCount == 1)
+
+        let resumedTranscript = VocabularyArticleTranscriptMatcher.apply(
+            transcript: "Focus helps memory",
+            baseline: revisedTranscript,
+            current: revisedTranscript
+        )
+        expect(resumedTranscript.isComplete)
+
         let normalized = VocabularyArticleTextNormalizer.words(from: "I'm ready, and I don't stop.")
         expect(normalized == ["i", "am", "ready", "and", "i", "do", "not", "stop"])
 
-        print("VocabularyArticleRecitationTests: 11 passed")
+        print("VocabularyArticleRecitationTests: 17 passed")
     }
 
     private static func expect(

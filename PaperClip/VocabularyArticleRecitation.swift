@@ -161,6 +161,13 @@ struct VocabularyArticleRecitationState: Equatable {
         return "\(min(currentWordIndex, currentSentence.words.count))/\(currentSentence.words.count)"
     }
 
+    var matchedWordCount: Int {
+        let completedWordCount = sentences
+            .prefix(currentSentenceIndex)
+            .reduce(0) { $0 + $1.words.count }
+        return completedWordCount + currentWordIndex
+    }
+
     mutating func reset() {
         currentSentenceIndex = 0
         currentWordIndex = 0
@@ -194,6 +201,35 @@ struct VocabularyArticleRecitationState: Equatable {
 
         lastMismatchWord = rawWord
         currentWordIndex = 0
+    }
+}
+
+enum VocabularyArticleTranscriptMatcher {
+    static func apply(
+        transcript: String,
+        baseline: VocabularyArticleRecitationState,
+        current: VocabularyArticleRecitationState
+    ) -> VocabularyArticleRecitationState {
+        apply(
+            words: VocabularyArticleTextNormalizer.words(from: transcript),
+            baseline: baseline,
+            current: current
+        )
+    }
+
+    static func apply(
+        words: [String],
+        baseline: VocabularyArticleRecitationState,
+        current: VocabularyArticleRecitationState
+    ) -> VocabularyArticleRecitationState {
+        guard !words.isEmpty else { return current }
+
+        var candidate = baseline
+        candidate.process(words: words)
+        guard candidate.matchedWordCount >= current.matchedWordCount else {
+            return current
+        }
+        return candidate
     }
 }
 
