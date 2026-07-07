@@ -54,6 +54,7 @@ enum PaperClipModelContainerFactory {
             MistakeCard.self,
             ExportRecord.self,
             MistakePracticeLayer.self,
+            VocabularyFolder.self,
             VocabularyDeck.self,
             VocabularyCard.self,
             VocabularyMemoryState.self,

@@ -448,6 +448,7 @@
 		A100000000000000000000F5 /* VocabularyViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F5 /* VocabularyViews.swift */; };
 		A10000000000000000001171 /* VocabularyHomeOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001171 /* VocabularyHomeOperations.swift */; };
 		A100000000000000000010C2 /* VocabularyHomeContentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010C2 /* VocabularyHomeContentViews.swift */; };
+		A10000000000000000001231 /* VocabularyFolderViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001231 /* VocabularyFolderViews.swift */; };
 		A100000000000000000000F37 /* VocabularyMasteryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F37 /* VocabularyMasteryViews.swift */; };
 		A10000000000000000001023 /* VocabularyMasteryCardRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001023 /* VocabularyMasteryCardRows.swift */; };
 		A100000000000000000010D4 /* VocabularyMasteryDetailRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010D4 /* VocabularyMasteryDetailRows.swift */; };
@@ -1085,6 +1086,7 @@
 		A200000000000000000000F5 /* VocabularyViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyViews.swift; sourceTree = "<group>"; };
 		A20000000000000000001171 /* VocabularyHomeOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyHomeOperations.swift; sourceTree = "<group>"; };
 			A200000000000000000010C2 /* VocabularyHomeContentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyHomeContentViews.swift; sourceTree = "<group>"; };
+			A20000000000000000001231 /* VocabularyFolderViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyFolderViews.swift; sourceTree = "<group>"; };
 			A200000000000000000011A7 /* VocabularyStudySessionMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionMetrics.swift; sourceTree = "<group>"; };
 			A200000000000000000011A8 /* VocabularyStudySessionDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionDraft.swift; sourceTree = "<group>"; };
 			A200000000000000000011BE /* VocabularyStudySessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionItem.swift; sourceTree = "<group>"; };
@@ -1781,6 +1783,7 @@
 				A200000000000000000000F5 /* VocabularyViews.swift */,
 				A20000000000000000001171 /* VocabularyHomeOperations.swift */,
 				A200000000000000000010C2 /* VocabularyHomeContentViews.swift */,
+				A20000000000000000001231 /* VocabularyFolderViews.swift */,
 				A200000000000000000000F37 /* VocabularyMasteryViews.swift */,
 				A20000000000000000001023 /* VocabularyMasteryCardRows.swift */,
 				A200000000000000000010D4 /* VocabularyMasteryDetailRows.swift */,
@@ -2513,6 +2516,7 @@
 				A100000000000000000000F5 /* VocabularyViews.swift in Sources */,
 				A10000000000000000001171 /* VocabularyHomeOperations.swift in Sources */,
 				A100000000000000000010C2 /* VocabularyHomeContentViews.swift in Sources */,
+				A10000000000000000001231 /* VocabularyFolderViews.swift in Sources */,
 				A100000000000000000000F37 /* VocabularyMasteryViews.swift in Sources */,
 				A10000000000000000001023 /* VocabularyMasteryCardRows.swift in Sources */,
 				A100000000000000000010D4 /* VocabularyMasteryDetailRows.swift in Sources */,

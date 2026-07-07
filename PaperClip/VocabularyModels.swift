@@ -2,12 +2,37 @@ import Foundation
 import SwiftData
 
 @Model
+final class VocabularyFolder {
+    static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyFolder>] {
+        [\.id]
+    }
+
+    @Attribute(.unique) var id: UUID
+    var title: String
+    var createdAt: Date
+    var updatedAt: Date
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        createdAt: Date = .now,
+        updatedAt: Date = .now
+    ) {
+        self.id = id
+        self.title = title
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+}
+
+@Model
 final class VocabularyDeck {
     static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyDeck>] {
         [\.id]
     }
 
     @Attribute(.unique) var id: UUID
+    var folderID: UUID?
     var title: String
     var sourceLanguage: String
     var targetLanguage: String
@@ -20,6 +45,7 @@ final class VocabularyDeck {
 
     init(
         id: UUID = UUID(),
+        folderID: UUID? = nil,
         title: String,
         sourceLanguage: String = "英语",
         targetLanguage: String = "中文",
@@ -31,6 +57,7 @@ final class VocabularyDeck {
         updatedAt: Date = .now
     ) {
         self.id = id
+        self.folderID = folderID
         self.title = title
         self.sourceLanguage = sourceLanguage
         self.targetLanguage = targetLanguage

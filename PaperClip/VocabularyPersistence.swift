@@ -2,6 +2,29 @@ import Foundation
 import SwiftData
 
 extension ModelContext {
+    func fetchVocabularyFolder(id: UUID) throws -> VocabularyFolder? {
+        let descriptor = FetchDescriptor<VocabularyFolder>(
+            predicate: #Predicate<VocabularyFolder> { folder in
+                folder.id == id
+            }
+        )
+        return try fetchFirst(descriptor)
+    }
+
+    func fetchVocabularyFolders(
+        propertiesToFetch: [PartialKeyPath<VocabularyFolder>] = []
+    ) throws -> [VocabularyFolder] {
+        try fetchConfigured(
+            FetchDescriptor<VocabularyFolder>(
+                sortBy: [
+                    SortDescriptor(\.updatedAt, order: .reverse),
+                    SortDescriptor(\.title)
+                ]
+            ),
+            propertiesToFetch: propertiesToFetch
+        )
+    }
+
     func fetchVocabularyDeck(id: UUID) throws -> VocabularyDeck? {
         let descriptor = FetchDescriptor<VocabularyDeck>(
             predicate: #Predicate<VocabularyDeck> { deck in

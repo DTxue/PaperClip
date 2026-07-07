@@ -2,6 +2,17 @@ import Foundation
 import SwiftData
 
 extension ModelContext {
+    func deleteVocabularyFolderPreservingDecks(folderID: UUID) throws {
+        for deck in try fetchVocabularyDecks() where deck.folderID == folderID {
+            deck.folderID = nil
+            deck.updatedAt = .now
+        }
+
+        if let folder = try fetchVocabularyFolder(id: folderID) {
+            delete(folder)
+        }
+    }
+
     func deleteVocabularyDeckCascade(deckID: UUID) throws {
         try deleteFetchedVocabularyRows(FetchDescriptor<VocabularyCard>(
             predicate: #Predicate<VocabularyCard> { card in card.deckID == deckID }

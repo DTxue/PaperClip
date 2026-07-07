@@ -6,6 +6,7 @@ struct VocabularyPersistenceTests {
     @MainActor
     static func main() throws {
         let schema = Schema([
+            VocabularyFolder.self,
             VocabularyDeck.self,
             VocabularyCard.self,
             VocabularyMemoryState.self,
@@ -22,6 +23,7 @@ struct VocabularyPersistenceTests {
 
         let deck = VocabularyDeck(title: "FSRS Test")
         let card = VocabularyCard(deckID: deck.id, term: "memory", definition: "记忆")
+        let folder = VocabularyFolder(title: "Unit 1")
         let state = VocabularyMemoryState(
             deckID: deck.id,
             cardID: card.id,
@@ -32,6 +34,8 @@ struct VocabularyPersistenceTests {
             cardID: card.id,
             direction: .termToDefinition
         )
+        deck.folderID = folder.id
+        context.insert(folder)
         context.insert(deck)
         context.insert(card)
         context.insert(state)
@@ -46,6 +50,17 @@ struct VocabularyPersistenceTests {
 
         let states = try context.fetch(FetchDescriptor<VocabularyMemoryState>())
         expect(states.count == 2)
+        let folderID = folder.id
+        let folderRows = try context.fetchVocabularyFolders(
+            propertiesToFetch: VocabularyFolderRowData.propertiesToFetch
+        ).map(VocabularyFolderRowData.init)
+        let deckRows = try context.fetchVocabularyDecks(
+            propertiesToFetch: VocabularyDeckRowData.propertiesToFetch
+        ).map(VocabularyDeckRowData.init)
+        expect(folderRows.count == 1)
+        expect(folderRows.first?.title == "Unit 1")
+        expect(deckRows.first?.folderID == folderID)
+        expect(VocabularyFolder.deletionPropertiesToFetch.count == 1)
         expect(state.algorithmVersion == 6)
         expect(state.deckID == deck.id)
         expect(state.learningStep == 0)
@@ -67,6 +82,15 @@ struct VocabularyPersistenceTests {
         expect(VocabularyDistractorCache.freshnessPropertiesToFetch.count == 2)
         expect(VocabularyDistractorCache.deletionPropertiesToFetch.count == 1)
         expect(missingDeckState.deckID == nil)
+
+        try context.deleteVocabularyFolderPreservingDecks(folderID: folderID)
+        try context.save()
+        let foldersAfterDelete = try context.fetch(FetchDescriptor<VocabularyFolder>())
+        let deckAfterFolderDelete = try context.fetchVocabularyDeck(id: deck.id)
+        let cardsAfterFolderDelete = try context.fetchVocabularyCards(deckID: deck.id)
+        expect(foldersAfterDelete.isEmpty)
+        expect(deckAfterFolderDelete?.folderID == nil)
+        expect(cardsAfterFolderDelete.count == 1)
 
         VocabularyMaintenance.backfillMemoryStateDeckIDs(in: container)
 
@@ -310,7 +334,7 @@ struct VocabularyPersistenceTests {
         expect(remainingBatches.isEmpty)
         expect(remainingCaches.isEmpty)
 
-        print("VocabularyPersistenceTests: 56 passed")
+        print("VocabularyPersistenceTests: 63 passed")
     }
 
     private static func expect(
