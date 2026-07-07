@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 struct VocabularyFolderCreateView: View {
@@ -46,6 +47,7 @@ struct VocabularyFolderRenameView: View {
 
     @State private var title: String
     @State private var alert: AppAlert?
+    @State private var deleteRequest: VocabularyFolderDeleteRequest?
 
     init(folder: VocabularyFolderRowData) {
         self.folder = folder
@@ -57,14 +59,35 @@ struct VocabularyFolderRenameView: View {
             Section("文件夹") {
                 TextField("名称", text: $title)
             }
+
+            Section {
+                Button(role: .destructive) {
+                    deleteRequest = VocabularyFolderDeleteRequest(
+                        id: folder.id,
+                        title: folder.title
+                    )
+                } label: {
+                    Label("删除文件夹", systemImage: "trash")
+                }
+            } header: {
+                Text("危险操作")
+            } footer: {
+                Text("删除文件夹会把其中的词集移回未归档，不会删除单词、复习记录或手写记录。")
+            }
         }
-        .navigationTitle("重命名文件夹")
+        .navigationTitle("文件夹设置")
         .navigationBarTitleDisplayMode(.inline)
         .editSheetToolbar(
             confirmTitle: "保存",
             isConfirmDisabled: title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
             onCancel: { dismiss() },
             onConfirm: rename
+        )
+        .deleteConfirmationDialog(
+            item: $deleteRequest,
+            title: { "删除文件夹「\($0.title)」？" },
+            message: { _ in "文件夹内的词集会移回未归档，不会删除单词、复习记录或手写记录。" },
+            onDelete: deleteFolder
         )
         .appAlert($alert)
     }
@@ -89,6 +112,21 @@ struct VocabularyFolderRenameView: View {
             alert = AppAlert(title: "无法重命名文件夹", error: error)
         }
     }
+
+    private func deleteFolder(_ request: VocabularyFolderDeleteRequest) {
+        do {
+            try modelContext.deleteVocabularyFolderPreservingDecks(folderID: request.id)
+            try modelContext.saveOrRollbackIfNeeded()
+            dismiss()
+        } catch {
+            alert = AppAlert(title: "无法删除文件夹", error: error)
+        }
+    }
+}
+
+private struct VocabularyFolderDeleteRequest: Identifiable, Sendable {
+    let id: UUID
+    let title: String
 }
 
 struct VocabularyDeckFolderPickerView: View {

@@ -44,7 +44,6 @@ struct VocabularyHomeFolderGrid: View {
     let decks: [VocabularyDeckRowData]
     let snapshot: VocabularyHomeSnapshot
     let onRenameFolder: (VocabularyFolderRowData) -> Void
-    let onDeleteFolder: (VocabularyFolderRowData) -> Void
     let onMoveDeck: (VocabularyDeckRowData) -> Void
     let onRemoveDeckFromFolder: (VocabularyDeckRowData) -> Void
 
@@ -73,11 +72,8 @@ struct VocabularyHomeFolderGrid: View {
                             }
                             .buttonStyle(.plain)
                             .contextMenu {
-                                Button("重命名", systemImage: "pencil") {
+                                Button("文件夹设置", systemImage: "gearshape") {
                                     onRenameFolder(folder)
-                                }
-                                Button("删除文件夹", systemImage: "trash", role: .destructive) {
-                                    onDeleteFolder(folder)
                                 }
                             }
                             .accessibilityLabel("\(folder.title)，\(decks(in: folder).count)个词集")

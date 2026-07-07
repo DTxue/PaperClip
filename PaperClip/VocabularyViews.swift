@@ -11,7 +11,6 @@ struct VocabularyHomeView: View {
     @State private var isCreatingFolder = false
     @State private var deckToMove: VocabularyDeckRowData?
     @State private var folderToRename: VocabularyFolderRowData?
-    @State private var folderToDelete: VocabularyFolderRowData?
     @State var alert: AppAlert?
 
     var body: some View {
@@ -44,7 +43,6 @@ struct VocabularyHomeView: View {
                         decks: decks,
                         snapshot: snapshot,
                         onRenameFolder: { folderToRename = $0 },
-                        onDeleteFolder: { folderToDelete = $0 },
                         onMoveDeck: { deckToMove = $0 },
                         onRemoveDeckFromFolder: removeDeckFromFolder
                     )
@@ -107,12 +105,6 @@ struct VocabularyHomeView: View {
                 )
             }
         }
-        .deleteConfirmationDialog(
-            item: $folderToDelete,
-            title: { "删除文件夹「\($0.title)」？" },
-            message: { _ in "文件夹内的词集会移回未归档，不会删除单词、复习记录或手写记录。" },
-            onDelete: deleteFolder
-        )
         .appAlert($alert)
     }
 
