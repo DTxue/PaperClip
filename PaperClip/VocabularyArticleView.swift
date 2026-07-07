@@ -11,6 +11,7 @@ struct VocabularyArticleView: View {
     @State private var cards: [VocabularyCard] = []
     @State private var article: VocabularyGeneratedArticle?
     @State private var recitation = VocabularyArticleRecitationState(sentences: [])
+    @State private var viewMode: VocabularyArticleViewMode = .reading
     @State private var processedSpeechWordCount = 0
     @State private var isGenerating = false
     @State private var alert: AppAlert?
@@ -63,6 +64,11 @@ struct VocabularyArticleView: View {
         .onChange(of: speechRecognizer.transcript) { _, transcript in
             processTranscript(transcript)
         }
+        .onChange(of: viewMode) { _, mode in
+            if mode == .reading {
+                speechRecognizer.stop()
+            }
+        }
         .onDisappear {
             speechRecognizer.stop()
         }
@@ -79,19 +85,33 @@ struct VocabularyArticleView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                recitationControls
+                Picker("词生文模式", selection: $viewMode) {
+                    ForEach(VocabularyArticleViewMode.allCases) { mode in
+                        Label(mode.title, systemImage: mode.systemImage)
+                            .tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
 
-                VocabularyArticleMaskedTextView(
-                    sentences: recitation.sentences,
-                    revealedSentenceCount: recitation.revealedSentenceCount,
-                    currentSentenceIndex: recitation.currentSentenceIndex,
-                    isComplete: recitation.isComplete
-                )
+                if viewMode == .reading {
+                    VocabularyArticleReadingTextView(articleText: article.articleText) {
+                        viewMode = .recitation
+                    }
+                } else {
+                    recitationControls
 
-                if let mismatch = recitation.lastMismatchWord {
-                    Label("检测到不匹配：\(mismatch)。请从当前句开头重新背诵。", systemImage: "exclamationmark.triangle")
-                        .font(.callout)
-                        .foregroundStyle(.orange)
+                    VocabularyArticleMaskedTextView(
+                        sentences: recitation.sentences,
+                        revealedSentenceCount: recitation.revealedSentenceCount,
+                        currentSentenceIndex: recitation.currentSentenceIndex,
+                        isComplete: recitation.isComplete
+                    )
+
+                    if let mismatch = recitation.lastMismatchWord {
+                        Label("检测到不匹配：\(mismatch)。请从当前句开头重新背诵。", systemImage: "exclamationmark.triangle")
+                            .font(.callout)
+                            .foregroundStyle(.orange)
+                    }
                 }
             }
             .padding(28)
@@ -176,6 +196,7 @@ struct VocabularyArticleView: View {
             cards = latestCards
             article = storedArticle
             resetRecitation()
+            viewMode = .reading
         } catch {
             alert = AppAlert(title: "无法生成词生文", error: error)
         }
@@ -213,6 +234,49 @@ struct VocabularyArticleView: View {
         if recitation.isComplete {
             speechRecognizer.stop()
         }
+    }
+}
+
+private enum VocabularyArticleViewMode: String, CaseIterable, Identifiable {
+    case reading
+    case recitation
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .reading: "阅读"
+        case .recitation: "背诵"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .reading: "text.book.closed"
+        case .recitation: "mic.circle"
+        }
+    }
+}
+
+private struct VocabularyArticleReadingTextView: View {
+    let articleText: String
+    let onStartRecitation: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text(articleText)
+                .font(.title3)
+                .lineSpacing(7)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button("开始背诵", systemImage: "mic.circle") {
+                onStartRecitation()
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding(18)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
     }
 }
 
