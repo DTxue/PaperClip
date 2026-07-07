@@ -133,6 +133,65 @@ enum VocabularyArticleTextNormalizer {
     }
 }
 
+enum VocabularyArticleWordMatcher {
+    private static let homophoneGroups: [Set<String>] = [
+        ["to", "too", "two"],
+        ["for", "four"],
+        ["there", "their", "theyre"],
+        ["your", "youre"],
+        ["hear", "here"],
+        ["no", "know"],
+        ["right", "write"],
+        ["one", "won"],
+        ["new", "knew"]
+    ]
+
+    static func matches(spoken: String, target: String) -> Bool {
+        spoken == target || homophoneGroups.contains { group in
+            group.contains(spoken) && group.contains(target)
+        }
+    }
+}
+
+enum VocabularyArticleDisplayText {
+    static func prefix(_ sentenceText: String, matchedWordCount: Int) -> String {
+        guard matchedWordCount > 0 else { return "" }
+
+        var matchedWords = 0
+        var prefixEnd = sentenceText.startIndex
+        var wordStart: String.Index?
+
+        for index in sentenceText.indices {
+            let character = sentenceText[index]
+            if character.isLetter || character.isNumber || character == "'" || character == "’" {
+                if wordStart == nil {
+                    wordStart = index
+                }
+                continue
+            }
+
+            if let start = wordStart {
+                let word = String(sentenceText[start..<index])
+                matchedWords += VocabularyArticleTextNormalizer.words(from: word).count
+                prefixEnd = index
+                wordStart = nil
+                if matchedWords >= matchedWordCount {
+                    return String(sentenceText[...prefixEnd])
+                }
+            }
+        }
+
+        if let start = wordStart {
+            let word = String(sentenceText[start...])
+            matchedWords += VocabularyArticleTextNormalizer.words(from: word).count
+            prefixEnd = sentenceText.endIndex
+        }
+
+        guard matchedWords >= matchedWordCount else { return sentenceText }
+        return String(sentenceText[..<prefixEnd])
+    }
+}
+
 struct VocabularyArticleRecitationState: Equatable {
     private(set) var sentences: [VocabularyArticleSentence]
     private(set) var currentSentenceIndex: Int = 0
@@ -185,7 +244,10 @@ struct VocabularyArticleRecitationState: Equatable {
         let targetWords = currentSentence.words
         guard targetWords.indices.contains(currentWordIndex) else { return }
 
-        if rawWord == targetWords[currentWordIndex] {
+        if VocabularyArticleWordMatcher.matches(
+            spoken: rawWord,
+            target: targetWords[currentWordIndex]
+        ) {
             currentWordIndex += 1
             lastMismatchWord = nil
             if currentWordIndex == targetWords.count {
@@ -195,7 +257,9 @@ struct VocabularyArticleRecitationState: Equatable {
             return
         }
 
-        if currentWordIndex > 0 && targetWords[..<currentWordIndex].contains(rawWord) {
+        if currentWordIndex > 0 && targetWords[..<currentWordIndex].contains(where: { targetWord in
+            VocabularyArticleWordMatcher.matches(spoken: rawWord, target: targetWord)
+        }) {
             return
         }
 

@@ -662,6 +662,7 @@ run_swift_test StatisticsSnapshotTests \
     PaperClip/ExamModels.swift \
     PaperClip/ExamGradeMarkModel.swift \
     PaperClip/VocabularyJSONStorage.swift \
+    PaperClip/VocabularyArticleRecitation.swift \
     PaperClip/VocabularyModels.swift \
     PaperClip/VocabularyCardDerivedProperties.swift \
     PaperClip/VocabularyPersistence.swift \

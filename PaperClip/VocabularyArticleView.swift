@@ -1,5 +1,4 @@
-import AVFoundation
-import Speech
+import Foundation
 import SwiftData
 import SwiftUI
 
@@ -11,8 +10,12 @@ struct VocabularyArticleView: View {
     @State private var cards: [VocabularyCard] = []
     @State private var article: VocabularyGeneratedArticle?
     @State private var recitation = VocabularyArticleRecitationState(sentences: [])
+    @State private var recitationHistories: [VocabularyArticleRecitationHistory] = []
     @State private var viewMode: VocabularyArticleViewMode = .reading
     @State private var listeningBaseline: VocabularyArticleRecitationState?
+    @State private var sessionStartedAt: Date?
+    @State private var stuckSentenceIndexes: Set<Int> = []
+    @State private var completionFeedbackTick = 0
     @State private var isGenerating = false
     @State private var alert: AppAlert?
 
@@ -72,6 +75,7 @@ struct VocabularyArticleView: View {
         .onDisappear {
             speechRecognizer.stop()
         }
+        .sensoryFeedback(.success, trigger: completionFeedbackTick)
     }
 
     private func articleContent(_ article: VocabularyGeneratedArticle) -> some View {
@@ -98,12 +102,15 @@ struct VocabularyArticleView: View {
                         viewMode = .recitation
                     }
                 } else {
+                    VocabularyArticleRecitationSummaryView(histories: recitationHistories)
+
                     recitationControls
 
                     VocabularyArticleMaskedTextView(
                         sentences: recitation.sentences,
                         revealedSentenceCount: recitation.revealedSentenceCount,
                         currentSentenceIndex: recitation.currentSentenceIndex,
+                        currentWordIndex: recitation.currentWordIndex,
                         isComplete: recitation.isComplete
                     )
 
@@ -140,6 +147,8 @@ struct VocabularyArticleView: View {
                 Button("重置", systemImage: "arrow.counterclockwise") {
                     speechRecognizer.stop()
                     listeningBaseline = nil
+                    sessionStartedAt = nil
+                    stuckSentenceIndexes = []
                     recitation.reset()
                 }
                 .buttonStyle(.bordered)
@@ -159,6 +168,20 @@ struct VocabularyArticleView: View {
             }
             .font(.callout)
             .foregroundStyle(.secondary)
+
+            if speechRecognizer.isRecording || !speechRecognizer.transcript.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("识别文本")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Text(speechRecognizer.transcript.isEmpty ? "..." : speechRecognizer.transcript)
+                        .font(.callout)
+                        .foregroundStyle(.primary)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.top, 4)
+            }
         }
         .padding(16)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8))
@@ -169,6 +192,7 @@ struct VocabularyArticleView: View {
             cards = try modelContext.fetchVocabularyArticleCards(deckID: deck.id)
             article = try modelContext.fetchVocabularyGeneratedArticle(deckID: deck.id)
             resetRecitation()
+            loadRecitationHistories()
         } catch {
             alert = AppAlert(title: "无法读取词生文", error: error)
         }
@@ -196,6 +220,7 @@ struct VocabularyArticleView: View {
             cards = latestCards
             article = storedArticle
             resetRecitation()
+            loadRecitationHistories()
             viewMode = .reading
         } catch {
             alert = AppAlert(title: "无法生成词生文", error: error)
@@ -205,6 +230,8 @@ struct VocabularyArticleView: View {
     private func resetRecitation() {
         speechRecognizer.stop()
         listeningBaseline = nil
+        sessionStartedAt = nil
+        stuckSentenceIndexes = []
         recitation = VocabularyArticleRecitationState(
             sentences: VocabularyArticleSentence.split(article?.articleText ?? "")
         )
@@ -214,6 +241,7 @@ struct VocabularyArticleView: View {
         guard !speechRecognizer.isRecording, !speechRecognizer.isStarting else { return }
         do {
             listeningBaseline = recitation
+            sessionStartedAt = sessionStartedAt ?? Date()
             try await speechRecognizer.start()
         } catch {
             listeningBaseline = nil
@@ -223,6 +251,7 @@ struct VocabularyArticleView: View {
 
     private func processTranscript(_ transcript: String) {
         let baseline = listeningBaseline ?? recitation
+        let previousRecitation = recitation
         let nextRecitation = VocabularyArticleTranscriptMatcher.apply(
             transcript: transcript,
             baseline: baseline,
@@ -231,9 +260,55 @@ struct VocabularyArticleView: View {
         guard nextRecitation != recitation else { return }
 
         recitation = nextRecitation
+        if nextRecitation.lastMismatchWord != nil {
+            stuckSentenceIndexes.insert(previousRecitation.currentSentenceIndex)
+        }
+        if nextRecitation.revealedSentenceCount > previousRecitation.revealedSentenceCount {
+            completionFeedbackTick += 1
+        }
         if recitation.isComplete {
             listeningBaseline = nil
             speechRecognizer.stop()
+            recordRecitationCompletion()
+        }
+    }
+
+    private func loadRecitationHistories() {
+        guard let article else {
+            recitationHistories = []
+            return
+        }
+
+        do {
+            recitationHistories = try modelContext.fetchVocabularyArticleRecitationHistories(
+                deckID: deck.id,
+                articleSnapshotHash: article.sourceCardSnapshotHash
+            )
+        } catch {
+            alert = AppAlert(title: "无法读取背诵记录", error: error)
+        }
+    }
+
+    private func recordRecitationCompletion() {
+        guard let article, let sessionStartedAt else { return }
+        let duration = max(0, Date().timeIntervalSince(sessionStartedAt))
+        let wordCount = recitation.sentences.reduce(0) { $0 + $1.words.count }
+
+        _ = modelContext.recordVocabularyArticleRecitationHistory(
+            article: article,
+            duration: duration,
+            sentenceCount: recitation.sentences.count,
+            wordCount: wordCount,
+            stuckSentenceIndexes: Array(stuckSentenceIndexes)
+        )
+
+        do {
+            try modelContext.save()
+            self.sessionStartedAt = nil
+            stuckSentenceIndexes = []
+            loadRecitationHistories()
+        } catch {
+            alert = AppAlert(title: "无法保存背诵记录", error: error)
         }
     }
 }
@@ -256,6 +331,62 @@ private enum VocabularyArticleViewMode: String, CaseIterable, Identifiable {
         case .reading: "text.book.closed"
         case .recitation: "mic.circle"
         }
+    }
+}
+
+private struct VocabularyArticleRecitationSummaryView: View {
+    let histories: [VocabularyArticleRecitationHistory]
+
+    private let columns = [
+        GridItem(.adaptive(minimum: 150), spacing: 12, alignment: .leading)
+    ]
+
+    private var averageDuration: Double {
+        guard !histories.isEmpty else { return 0 }
+        let totalDuration = histories.reduce(0) { $0 + $1.duration }
+        return totalDuration / Double(histories.count)
+    }
+
+    private var lastCompletedText: String {
+        guard let latest = histories.first?.completedAt else { return "暂无" }
+        return latest.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    private var frequentStuckSentenceText: String {
+        let indexes = histories.flatMap(\.stuckSentenceIndexes)
+        guard let index = indexes.mostFrequentValue else { return "暂无" }
+        return "第 \(index + 1) 句"
+    }
+
+    var body: some View {
+        LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
+            metric("完成次数", value: "\(histories.count)", systemImage: "checkmark.circle")
+            metric("平均用时", value: VocabularyStudySessionFormat.duration(averageDuration), systemImage: "timer")
+            metric("最近完成", value: lastCompletedText, systemImage: "calendar")
+            metric("易卡句", value: frequentStuckSentenceText, systemImage: "exclamationmark.bubble")
+        }
+        .font(.callout)
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    private func metric(_ title: String, value: String, systemImage: String) -> some View {
+        Label {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(value)
+                    .font(.callout.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+        } icon: {
+            Image(systemName: systemImage)
+                .foregroundStyle(.blue)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -285,6 +416,7 @@ private struct VocabularyArticleMaskedTextView: View {
     let sentences: [VocabularyArticleSentence]
     let revealedSentenceCount: Int
     let currentSentenceIndex: Int
+    let currentWordIndex: Int
     let isComplete: Bool
 
     var body: some View {
@@ -292,32 +424,58 @@ private struct VocabularyArticleMaskedTextView: View {
             ForEach(sentences.indices, id: \.self) { index in
                 let isRevealed = index < revealedSentenceCount || isComplete
                 let isCurrent = index == currentSentenceIndex && !isComplete
-
-                Text(sentences[index].text)
-                    .font(.title3)
-                    .lineSpacing(5)
-                    .foregroundStyle(isRevealed ? .primary : .secondary)
-                    .blur(radius: isRevealed ? 0 : 4)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(isCurrent ? Color.accentColor.opacity(0.08) : Color.clear)
+                let visiblePrefix = isCurrent
+                    ? VocabularyArticleDisplayText.prefix(
+                        sentences[index].text,
+                        matchedWordCount: currentWordIndex
                     )
-                    .overlay {
+                    : ""
+
+                VStack(alignment: .leading, spacing: 6) {
+                    ZStack(alignment: .leading) {
+                        Text(sentences[index].text)
+                            .font(.title3)
+                            .lineSpacing(5)
+                            .foregroundStyle(isRevealed ? .primary : .secondary)
+                            .blur(radius: isRevealed ? 0 : 4)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
                         if !isRevealed {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(.regularMaterial)
                                 .opacity(isCurrent ? 0.72 : 0.92)
                         }
-                    }
-                    .overlay {
-                        if isCurrent {
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.accentColor.opacity(0.35), lineWidth: 1)
+
+                        if !visiblePrefix.isEmpty {
+                            Text(visiblePrefix)
+                                .font(.title3)
+                                .lineSpacing(5)
+                                .foregroundStyle(.primary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
+
+                    if isCurrent, let currentSentence = sentences[safe: index], !currentSentence.words.isEmpty {
+                        ProgressView(
+                            value: Double(currentWordIndex),
+                            total: Double(currentSentence.words.count)
+                        )
+                        .tint(.blue)
+                    }
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(isCurrent ? Color.accentColor.opacity(0.08) : Color.clear)
+                )
+                .overlay {
+                    if isCurrent {
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.accentColor.opacity(0.35), lineWidth: 1)
+                    }
+                }
             }
         }
         .padding(18)
@@ -325,196 +483,23 @@ private struct VocabularyArticleMaskedTextView: View {
     }
 }
 
-@MainActor
-final class VocabularyArticleSpeechRecognizer: ObservableObject {
-    @Published var transcript = ""
-    @Published var isRecording = false
-    @Published var isStarting = false
-
-    private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
-    private let audioEngine = AVAudioEngine()
-    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
-    private var recognitionTask: SFSpeechRecognitionTask?
-    private var isTapInstalled = false
-    private var startGeneration = 0
-
-    func start() async throws {
-        guard !isStarting, !isRecording else { return }
-        startGeneration += 1
-        let generation = startGeneration
-        isStarting = true
-        defer {
-            if self.startGeneration == generation {
-                self.isStarting = false
+private extension Array where Element == Int {
+    var mostFrequentValue: Element? {
+        var counts: [Element: Int] = [:]
+        for value in self {
+            counts[value, default: 0] += 1
+        }
+        return counts.max { lhs, rhs in
+            if lhs.value == rhs.value {
+                return lhs.key > rhs.key
             }
-        }
-
-        finishRecognition(cancelTask: true)
-        transcript = ""
-
-        let speechAuthorization = await VocabularyArticleSpeechPermissions.requestSpeechAuthorization()
-        guard isCurrentStart(generation) else { return }
-        guard speechAuthorization == .authorized else {
-            throw VocabularyArticleSpeechError.speechNotAuthorized
-        }
-
-        let microphoneAllowed = await VocabularyArticleSpeechPermissions.requestMicrophonePermission()
-        guard isCurrentStart(generation) else { return }
-        guard microphoneAllowed else {
-            throw VocabularyArticleSpeechError.microphoneNotAuthorized
-        }
-
-        guard let speechRecognizer, speechRecognizer.isAvailable else {
-            throw VocabularyArticleSpeechError.recognizerUnavailable
-        }
-
-        let audioSession = AVAudioSession.sharedInstance()
-        try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-        try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-        guard isCurrentStart(generation) else {
-            finishRecognition(cancelTask: true)
-            return
-        }
-
-        let request = SFSpeechAudioBufferRecognitionRequest()
-        request.shouldReportPartialResults = true
-        recognitionRequest = request
-
-        recognitionTask = VocabularyArticleSpeechRuntime.makeRecognitionTask(
-            speechRecognizer: speechRecognizer,
-            request: request
-        ) { [weak self] transcript, shouldFinish in
-            guard self?.isCurrentStart(generation) == true else { return }
-            if let transcript {
-                self?.transcript = transcript
-            }
-            if shouldFinish {
-                self?.finishRecognition(cancelTask: false)
-            }
-        }
-
-        let inputNode = audioEngine.inputNode
-        let recordingFormat = inputNode.outputFormat(forBus: 0)
-        VocabularyArticleSpeechRuntime.installAudioTap(
-            on: inputNode,
-            format: recordingFormat,
-            request: request
-        )
-        isTapInstalled = true
-
-        guard isCurrentStart(generation) else {
-            finishRecognition(cancelTask: true)
-            return
-        }
-
-        do {
-            audioEngine.prepare()
-            try audioEngine.start()
-        } catch {
-            finishRecognition(cancelTask: true)
-            throw error
-        }
-
-        guard isCurrentStart(generation) else {
-            finishRecognition(cancelTask: true)
-            return
-        }
-        isRecording = true
-    }
-
-    func stop() {
-        startGeneration += 1
-        isStarting = false
-        guard isRecording || recognitionTask != nil || recognitionRequest != nil else { return }
-        finishRecognition(cancelTask: true)
-    }
-
-    private func finishRecognition(cancelTask: Bool) {
-        if audioEngine.isRunning {
-            audioEngine.stop()
-        }
-
-        if isTapInstalled {
-            audioEngine.inputNode.removeTap(onBus: 0)
-            isTapInstalled = false
-        }
-
-        let request = recognitionRequest
-        let task = recognitionTask
-        recognitionRequest = nil
-        recognitionTask = nil
-
-        request?.endAudio()
-        if cancelTask {
-            task?.cancel()
-        }
-        isRecording = false
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-    }
-
-    private func isCurrentStart(_ generation: Int) -> Bool {
-        startGeneration == generation
-    }
-
-}
-
-private enum VocabularyArticleSpeechPermissions {
-    static func requestSpeechAuthorization() async -> SFSpeechRecognizerAuthorizationStatus {
-        await withCheckedContinuation { continuation in
-            SFSpeechRecognizer.requestAuthorization { status in
-                continuation.resume(returning: status)
-            }
-        }
-    }
-
-    static func requestMicrophonePermission() async -> Bool {
-        await withCheckedContinuation { continuation in
-            AVAudioApplication.requestRecordPermission { isAllowed in
-                continuation.resume(returning: isAllowed)
-            }
-        }
+            return lhs.value < rhs.value
+        }?.key
     }
 }
 
-private enum VocabularyArticleSpeechRuntime {
-    static func makeRecognitionTask(
-        speechRecognizer: SFSpeechRecognizer,
-        request: SFSpeechAudioBufferRecognitionRequest,
-        onResult: @escaping @MainActor (String?, Bool) -> Void
-    ) -> SFSpeechRecognitionTask {
-        speechRecognizer.recognitionTask(with: request) { result, error in
-            let transcript = result?.bestTranscription.formattedString
-            let shouldFinish = error != nil || result?.isFinal == true
-            Task { @MainActor in
-                onResult(transcript, shouldFinish)
-            }
-        }
-    }
-
-    static func installAudioTap(
-        on inputNode: AVAudioInputNode,
-        format: AVAudioFormat,
-        request: SFSpeechAudioBufferRecognitionRequest
-    ) {
-        inputNode.installTap(onBus: 0, bufferSize: 1_024, format: format) { [weak request] buffer, _ in
-            request?.append(buffer)
-        }
-    }
-}
-
-private enum VocabularyArticleSpeechError: LocalizedError {
-    case speechNotAuthorized
-    case microphoneNotAuthorized
-    case recognizerUnavailable
-
-    var errorDescription: String? {
-        switch self {
-        case .speechNotAuthorized:
-            "请在系统设置中允许 PaperClip 使用语音识别。"
-        case .microphoneNotAuthorized:
-            "请在系统设置中允许 PaperClip 使用麦克风。"
-        case .recognizerUnavailable:
-            "当前设备暂时无法使用英语语音识别。"
-        }
+private extension Collection {
+    subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }

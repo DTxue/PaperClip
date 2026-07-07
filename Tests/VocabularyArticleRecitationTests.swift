@@ -37,9 +37,9 @@ struct VocabularyArticleRecitationTests {
             baseline: baseline,
             current: revisedTranscript
         )
-        expect(revisedTranscript.currentWordIndex == 4)
+        expect(revisedTranscript.revealedSentenceCount == 1)
         revisedTranscript = VocabularyArticleTranscriptMatcher.apply(
-            transcript: "I am ready to learn",
+            transcript: "I am ready wrong learn",
             baseline: baseline,
             current: revisedTranscript
         )
@@ -52,10 +52,21 @@ struct VocabularyArticleRecitationTests {
         )
         expect(resumedTranscript.isComplete)
 
+        var homophone = VocabularyArticleRecitationState(sentences: sentences)
+        homophone.process(words: VocabularyArticleTextNormalizer.words(from: "I am ready two learn"))
+        expect(homophone.revealedSentenceCount == 1)
+
+        var repeatedHomophone = VocabularyArticleRecitationState(sentences: sentences)
+        repeatedHomophone.process(words: VocabularyArticleTextNormalizer.words(from: "I am ready to two learn"))
+        expect(repeatedHomophone.revealedSentenceCount == 1)
+
+        expect(VocabularyArticleDisplayText.prefix("I am ready to learn.", matchedWordCount: 3) == "I am ready ")
+        expect(VocabularyArticleDisplayText.prefix("I am ready to learn.", matchedWordCount: 5) == "I am ready to learn.")
+
         let normalized = VocabularyArticleTextNormalizer.words(from: "I'm ready, and I don't stop.")
         expect(normalized == ["i", "am", "ready", "and", "i", "do", "not", "stop"])
 
-        print("VocabularyArticleRecitationTests: 17 passed")
+        print("VocabularyArticleRecitationTests: 21 passed")
     }
 
     private static func expect(

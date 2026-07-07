@@ -136,4 +136,43 @@ extension ModelContext {
         insert(article)
         return article
     }
+
+    func fetchVocabularyArticleRecitationHistories(
+        deckID: UUID,
+        articleSnapshotHash: String
+    ) throws -> [VocabularyArticleRecitationHistory] {
+        try fetch(
+            FetchDescriptor<VocabularyArticleRecitationHistory>(
+                predicate: #Predicate<VocabularyArticleRecitationHistory> { history in
+                    history.deckID == deckID && history.articleSnapshotHash == articleSnapshotHash
+                },
+                sortBy: [SortDescriptor(\.completedAt, order: .reverse)]
+            )
+        )
+    }
+
+    @discardableResult
+    func recordVocabularyArticleRecitationHistory(
+        article: VocabularyGeneratedArticle,
+        duration: TimeInterval,
+        sentenceCount: Int,
+        wordCount: Int,
+        stuckSentenceIndexes: [Int]
+    ) -> VocabularyArticleRecitationHistory {
+        let now = Date()
+        let history = VocabularyArticleRecitationHistory(
+            deckID: article.deckID,
+            articleID: article.id,
+            articleTitle: article.title,
+            articleSnapshotHash: article.sourceCardSnapshotHash,
+            completedAt: now,
+            duration: duration,
+            sentenceCount: sentenceCount,
+            wordCount: wordCount,
+            stuckSentenceIndexes: stuckSentenceIndexes,
+            createdAt: now
+        )
+        insert(history)
+        return history
+    }
 }

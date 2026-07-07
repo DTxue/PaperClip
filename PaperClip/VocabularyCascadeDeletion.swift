@@ -46,6 +46,10 @@ extension ModelContext {
             predicate: #Predicate<VocabularyGeneratedArticle> { article in article.deckID == deckID }
         ), fetching: VocabularyGeneratedArticle.deletionPropertiesToFetch)
 
+        try deleteFetchedVocabularyRows(FetchDescriptor<VocabularyArticleRecitationHistory>(
+            predicate: #Predicate<VocabularyArticleRecitationHistory> { history in history.deckID == deckID }
+        ), fetching: VocabularyArticleRecitationHistory.deletionPropertiesToFetch)
+
         try deleteVocabularyDistractorCaches(deckID: deckID)
 
         if let deck = try fetchVocabularyDeck(id: deckID) {

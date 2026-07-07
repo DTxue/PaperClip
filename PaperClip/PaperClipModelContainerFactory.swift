@@ -58,6 +58,7 @@ enum PaperClipModelContainerFactory {
             VocabularyDeck.self,
             VocabularyCard.self,
             VocabularyGeneratedArticle.self,
+            VocabularyArticleRecitationHistory.self,
             VocabularyMemoryState.self,
             VocabularyReviewLog.self,
             VocabularyStudySession.self,
