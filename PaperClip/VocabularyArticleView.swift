@@ -67,6 +67,8 @@ struct VocabularyArticleView: View {
         .onChange(of: viewMode) { _, mode in
             if mode == .reading {
                 speechRecognizer.stop()
+            } else {
+                Task { await startListening() }
             }
         }
         .onDisappear {
@@ -211,6 +213,7 @@ struct VocabularyArticleView: View {
     }
 
     private func startListening() async {
+        guard !speechRecognizer.isRecording else { return }
         do {
             processedSpeechWordCount = 0
             try await speechRecognizer.start()
@@ -366,7 +369,7 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
                     self?.transcript = result.bestTranscription.formattedString
                 }
                 if error != nil || result?.isFinal == true {
-                    self?.stop()
+                    self?.finishRecognition(cancelTask: false)
                 }
             }
         }
@@ -385,13 +388,18 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
 
     func stop() {
         guard isRecording || recognitionTask != nil || recognitionRequest != nil else { return }
+        finishRecognition(cancelTask: true)
+    }
 
+    private func finishRecognition(cancelTask: Bool) {
         if audioEngine.isRunning {
             audioEngine.stop()
         }
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()
-        recognitionTask?.cancel()
+        if cancelTask {
+            recognitionTask?.cancel()
+        }
         recognitionRequest = nil
         recognitionTask = nil
         isRecording = false
@@ -408,7 +416,7 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
 
     private func requestMicrophonePermission() async -> Bool {
         await withCheckedContinuation { continuation in
-            AVAudioSession.sharedInstance().requestRecordPermission { isAllowed in
+            AVAudioApplication.requestRecordPermission { isAllowed in
                 continuation.resume(returning: isAllowed)
             }
         }
