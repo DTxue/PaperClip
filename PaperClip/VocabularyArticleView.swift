@@ -335,6 +335,7 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
     private let audioEngine = AVAudioEngine()
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
+    private var isTapInstalled = false
     private var startGeneration = 0
 
     func start() async throws {
@@ -351,13 +352,13 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
         finishRecognition(cancelTask: true)
         transcript = ""
 
-        let speechAuthorization = await requestSpeechAuthorization()
+        let speechAuthorization = await VocabularyArticleSpeechPermissions.requestSpeechAuthorization()
         guard isCurrentStart(generation) else { return }
         guard speechAuthorization == .authorized else {
             throw VocabularyArticleSpeechError.speechNotAuthorized
         }
 
-        let microphoneAllowed = await requestMicrophonePermission()
+        let microphoneAllowed = await VocabularyArticleSpeechPermissions.requestMicrophonePermission()
         guard isCurrentStart(generation) else { return }
         guard microphoneAllowed else {
             throw VocabularyArticleSpeechError.microphoneNotAuthorized
@@ -379,32 +380,41 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
         request.shouldReportPartialResults = true
         recognitionRequest = request
 
-        recognitionTask = speechRecognizer.recognitionTask(with: request) { [weak self] result, error in
-            Task { @MainActor in
-                guard self?.isCurrentStart(generation) == true else { return }
-                if let result {
-                    self?.transcript = result.bestTranscription.formattedString
-                }
-                if error != nil || result?.isFinal == true {
-                    self?.finishRecognition(cancelTask: false)
-                }
+        recognitionTask = VocabularyArticleSpeechRuntime.makeRecognitionTask(
+            speechRecognizer: speechRecognizer,
+            request: request
+        ) { [weak self] transcript, shouldFinish in
+            guard self?.isCurrentStart(generation) == true else { return }
+            if let transcript {
+                self?.transcript = transcript
+            }
+            if shouldFinish {
+                self?.finishRecognition(cancelTask: false)
             }
         }
 
         let inputNode = audioEngine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
-        inputNode.removeTap(onBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1_024, format: recordingFormat) { [weak request] buffer, _ in
-            request?.append(buffer)
-        }
+        VocabularyArticleSpeechRuntime.installAudioTap(
+            on: inputNode,
+            format: recordingFormat,
+            request: request
+        )
+        isTapInstalled = true
 
         guard isCurrentStart(generation) else {
             finishRecognition(cancelTask: true)
             return
         }
 
-        audioEngine.prepare()
-        try audioEngine.start()
+        do {
+            audioEngine.prepare()
+            try audioEngine.start()
+        } catch {
+            finishRecognition(cancelTask: true)
+            throw error
+        }
+
         guard isCurrentStart(generation) else {
             finishRecognition(cancelTask: true)
             return
@@ -423,13 +433,21 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
         if audioEngine.isRunning {
             audioEngine.stop()
         }
-        audioEngine.inputNode.removeTap(onBus: 0)
-        recognitionRequest?.endAudio()
-        if cancelTask {
-            recognitionTask?.cancel()
+
+        if isTapInstalled {
+            audioEngine.inputNode.removeTap(onBus: 0)
+            isTapInstalled = false
         }
+
+        let request = recognitionRequest
+        let task = recognitionTask
         recognitionRequest = nil
         recognitionTask = nil
+
+        request?.endAudio()
+        if cancelTask {
+            task?.cancel()
+        }
         isRecording = false
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
@@ -438,7 +456,10 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
         startGeneration == generation
     }
 
-    private func requestSpeechAuthorization() async -> SFSpeechRecognizerAuthorizationStatus {
+}
+
+private enum VocabularyArticleSpeechPermissions {
+    static func requestSpeechAuthorization() async -> SFSpeechRecognizerAuthorizationStatus {
         await withCheckedContinuation { continuation in
             SFSpeechRecognizer.requestAuthorization { status in
                 continuation.resume(returning: status)
@@ -446,11 +467,37 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
         }
     }
 
-    private func requestMicrophonePermission() async -> Bool {
+    static func requestMicrophonePermission() async -> Bool {
         await withCheckedContinuation { continuation in
             AVAudioApplication.requestRecordPermission { isAllowed in
                 continuation.resume(returning: isAllowed)
             }
+        }
+    }
+}
+
+private enum VocabularyArticleSpeechRuntime {
+    static func makeRecognitionTask(
+        speechRecognizer: SFSpeechRecognizer,
+        request: SFSpeechAudioBufferRecognitionRequest,
+        onResult: @escaping @MainActor (String?, Bool) -> Void
+    ) -> SFSpeechRecognitionTask {
+        speechRecognizer.recognitionTask(with: request) { result, error in
+            let transcript = result?.bestTranscription.formattedString
+            let shouldFinish = error != nil || result?.isFinal == true
+            Task { @MainActor in
+                onResult(transcript, shouldFinish)
+            }
+        }
+    }
+
+    static func installAudioTap(
+        on inputNode: AVAudioInputNode,
+        format: AVAudioFormat,
+        request: SFSpeechAudioBufferRecognitionRequest
+    ) {
+        inputNode.installTap(onBus: 0, bufferSize: 1_024, format: format) { [weak request] buffer, _ in
+            request?.append(buffer)
         }
     }
 }
