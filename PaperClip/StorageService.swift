@@ -1,24 +1,6 @@
 import Foundation
 import UIKit
-
-enum AppStorageDirectory {
-    private static let root: URL = {
-        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        let url = support.appendingPathComponent("PaperClip", isDirectory: true)
-        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-        return url
-    }()
-
-    static let pdfs = directory(named: "PDFs")
-    static let cards = directory(named: "Cards")
-    static let exports = directory(named: "Exports")
-
-    private static func directory(named name: String) -> URL {
-        let url = root.appendingPathComponent(name, isDirectory: true)
-        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-        return url
-    }
-}
+@preconcurrency import PDFKit
 
 enum StorageService {
     static func importPDF(from sourceURL: URL) throws -> (fileName: String, title: String) {
@@ -28,31 +10,63 @@ enum StorageService {
         }
 
         let fileName = "\(UUID().uuidString).pdf"
-        let destination = AppStorageDirectory.pdfs.appendingPathComponent(fileName)
+        let destination = StoredFile.importedPDF(fileName: fileName).url
+        try ensureParentDirectoryExists(for: destination)
         try FileManager.default.copyItem(at: sourceURL, to: destination)
         try makePDFReadOnly(at: destination)
         return (fileName, sourceURL.deletingPathExtension().lastPathComponent)
     }
 
-    static func makePDFReadOnly(at url: URL) throws {
-        guard FileManager.default.fileExists(atPath: url.path) else { return }
-        try FileManager.default.setAttributes(
-            [.posixPermissions: 0o444],
-            ofItemAtPath: url.path
-        )
-    }
+    static func createExamPDF(from sourceURL: URL, selectedPageIndices: [Int]) throws -> String {
+        let source = try PDFRenderSupport.document(at: sourceURL)
+        guard let uniqueIndices = PDFPageExportSelectionSupport.sortedUniqueIndices(
+            selectedPageIndices,
+            maximumCount: source.pageCount,
+            pageCount: source.pageCount
+        ) else {
+            throw CocoaError(.fileNoSuchFile)
+        }
 
-    static func saveCardImage(_ image: UIImage) throws -> String {
-        let fileName = "\(UUID().uuidString).png"
-        let destination = AppStorageDirectory.cards.appendingPathComponent(fileName)
-        guard let data = image.pngData() else {
+        let output = PDFDocument()
+        for (outputIndex, sourceIndex) in uniqueIndices.enumerated() {
+            guard let page = source.page(at: sourceIndex)?.copy() as? PDFPage else { continue }
+            output.insert(page, at: outputIndex)
+        }
+        guard output.pageCount > 0 else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+
+        let fileName = "\(UUID().uuidString).pdf"
+        let destination = StoredFile.examPDF(fileName: fileName).url
+        try ensureParentDirectoryExists(for: destination)
+        guard output.write(to: destination) else {
             throw CocoaError(.fileWriteUnknown)
         }
-        try data.write(to: destination, options: .atomic)
+        try makePDFReadOnly(at: destination)
         return fileName
     }
 
-    static func deleteFile(at url: URL) {
-        try? FileManager.default.removeItem(at: url)
+    static func saveCardImage(_ image: UIImage) throws -> String {
+        guard let data = ImageJPEGEncoder.standardData(from: image) else {
+            throw CocoaError(.fileWriteUnknown)
+        }
+        return try saveCardImageData(data)
+    }
+
+    static func saveCardImage(
+        _ image: UIImage,
+        priority: TaskPriority = .userInitiated
+    ) async throws -> String {
+        try await Task.detached(priority: priority) {
+            try saveCardImage(image)
+        }.value
+    }
+
+    static func saveCardImageData(_ data: Data) throws -> String {
+        let fileName = "\(UUID().uuidString).jpg"
+        let destination = StoredFile.cardImage(fileName: fileName).url
+        try ensureParentDirectoryExists(for: destination)
+        try data.write(to: destination, options: .atomic)
+        return fileName
     }
 }

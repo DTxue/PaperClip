@@ -68,6 +68,7 @@ NavigationSplitView(columnVisibility: .constant(.all)) {
 | 能力 | 必须使用的 API |
 |------|---------------|
 | 导航 | `NavigationStack`、`NavigationSplitView`、Toolbar |
+| 菜单与操作 | `Menu`、`contextMenu`、`Command`、系统 Button Style |
 | 弹窗/确认 | `alert`、`confirmationDialog`、`sheet`、`popover` |
 | 文件导入导出 | `fileImporter`、`fileExporter`、`FileDocument` |
 | 分享 | `ShareLink`、`Transferable` |
@@ -82,6 +83,18 @@ NavigationSplitView(columnVisibility: .constant(.all)) {
 
 禁止在 SwiftUI 已提供等价能力时创建 `UIViewControllerRepresentable` / `UIViewRepresentable` 包装。
 
+## 实施顺序
+
+每项 UI 或交互任务必须按以下顺序执行：
+
+1. 查阅当前项目最低系统版本对应的 Apple API；
+2. 确认是否已有 SwiftUI 原生组件；
+3. 确认是否已有 Apple 官方框架组件；
+4. 优先通过系统修饰器、容器和组合实现需求；
+5. 仅在原生方案确实无法满足时设计自定义实现；
+6. 完成后检查是否存在重复实现系统能力的代码；
+7. 使用项目支持的设备 SDK 完整编译。
+
 ## 允许保留的自定义实现
 
 以下业务能力暂无系统等价方案，可保留自定义代码，但内部仍须使用系统基础组件：
@@ -91,6 +104,15 @@ NavigationSplitView(columnVisibility: .constant(.all)) {
 - 可移动、可调整尺寸的浮动草稿板容器
 - 错题卡业务展示
 - A4 错题集排版与 PDF 生成
+
+即使属于允许自定义范围，也应继续使用系统基础能力：
+
+- 答题与草稿板使用 `PKCanvasView`
+- 画笔工具使用 `PKToolPicker`
+- PDF 显示和坐标转换使用 PDFKit
+- 分享使用 `ShareLink`
+- 文件导入使用 `fileImporter`
+- 状态提示、菜单和确认使用 SwiftUI 系统组件
 
 ## 新增自定义实现的准入条件
 

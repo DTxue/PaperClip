@@ -1,0 +1,94 @@
+import SwiftUI
+import SwiftData
+
+struct VocabularyCardEditorLoader: View {
+    @Environment(\.modelContext) private var modelContext
+    let deck: VocabularyDeck
+    let cardID: UUID
+    @State private var card: VocabularyCard?
+    @State private var alert: AppAlert?
+
+    var body: some View {
+        Group {
+            if let card {
+                VocabularyCardEditorView(deck: deck, card: card)
+            } else {
+                ContentUnavailableView(
+                    "无法打开单词",
+                    systemImage: "textformat.abc",
+                    description: Text("这个单词可能已被删除。")
+                )
+            }
+        }
+        .appAlert($alert)
+        .task(id: cardID) {
+            loadCard()
+        }
+    }
+
+    private func loadCard() {
+        do {
+            card = try modelContext.fetchVocabularyCard(id: cardID)
+        } catch {
+            card = nil
+            alert = AppAlert(title: "无法读取单词", error: error)
+        }
+    }
+}
+
+struct VocabularyCardEditorView: View {
+    let deck: VocabularyDeck
+    let card: VocabularyCard?
+
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+
+    @State private var draft: VocabularyCardEditDraft
+    @State private var alert: AppAlert?
+
+    init(deck: VocabularyDeck, card: VocabularyCard? = nil) {
+        self.deck = deck
+        self.card = card
+        _draft = State(initialValue: VocabularyCardEditDraft(card: card))
+    }
+
+    var body: some View {
+        Form {
+            VocabularyCardEditorFormSections(draft: $draft)
+        }
+        .navigationTitle(card == nil ? "新增单词" : "编辑单词")
+        .navigationBarTitleDisplayMode(.inline)
+        .editSheetToolbar(
+            isConfirmDisabled: !draft.canSave,
+            onCancel: { dismiss() },
+            onConfirm: save
+        )
+        .appAlert($alert)
+    }
+
+    private func save() {
+        let snapshot = draft.snapshot
+
+        let target: VocabularyCard
+        if let card {
+            guard VocabularyCardEditSnapshot(card: card) != snapshot else {
+                dismiss()
+                return
+            }
+            target = card
+        } else {
+            target = VocabularyCard(deckID: deck.id, term: "", definition: "")
+            modelContext.insert(target)
+        }
+
+        snapshot.apply(to: target)
+        target.updatedAt = .now
+        deck.updatedAt = .now
+        do {
+            try modelContext.saveOrRollbackIfNeeded()
+            dismiss()
+        } catch {
+            alert = AppAlert(title: "无法保存单词", error: error)
+        }
+    }
+}

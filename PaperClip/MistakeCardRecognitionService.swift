@@ -16,28 +16,18 @@ final class MistakeCardRecognitionService {
 
     var modelContainer: ModelContainer? {
         didSet {
+            if oldValue !== modelContainer {
+                cancelAllWork()
+            }
             drain()
         }
     }
 
     // MARK: - Queue State
 
-    private struct QueueItem {
-        enum Priority {
-            case userInitiated
-            case recovery
-        }
-
-        let cardID: UUID
-        let imagePath: String
-        let priority: Priority
-    }
-
-    private var userPending: [QueueItem] = []
-    private var recoveryPending: [QueueItem] = []
-    private var processingIDs: Set<UUID> = []
-    private var activeCount = 0
-    private var activeRecoveryCount = 0
+    private var queue = MistakeRecognitionQueue()
+    private var activeTaskIDs: [UUID: UUID] = [:]
+    private var activeTasks: [UUID: Task<Void, Never>] = [:]
     private let maxConcurrent = 2
     private let maxConcurrentRecovery = 1
 
@@ -52,49 +42,13 @@ final class MistakeCardRecognitionService {
         )
     }
 
-    private func enqueue(
+    func enqueue(
         cardID: UUID,
         imagePath: String,
-        priority: QueueItem.Priority
+        priority: MistakeRecognitionQueue.Item.Priority
     ) {
-        guard !processingIDs.contains(cardID),
-              !userPending.contains(where: { $0.cardID == cardID }),
-              !recoveryPending.contains(where: { $0.cardID == cardID }) else {
-            return
-        }
-        let item = QueueItem(
-            cardID: cardID,
-            imagePath: imagePath,
-            priority: priority
-        )
-        switch priority {
-        case .userInitiated:
-            userPending.append(item)
-        case .recovery:
-            recoveryPending.append(item)
-        }
+        queue.enqueue(cardID: cardID, imagePath: imagePath, priority: priority)
         drain()
-    }
-
-    /// 启动时重新提交上次未完成的卡片。
-    func resumeUnfinished() {
-        guard let container = modelContainer else { return }
-        let context = container.mainContext
-        let all = (try? context.fetch(FetchDescriptor<MistakeCard>())) ?? []
-        let unfinished = all.filter {
-            $0.recognitionStatus == RecognitionStatus.pending.rawValue
-                || $0.recognitionStatus == RecognitionStatus.processing.rawValue
-                || $0.recognitionStatus == RecognitionStatus.failed.rawValue
-        }
-        for card in unfinished {
-            card.recognitionStatus = RecognitionStatus.pending.rawValue
-            enqueue(
-                cardID: card.id,
-                imagePath: card.imageURL.path,
-                priority: .recovery
-            )
-        }
-        try? context.save()
     }
 
     // MARK: - Queue Drain
@@ -102,102 +56,33 @@ final class MistakeCardRecognitionService {
     private func drain() {
         guard modelContainer != nil else { return }
 
-        while activeCount < maxConcurrent, let item = nextItem() {
-            guard !processingIDs.contains(item.cardID) else { continue }
-            processingIDs.insert(item.cardID)
-            activeCount += 1
-            if item.priority == .recovery {
-                activeRecoveryCount += 1
-            }
-
-            Task {
+        while let item = queue.startNext(
+            maxConcurrent: maxConcurrent,
+            maxConcurrentRecovery: maxConcurrentRecovery
+        ) {
+            let taskID = UUID()
+            activeTaskIDs[item.cardID] = taskID
+            activeTasks[item.cardID] = Task {
                 await process(item: item)
-                activeCount -= 1
-                if item.priority == .recovery {
-                    activeRecoveryCount -= 1
-                }
-                processingIDs.remove(item.cardID)
+                finish(item: item, taskID: taskID)
                 drain()
             }
         }
     }
 
-    private func nextItem() -> QueueItem? {
-        if !userPending.isEmpty {
-            return userPending.removeFirst()
-        }
-        guard activeRecoveryCount < maxConcurrentRecovery,
-              !recoveryPending.isEmpty else {
-            return nil
-        }
-        return recoveryPending.removeFirst()
+    private func finish(item: MistakeRecognitionQueue.Item, taskID: UUID) {
+        guard activeTaskIDs[item.cardID] == taskID else { return }
+        activeTaskIDs[item.cardID] = nil
+        activeTasks[item.cardID] = nil
+        queue.finish(item)
     }
 
-    // MARK: - Recognition
-
-    private func process(item: QueueItem) async {
-        guard let container = modelContainer else { return }
-        let context = container.mainContext
-
-        // 卡片入队前已经保存；从主上下文加载，确保状态变化实时反映到界面。
-        let id = item.cardID
-        guard let card = (try? context.fetch(
-            FetchDescriptor<MistakeCard>(
-                predicate: #Predicate<MistakeCard> { $0.id == id }
-            )
-        ))?.first else {
-            return
+    private func cancelAllWork() {
+        for task in activeTasks.values {
+            task.cancel()
         }
-
-        // 入队任务一开始就离开“等待识别”，避免网络准备期间长期显示 pending。
-        card.recognitionStatus = RecognitionStatus.processing.rawValue
-        save(context)
-
-        // 加载图片
-        guard let image = UIImage(contentsOfFile: item.imagePath) else {
-            card.recognitionStatus = RecognitionStatus.failed.rawValue
-            save(context)
-            return
-        }
-
-        // 调用 AI 识别
-        do {
-            let recognition = try await AIService.recognize(image: image)
-
-            card.recognizedText = recognition.recognizedQuestion
-            card.questionType = QuestionType.resolve(
-                recognition.questionType,
-                questionText: recognition.recognizedQuestion
-            ).rawValue
-            card.correctAnswer = recognition.correctAnswer.trimmingCharacters(
-                in: .whitespacesAndNewlines
-            )
-
-            // 仅在识别结果可信时覆盖学科（避免覆盖用户已手动设置的值）
-            if let mappedSubject = Subject.from(aiString: recognition.subject) {
-                card.subject = mappedSubject.rawValue
-            }
-
-            // 用知识点填充 tag（已有 tag 则跳过，尊重用户已有内容）
-            let newTags = recognition.knowledgePoints.filter { !$0.isEmpty }
-            if !newTags.isEmpty && card.tagsText.isEmpty {
-                card.tagsText = newTags.joined(separator: ",")
-            }
-
-            card.recognitionStatus = RecognitionStatus.completed.rawValue
-            card.updatedAt = .now
-        } catch {
-            card.recognitionStatus = RecognitionStatus.failed.rawValue
-        }
-
-        save(context)
-    }
-
-    private func save(_ context: ModelContext) {
-        do {
-            try context.save()
-        } catch {
-            assertionFailure("保存错题卡识别状态失败：\(error.localizedDescription)")
-        }
+        activeTasks.removeAll()
+        activeTaskIDs.removeAll()
+        queue.reset()
     }
 }
