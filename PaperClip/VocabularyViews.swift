@@ -10,6 +10,7 @@ struct VocabularyHomeView: View {
     @State private var isCreatingDeck = false
     @State private var isCreatingFolder = false
     @State private var deckToMove: VocabularyDeckRowData?
+    @State private var folderToRename: VocabularyFolderRowData?
     @State private var folderToDelete: VocabularyFolderRowData?
     @State var alert: AppAlert?
 
@@ -42,6 +43,7 @@ struct VocabularyHomeView: View {
                         folders: folders,
                         decks: decks,
                         snapshot: snapshot,
+                        onRenameFolder: { folderToRename = $0 },
                         onDeleteFolder: { folderToDelete = $0 },
                         onMoveDeck: { deckToMove = $0 },
                         onRemoveDeckFromFolder: removeDeckFromFolder
@@ -83,6 +85,13 @@ struct VocabularyHomeView: View {
         }) {
             NavigationStack {
                 VocabularyFolderCreateView()
+            }
+        }
+        .sheet(item: $folderToRename, onDismiss: {
+            refreshHome()
+        }) { folder in
+            NavigationStack {
+                VocabularyFolderRenameView(folder: folder)
             }
         }
         .sheet(item: $deckToMove, onDismiss: {

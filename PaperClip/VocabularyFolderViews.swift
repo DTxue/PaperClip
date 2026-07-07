@@ -38,6 +38,59 @@ struct VocabularyFolderCreateView: View {
     }
 }
 
+struct VocabularyFolderRenameView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+
+    let folder: VocabularyFolderRowData
+
+    @State private var title: String
+    @State private var alert: AppAlert?
+
+    init(folder: VocabularyFolderRowData) {
+        self.folder = folder
+        _title = State(initialValue: folder.title)
+    }
+
+    var body: some View {
+        Form {
+            Section("文件夹") {
+                TextField("名称", text: $title)
+            }
+        }
+        .navigationTitle("重命名文件夹")
+        .navigationBarTitleDisplayMode(.inline)
+        .editSheetToolbar(
+            confirmTitle: "保存",
+            isConfirmDisabled: title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+            onCancel: { dismiss() },
+            onConfirm: rename
+        )
+        .appAlert($alert)
+    }
+
+    private func rename() {
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedTitle.isEmpty else { return }
+
+        do {
+            guard let storedFolder = try modelContext.fetchVocabularyFolder(id: folder.id) else {
+                alert = AppAlert(title: "无法重命名文件夹", message: "该文件夹不存在或已被删除。")
+                return
+            }
+
+            if storedFolder.title != trimmedTitle {
+                storedFolder.title = trimmedTitle
+                storedFolder.updatedAt = .now
+                try modelContext.saveOrRollbackIfNeeded()
+            }
+            dismiss()
+        } catch {
+            alert = AppAlert(title: "无法重命名文件夹", error: error)
+        }
+    }
+}
+
 struct VocabularyDeckFolderPickerView: View {
     @Environment(\.dismiss) private var dismiss
 
