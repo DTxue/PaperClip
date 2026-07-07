@@ -51,8 +51,13 @@ run_swift_test VocabularyAIPromptsTests \
     PaperClip/AIResponseJSONSanitizer.swift \
     PaperClip/AIDecodingSupport.swift \
     PaperClip/AIVocabularyModels.swift \
+    PaperClip/VocabularyArticleRecitation.swift \
     PaperClip/VocabularyAIPrompts.swift \
     Tests/VocabularyAIPromptsTests.swift
+
+run_swift_test VocabularyArticleRecitationTests \
+    PaperClip/VocabularyArticleRecitation.swift \
+    Tests/VocabularyArticleRecitationTests.swift
 
 run_swift_test AIServiceErrorMessageSupportTests \
     PaperClip/AIServiceError.swift \
@@ -551,6 +556,7 @@ run_swift_test VocabularyPersistenceTests \
     PaperClip/AIDecodingSupport.swift \
     PaperClip/AIVocabularyModels.swift \
     PaperClip/ModelContextHelpers.swift \
+    PaperClip/VocabularyArticleRecitation.swift \
     PaperClip/VocabularyModels.swift \
     PaperClip/VocabularyCardDerivedProperties.swift \
     PaperClip/VocabularyCoreEnums.swift \

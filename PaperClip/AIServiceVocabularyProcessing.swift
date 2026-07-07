@@ -1,7 +1,43 @@
 import Foundation
 import UIKit
 
+extension VocabularyArticleCardInput {
+    init(card: VocabularyCard) {
+        self.init(
+            term: card.term,
+            definition: card.definition,
+            phonetic: card.phonetic,
+            example: card.example,
+            partOfSpeech: card.partOfSpeech,
+            tagsText: card.tagsText,
+            note: card.note,
+            alternativeAnswersText: card.alternativeAnswersText
+        )
+    }
+}
+
 extension AIService {
+    static func generateVocabularyArticle(cards: [VocabularyArticleCardInput]) async throws -> VocabularyArticleDraft {
+        let configuration = AIRequestConfiguration.deepSeek(
+            modelName: AIService.defaultDeepSeekInferenceID,
+            maxOutputTokens: 12_000
+        )
+        let result = try await requestDecoded(
+            VocabularyArticleGenerationResult.self,
+            VocabularyAIPrompts.article(cards: cards),
+            configuration: configuration
+        )
+        let title = result.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        return VocabularyArticleDraft(
+            title: title.isEmpty ? "Vocabulary Story" : title,
+            articleText: result.article.trimmingCharacters(in: .whitespacesAndNewlines),
+            coveredTerms: result.coveredTerms,
+            sourceCardSnapshotHash: VocabularyArticleSourceFingerprint.make(cards: cards),
+            modelName: AIService.defaultDeepSeekInferenceID,
+            promptVersion: 1
+        )
+    }
+
     static func splitCard(term: String, definition: String) async throws -> VocabularyCardSplitResult {
         let configuration = AIRequestConfiguration.doubao(
             modelName: "豆包拆分",

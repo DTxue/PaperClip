@@ -32,7 +32,7 @@ struct VocabularyDeckView: View {
             Group {
                 switch selection {
                 case .words: wordList(snapshot)
-                case .overview: deckOverview(snapshot)
+                case .article: VocabularyArticleView(deck: deck)
                 case .mastery: VocabularyMasteryView(deck: deck)
                 case .scores: VocabularyStudySessionsView(deck: deck)
                 case .settings: VocabularyDeckSettingsView(deck: deck)

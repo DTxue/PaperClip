@@ -42,6 +42,10 @@ extension ModelContext {
             predicate: #Predicate<VocabularyImportBatch> { batch in batch.deckID == deckID }
         ), fetching: VocabularyImportBatch.deletionPropertiesToFetch)
 
+        try deleteFetchedVocabularyRows(FetchDescriptor<VocabularyGeneratedArticle>(
+            predicate: #Predicate<VocabularyGeneratedArticle> { article in article.deckID == deckID }
+        ), fetching: VocabularyGeneratedArticle.deletionPropertiesToFetch)
+
         try deleteVocabularyDistractorCaches(deckID: deckID)
 
         if let deck = try fetchVocabularyDeck(id: deckID) {

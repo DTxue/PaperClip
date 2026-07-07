@@ -449,6 +449,8 @@
 		A10000000000000000001171 /* VocabularyHomeOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001171 /* VocabularyHomeOperations.swift */; };
 		A100000000000000000010C2 /* VocabularyHomeContentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010C2 /* VocabularyHomeContentViews.swift */; };
 		A10000000000000000001231 /* VocabularyFolderViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001231 /* VocabularyFolderViews.swift */; };
+		A10000000000000000001232 /* VocabularyArticleRecitation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001232 /* VocabularyArticleRecitation.swift */; };
+		A10000000000000000001233 /* VocabularyArticleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001233 /* VocabularyArticleView.swift */; };
 		A100000000000000000000F37 /* VocabularyMasteryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F37 /* VocabularyMasteryViews.swift */; };
 		A10000000000000000001023 /* VocabularyMasteryCardRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001023 /* VocabularyMasteryCardRows.swift */; };
 		A100000000000000000010D4 /* VocabularyMasteryDetailRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010D4 /* VocabularyMasteryDetailRows.swift */; };
@@ -1087,6 +1089,8 @@
 		A20000000000000000001171 /* VocabularyHomeOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyHomeOperations.swift; sourceTree = "<group>"; };
 			A200000000000000000010C2 /* VocabularyHomeContentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyHomeContentViews.swift; sourceTree = "<group>"; };
 			A20000000000000000001231 /* VocabularyFolderViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyFolderViews.swift; sourceTree = "<group>"; };
+			A20000000000000000001232 /* VocabularyArticleRecitation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleRecitation.swift; sourceTree = "<group>"; };
+			A20000000000000000001233 /* VocabularyArticleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleView.swift; sourceTree = "<group>"; };
 			A200000000000000000011A7 /* VocabularyStudySessionMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionMetrics.swift; sourceTree = "<group>"; };
 			A200000000000000000011A8 /* VocabularyStudySessionDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionDraft.swift; sourceTree = "<group>"; };
 			A200000000000000000011BE /* VocabularyStudySessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionItem.swift; sourceTree = "<group>"; };
@@ -1784,6 +1788,8 @@
 				A20000000000000000001171 /* VocabularyHomeOperations.swift */,
 				A200000000000000000010C2 /* VocabularyHomeContentViews.swift */,
 				A20000000000000000001231 /* VocabularyFolderViews.swift */,
+				A20000000000000000001232 /* VocabularyArticleRecitation.swift */,
+				A20000000000000000001233 /* VocabularyArticleView.swift */,
 				A200000000000000000000F37 /* VocabularyMasteryViews.swift */,
 				A20000000000000000001023 /* VocabularyMasteryCardRows.swift */,
 				A200000000000000000010D4 /* VocabularyMasteryDetailRows.swift */,
@@ -2517,6 +2523,8 @@
 				A10000000000000000001171 /* VocabularyHomeOperations.swift in Sources */,
 				A100000000000000000010C2 /* VocabularyHomeContentViews.swift in Sources */,
 				A10000000000000000001231 /* VocabularyFolderViews.swift in Sources */,
+				A10000000000000000001232 /* VocabularyArticleRecitation.swift in Sources */,
+				A10000000000000000001233 /* VocabularyArticleView.swift in Sources */,
 				A100000000000000000000F37 /* VocabularyMasteryViews.swift in Sources */,
 				A10000000000000000001023 /* VocabularyMasteryCardRows.swift in Sources */,
 				A100000000000000000010D4 /* VocabularyMasteryDetailRows.swift in Sources */,
@@ -2820,7 +2828,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PaperClip;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "PaperClip 需要麦克风权限，用于词生文背诵检测。";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "PaperClip 需要写入照片权限，以便将 PDF 页面长图保存到相册。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "PaperClip 需要语音识别权限，用于将背诵语音转写并检测文章匹配情况。";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -2852,7 +2862,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PaperClip;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "PaperClip 需要麦克风权限，用于词生文背诵检测。";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "PaperClip 需要写入照片权限，以便将 PDF 页面长图保存到相册。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "PaperClip 需要语音识别权限，用于将背诵语音转写并检测文章匹配情况。";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

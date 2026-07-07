@@ -37,7 +37,7 @@ struct VocabularyDeckLoader: View {
 
 enum VocabularyDeckSection: String, CaseIterable, Identifiable {
     case words = "单词"
-    case overview = "概况"
+    case article = "词生文"
     case mastery = "熟练度"
     case scores = "成绩"
     case settings = "词集设置"
@@ -46,7 +46,7 @@ enum VocabularyDeckSection: String, CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .words: "list.bullet"
-        case .overview: "chart.bar"
+        case .article: "text.book.closed"
         case .mastery: "gauge.with.dots.needle.67percent"
         case .scores: "chart.line.uptrend.xyaxis"
         case .settings: "gearshape"

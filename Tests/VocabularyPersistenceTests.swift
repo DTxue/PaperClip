@@ -9,6 +9,7 @@ struct VocabularyPersistenceTests {
             VocabularyFolder.self,
             VocabularyDeck.self,
             VocabularyCard.self,
+            VocabularyGeneratedArticle.self,
             VocabularyMemoryState.self,
             VocabularyReviewLog.self,
             VocabularyStudySession.self,
@@ -71,7 +72,9 @@ struct VocabularyPersistenceTests {
         expect(VocabularyCard.deletionPropertiesToFetch.count == 1)
         expect(VocabularyCard.homeCountPropertiesToFetch.count == 2)
         expect(VocabularyCard.deckSettingsPropertiesToFetch.count == 6)
+        expect(VocabularyCard.articleGenerationPropertiesToFetch.count == 10)
         expect(VocabularyCard.importMergePropertiesToFetch.count == 7)
+        expect(VocabularyGeneratedArticle.deletionPropertiesToFetch.count == 1)
         expect(VocabularyMemoryState.deletionPropertiesToFetch.count == 1)
         expect(VocabularyMemoryState.futureDuePropertiesToFetch.count == 3)
         expect(VocabularyReviewLog.deletionPropertiesToFetch.count == 1)
@@ -227,6 +230,23 @@ struct VocabularyPersistenceTests {
         context.insert(distractorCache)
         try context.save()
 
+        let articleDraft = VocabularyArticleDraft(
+            title: "Memory Day",
+            articleText: "Memory matters. Focus helps memory.",
+            coveredTerms: ["memory", "focus"],
+            sourceCardSnapshotHash: "fixture",
+            modelName: "deepseek-v4-pro",
+            promptVersion: 1
+        )
+        let storedArticle = try context.upsertVocabularyGeneratedArticle(
+            deckID: deck.id,
+            draft: articleDraft
+        )
+        try context.save()
+        let fetchedArticle = try context.fetchVocabularyGeneratedArticle(deckID: deck.id)
+        expect(fetchedArticle?.id == storedArticle.id)
+        expect(fetchedArticle?.title == "Memory Day")
+
         let scoreSessions = try context.fetchVocabularyScoreSessions(
             deckID: deck.id,
             limit: 100,
@@ -323,6 +343,7 @@ struct VocabularyPersistenceTests {
         let remainingAttempts = try context.fetch(FetchDescriptor<VocabularyHandwritingAttempt>())
         let remainingBatches = try context.fetch(FetchDescriptor<VocabularyImportBatch>())
         let remainingCaches = try context.fetch(FetchDescriptor<VocabularyDistractorCache>())
+        let remainingArticles = try context.fetch(FetchDescriptor<VocabularyGeneratedArticle>())
 
         expect(remainingDecks.isEmpty)
         expect(remainingCards.isEmpty)
@@ -333,8 +354,9 @@ struct VocabularyPersistenceTests {
         expect(remainingAttempts.isEmpty)
         expect(remainingBatches.isEmpty)
         expect(remainingCaches.isEmpty)
+        expect(remainingArticles.isEmpty)
 
-        print("VocabularyPersistenceTests: 63 passed")
+        print("VocabularyPersistenceTests: 68 passed")
     }
 
     private static func expect(

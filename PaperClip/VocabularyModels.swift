@@ -118,3 +118,45 @@ final class VocabularyCard {
     }
 
 }
+
+@Model
+final class VocabularyGeneratedArticle {
+    static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyGeneratedArticle>] {
+        [\.id]
+    }
+
+    @Attribute(.unique) var id: UUID
+    var deckID: UUID
+    var title: String
+    var articleText: String
+    var coveredTermsJSON: String
+    var sourceCardSnapshotHash: String
+    var modelName: String
+    var promptVersion: Int
+    var createdAt: Date
+    var updatedAt: Date
+
+    init(
+        id: UUID = UUID(),
+        deckID: UUID,
+        title: String,
+        articleText: String,
+        coveredTermsJSON: String = "[]",
+        sourceCardSnapshotHash: String,
+        modelName: String,
+        promptVersion: Int,
+        createdAt: Date = .now,
+        updatedAt: Date = .now
+    ) {
+        self.id = id
+        self.deckID = deckID
+        self.title = title
+        self.articleText = articleText
+        self.coveredTermsJSON = coveredTermsJSON
+        self.sourceCardSnapshotHash = sourceCardSnapshotHash
+        self.modelName = modelName
+        self.promptVersion = promptVersion
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+}

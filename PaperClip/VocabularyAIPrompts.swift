@@ -1,6 +1,38 @@
 import Foundation
 
 enum VocabularyAIPrompts {
+    static func article(cards: [VocabularyArticleCardInput]) -> String {
+        let items = cards.enumerated().map { index, card in
+            """
+            \(index + 1). term: \(card.term)
+               definition: \(card.definition)
+               phonetic: \(card.phonetic.isEmpty ? "N/A" : card.phonetic)
+               partOfSpeech: \(card.partOfSpeech.isEmpty ? "N/A" : card.partOfSpeech)
+               example: \(card.example.isEmpty ? "N/A" : card.example)
+               tags: \(card.tagsText.isEmpty ? "N/A" : card.tagsText)
+               note: \(card.note.isEmpty ? "N/A" : card.note)
+               alternativeAnswers: \(card.alternativeAnswersText.isEmpty ? "N/A" : card.alternativeAnswersText)
+            """
+        }.joined(separator: "\n")
+
+        return """
+        You are an English vocabulary learning assistant.
+        Create one coherent English article from all vocabulary content below.
+
+        Requirements:
+        1. Use clear, natural, easy English suitable for a learner to memorize.
+        2. Cover every vocabulary item. Include each English term or phrase exactly as written at least once when possible.
+        3. Integrate definitions, examples, notes, and alternative answers naturally. Do not write a list.
+        4. Keep the story/article coherent, concrete, and easy to recite aloud.
+        5. Use complete sentences and avoid rare grammar.
+        6. Return only valid JSON, no Markdown code block:
+        {"title":"...","article":"...","coveredTerms":["..."]}
+
+        Vocabulary content:
+        \(items)
+        """
+    }
+
     static func splitCard(term: String, definition: String) -> String {
         """
         你是英语词汇整理助手。请将以下词条拆分成若干独立词条。
