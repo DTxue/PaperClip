@@ -67,8 +67,6 @@ struct VocabularyArticleView: View {
         .onChange(of: viewMode) { _, mode in
             if mode == .reading {
                 speechRecognizer.stop()
-            } else {
-                Task { await startListening() }
             }
         }
         .onDisappear {
@@ -273,7 +271,7 @@ private struct VocabularyArticleReadingTextView: View {
                 .textSelection(.enabled)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Button("开始背诵", systemImage: "mic.circle") {
+            Button("进入背诵", systemImage: "mic.circle") {
                 onStartRecitation()
             }
             .buttonStyle(.borderedProminent)
