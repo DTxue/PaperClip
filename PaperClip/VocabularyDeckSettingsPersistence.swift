@@ -1,6 +1,19 @@
 import Foundation
 
 extension VocabularyDeckSettingsView {
+    func deleteDeck(_ request: VocabularyDeckDeleteRequest) {
+        do {
+            isDeletingDeck = true
+            cancelGeneration()
+            try modelContext.deleteVocabularyDeckCascade(deckID: request.id)
+            try modelContext.saveOrRollbackIfNeeded()
+            dismiss()
+        } catch {
+            isDeletingDeck = false
+            alert = AppAlert(title: "无法删除词集", error: error)
+        }
+    }
+
     func refreshDeckSettingsSnapshot() {
         let deckID = deck.id
         do {

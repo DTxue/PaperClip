@@ -44,7 +44,6 @@ struct VocabularyHomeFolderGrid: View {
     let decks: [VocabularyDeckRowData]
     let snapshot: VocabularyHomeSnapshot
     let onDeleteFolder: (VocabularyFolderRowData) -> Void
-    let onDeleteDeck: (VocabularyDeckRowData) -> Void
     let onMoveDeck: (VocabularyDeckRowData) -> Void
     let onRemoveDeckFromFolder: (VocabularyDeckRowData) -> Void
 
@@ -61,7 +60,6 @@ struct VocabularyHomeFolderGrid: View {
                                     folder: folder,
                                     decks: decks(in: folder),
                                     snapshot: snapshot,
-                                    onDeleteDeck: onDeleteDeck,
                                     onMoveDeck: onMoveDeck,
                                     onRemoveDeckFromFolder: onRemoveDeckFromFolder
                                 )
@@ -88,7 +86,6 @@ struct VocabularyHomeFolderGrid: View {
                 title: folders.isEmpty ? "我的词集" : "未归档词集",
                 decks: unfiledDecks,
                 snapshot: snapshot,
-                onDelete: onDeleteDeck,
                 onMoveDeck: onMoveDeck,
                 onRemoveDeckFromFolder: onRemoveDeckFromFolder
             )
@@ -125,7 +122,6 @@ struct VocabularyHomeDeckGrid: View {
     let title: String
     let decks: [VocabularyDeckRowData]
     let snapshot: VocabularyHomeSnapshot
-    let onDelete: (VocabularyDeckRowData) -> Void
     let onMoveDeck: (VocabularyDeckRowData) -> Void
     let onRemoveDeckFromFolder: (VocabularyDeckRowData) -> Void
 
@@ -146,7 +142,6 @@ struct VocabularyHomeDeckGrid: View {
                         VocabularyHomeDeckLink(
                             deck: deck,
                             cardCount: cardCount(for: deck),
-                            onDelete: onDelete,
                             onMoveDeck: onMoveDeck,
                             onRemoveDeckFromFolder: onRemoveDeckFromFolder
                         )
@@ -165,7 +160,6 @@ struct VocabularyFolderDeckListView: View {
     let folder: VocabularyFolderRowData
     let decks: [VocabularyDeckRowData]
     let snapshot: VocabularyHomeSnapshot
-    let onDeleteDeck: (VocabularyDeckRowData) -> Void
     let onMoveDeck: (VocabularyDeckRowData) -> Void
     let onRemoveDeckFromFolder: (VocabularyDeckRowData) -> Void
 
@@ -184,7 +178,6 @@ struct VocabularyFolderDeckListView: View {
                         title: "词集",
                         decks: decks,
                         snapshot: snapshot,
-                        onDelete: onDeleteDeck,
                         onMoveDeck: onMoveDeck,
                         onRemoveDeckFromFolder: onRemoveDeckFromFolder
                     )
@@ -202,7 +195,6 @@ struct VocabularyFolderDeckListView: View {
 private struct VocabularyHomeDeckLink: View {
     let deck: VocabularyDeckRowData
     let cardCount: Int
-    let onDelete: (VocabularyDeckRowData) -> Void
     let onMoveDeck: (VocabularyDeckRowData) -> Void
     let onRemoveDeckFromFolder: (VocabularyDeckRowData) -> Void
 
@@ -224,9 +216,6 @@ private struct VocabularyHomeDeckLink: View {
                 Button("移出文件夹", systemImage: "tray.and.arrow.up") {
                     onRemoveDeckFromFolder(deck)
                 }
-            }
-            Button("删除", systemImage: "trash", role: .destructive) {
-                onDelete(deck)
             }
         }
         .accessibilityLabel("\(deck.title)，\(cardCount)个单词")

@@ -4,6 +4,7 @@ import SwiftUI
 struct VocabularyDeckSettingsView: View {
     let deck: VocabularyDeck
 
+    @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) var modelContext
 
     @State var titleDraft: String
@@ -14,6 +15,9 @@ struct VocabularyDeckSettingsView: View {
     @State var generatedCount = 0
     @State var generateError: String?
     @State var saveError: String?
+    @State var alert: AppAlert?
+    @State var deckDeleteRequest: VocabularyDeckDeleteRequest?
+    @State var isDeletingDeck = false
 
     @AppStorage("distractor.totalCount") var totalCount: Int = 8
     @AppStorage("distractor.weight.inflection") var weightInflection: Int = 3
@@ -81,6 +85,13 @@ struct VocabularyDeckSettingsView: View {
                     startRegeneratingAll(snapshot)
                 }
             )
+
+            VocabularyDeckDangerSection {
+                deckDeleteRequest = VocabularyDeckDeleteRequest(
+                    id: deck.id,
+                    title: deck.title
+                )
+            }
         }
         .navigationTitle("词集设置")
         .onAppear {
@@ -91,7 +102,16 @@ struct VocabularyDeckSettingsView: View {
         }
         .onDisappear {
             cancelGeneration()
-            saveDeckTitle()
+            if !isDeletingDeck {
+                saveDeckTitle()
+            }
         }
+        .deleteConfirmationDialog(
+            item: $deckDeleteRequest,
+            title: { "删除词集「\($0.title)」？" },
+            message: { _ in "该词集中的单词、复习记录和手写记录都会删除，无法撤销。" },
+            onDelete: deleteDeck
+        )
+        .appAlert($alert)
     }
 }

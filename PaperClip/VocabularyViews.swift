@@ -9,7 +9,6 @@ struct VocabularyHomeView: View {
     @State var snapshot = VocabularyHomeSnapshot.empty
     @State private var isCreatingDeck = false
     @State private var isCreatingFolder = false
-    @State private var deckToDelete: VocabularyDeckRowData?
     @State private var deckToMove: VocabularyDeckRowData?
     @State private var folderToDelete: VocabularyFolderRowData?
     @State var alert: AppAlert?
@@ -44,7 +43,6 @@ struct VocabularyHomeView: View {
                         decks: decks,
                         snapshot: snapshot,
                         onDeleteFolder: { folderToDelete = $0 },
-                        onDeleteDeck: { deckToDelete = $0 },
                         onMoveDeck: { deckToMove = $0 },
                         onRemoveDeckFromFolder: removeDeckFromFolder
                     )
@@ -100,12 +98,6 @@ struct VocabularyHomeView: View {
                 )
             }
         }
-        .deleteConfirmationDialog(
-            item: $deckToDelete,
-            title: { "删除词集「\($0.title)」？" },
-            message: { _ in "该词集中的单词、复习记录和手写记录都会删除，无法撤销。" },
-            onDelete: deleteDeck
-        )
         .deleteConfirmationDialog(
             item: $folderToDelete,
             title: { "删除文件夹「\($0.title)」？" },

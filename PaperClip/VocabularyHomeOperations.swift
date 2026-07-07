@@ -38,17 +38,6 @@ extension VocabularyHomeView {
         }
     }
 
-    func deleteDeck(_ row: VocabularyDeckRowData) {
-        let deckID = row.id
-        do {
-            try modelContext.deleteVocabularyDeckCascade(deckID: deckID)
-            try modelContext.saveOrRollbackIfNeeded()
-            refreshHome()
-        } catch {
-            alert = AppAlert(title: "无法删除词集", error: error)
-        }
-    }
-
     func deleteFolder(_ row: VocabularyFolderRowData) {
         let folderID = row.id
         do {
