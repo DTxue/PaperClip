@@ -125,7 +125,7 @@ struct VocabularyArticleView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Button(
-                    speechRecognizer.isRecording ? "停止背诵" : "开始背诵",
+                    speechRecognizer.isRecording ? "停止背诵" : speechRecognizer.isStarting ? "正在启动" : "开始背诵",
                     systemImage: speechRecognizer.isRecording ? "stop.circle" : "mic.circle"
                 ) {
                     Task {
@@ -137,7 +137,7 @@ struct VocabularyArticleView: View {
                     }
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(recitation.sentences.isEmpty || recitation.isComplete)
+                .disabled(recitation.sentences.isEmpty || recitation.isComplete || speechRecognizer.isStarting)
 
                 Button("重置", systemImage: "arrow.counterclockwise") {
                     speechRecognizer.stop()
@@ -213,7 +213,7 @@ struct VocabularyArticleView: View {
     }
 
     private func startListening() async {
-        guard !speechRecognizer.isRecording else { return }
+        guard !speechRecognizer.isRecording, !speechRecognizer.isStarting else { return }
         do {
             processedSpeechWordCount = 0
             try await speechRecognizer.start()
@@ -331,22 +331,36 @@ private struct VocabularyArticleMaskedTextView: View {
 final class VocabularyArticleSpeechRecognizer: ObservableObject {
     @Published var transcript = ""
     @Published var isRecording = false
+    @Published var isStarting = false
 
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
     private let audioEngine = AVAudioEngine()
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
+    private var startGeneration = 0
 
     func start() async throws {
-        stop()
+        guard !isStarting, !isRecording else { return }
+        startGeneration += 1
+        let generation = startGeneration
+        isStarting = true
+        defer {
+            if self.startGeneration == generation {
+                self.isStarting = false
+            }
+        }
+
+        finishRecognition(cancelTask: true)
         transcript = ""
 
         let speechAuthorization = await requestSpeechAuthorization()
+        guard isCurrentStart(generation) else { return }
         guard speechAuthorization == .authorized else {
             throw VocabularyArticleSpeechError.speechNotAuthorized
         }
 
         let microphoneAllowed = await requestMicrophonePermission()
+        guard isCurrentStart(generation) else { return }
         guard microphoneAllowed else {
             throw VocabularyArticleSpeechError.microphoneNotAuthorized
         }
@@ -358,6 +372,10 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
         let audioSession = AVAudioSession.sharedInstance()
         try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
         try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        guard isCurrentStart(generation) else {
+            finishRecognition(cancelTask: true)
+            return
+        }
 
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = true
@@ -365,6 +383,7 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
 
         recognitionTask = speechRecognizer.recognitionTask(with: request) { [weak self] result, error in
             Task { @MainActor in
+                guard self?.isCurrentStart(generation) == true else { return }
                 if let result {
                     self?.transcript = result.bestTranscription.formattedString
                 }
@@ -381,12 +400,23 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
             request?.append(buffer)
         }
 
+        guard isCurrentStart(generation) else {
+            finishRecognition(cancelTask: true)
+            return
+        }
+
         audioEngine.prepare()
         try audioEngine.start()
+        guard isCurrentStart(generation) else {
+            finishRecognition(cancelTask: true)
+            return
+        }
         isRecording = true
     }
 
     func stop() {
+        startGeneration += 1
+        isStarting = false
         guard isRecording || recognitionTask != nil || recognitionRequest != nil else { return }
         finishRecognition(cancelTask: true)
     }
@@ -404,6 +434,10 @@ final class VocabularyArticleSpeechRecognizer: ObservableObject {
         recognitionTask = nil
         isRecording = false
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    }
+
+    private func isCurrentStart(_ generation: Int) -> Bool {
+        startGeneration == generation
     }
 
     private func requestSpeechAuthorization() async -> SFSpeechRecognizerAuthorizationStatus {
