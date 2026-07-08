@@ -19,6 +19,7 @@ extension VocabularyCard {
             \.deckID,
             \.term,
             \.definition,
+            \.englishDefinition,
             \.phonetic,
             \.example,
             \.alternativeAnswersText,
@@ -31,6 +32,7 @@ extension VocabularyCard {
             \.id,
             \.term,
             \.definition,
+            \.englishDefinition,
             \.partOfSpeech,
             \.example,
             \.createdAt
@@ -42,6 +44,7 @@ extension VocabularyCard {
             \.id,
             \.term,
             \.definition,
+            \.englishDefinition,
             \.phonetic,
             \.example,
             \.partOfSpeech,
@@ -55,6 +58,7 @@ extension VocabularyCard {
     static var importMergePropertiesToFetch: [PartialKeyPath<VocabularyCard>] {
         [
             \.term,
+            \.englishDefinition,
             \.phonetic,
             \.example,
             \.partOfSpeech,

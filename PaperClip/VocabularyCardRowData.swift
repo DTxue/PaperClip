@@ -5,6 +5,7 @@ struct VocabularyCardRowData: Identifiable, Equatable {
     let id: UUID
     let term: String
     let definition: String
+    let englishDefinition: String
     let phonetic: String
     let example: String
 
@@ -12,6 +13,7 @@ struct VocabularyCardRowData: Identifiable, Equatable {
         self.id = card.id
         self.term = card.term
         self.definition = card.definition
+        self.englishDefinition = card.englishDefinition
         self.phonetic = card.phonetic
         self.example = card.example
     }
@@ -20,12 +22,14 @@ struct VocabularyCardRowData: Identifiable, Equatable {
         id: UUID,
         term: String,
         definition: String,
+        englishDefinition: String = "",
         phonetic: String = "",
         example: String = ""
     ) {
         self.id = id
         self.term = term
         self.definition = definition
+        self.englishDefinition = englishDefinition
         self.phonetic = phonetic
         self.example = example
     }
@@ -35,6 +39,7 @@ struct VocabularyCardRowData: Identifiable, Equatable {
             \.id,
             \.term,
             \.definition,
+            \.englishDefinition,
             \.phonetic,
             \.example,
             \.createdAt

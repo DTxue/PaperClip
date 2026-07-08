@@ -3,6 +3,7 @@ import Foundation
 struct VocabularyCardEditDraft: Equatable {
     var term: String
     var definition: String
+    var englishDefinition: String
     var phonetic: String
     var example: String
     var partOfSpeech: String
@@ -13,6 +14,7 @@ struct VocabularyCardEditDraft: Equatable {
     init(card: VocabularyCard? = nil) {
         self.term = card?.term ?? ""
         self.definition = card?.definition ?? ""
+        self.englishDefinition = card?.englishDefinition ?? ""
         self.phonetic = card?.phonetic ?? ""
         self.example = card?.example ?? ""
         self.partOfSpeech = card?.partOfSpeech ?? ""
@@ -30,6 +32,7 @@ struct VocabularyCardEditDraft: Equatable {
         VocabularyCardEditSnapshot(
             term: term,
             definition: definition,
+            englishDefinition: englishDefinition,
             phonetic: phonetic,
             example: example,
             partOfSpeech: partOfSpeech,
@@ -43,6 +46,7 @@ struct VocabularyCardEditDraft: Equatable {
 struct VocabularyCardEditSnapshot: Equatable {
     let term: String
     let definition: String
+    let englishDefinition: String
     let phonetic: String
     let example: String
     let partOfSpeech: String
@@ -53,6 +57,7 @@ struct VocabularyCardEditSnapshot: Equatable {
     init(
         term: String,
         definition: String,
+        englishDefinition: String,
         phonetic: String,
         example: String,
         partOfSpeech: String,
@@ -62,6 +67,7 @@ struct VocabularyCardEditSnapshot: Equatable {
     ) {
         self.term = term.trimmingCharacters(in: .whitespacesAndNewlines)
         self.definition = definition.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.englishDefinition = englishDefinition.trimmingCharacters(in: .whitespacesAndNewlines)
         self.phonetic = phonetic
         self.example = example
         self.partOfSpeech = partOfSpeech
@@ -74,6 +80,7 @@ struct VocabularyCardEditSnapshot: Equatable {
         self.init(
             term: card.term,
             definition: card.definition,
+            englishDefinition: card.englishDefinition,
             phonetic: card.phonetic,
             example: card.example,
             partOfSpeech: card.partOfSpeech,
@@ -86,6 +93,7 @@ struct VocabularyCardEditSnapshot: Equatable {
     func apply(to card: VocabularyCard) {
         card.term = term
         card.definition = definition
+        card.englishDefinition = englishDefinition
         card.phonetic = phonetic
         card.example = example
         card.partOfSpeech = partOfSpeech

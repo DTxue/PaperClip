@@ -25,6 +25,14 @@ extension VocabularyFlashcardView {
                 Text(prompt(for: card))
                     .font(.system(.largeTitle, design: .rounded, weight: .semibold))
                     .multilineTextAlignment(.center)
+                if direction == .termToDefinition, !card.englishDefinition.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Text(card.englishDefinition)
+                        .font(.title2.weight(.semibold))
+                        .foregroundStyle(.tint)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(5)
+                        .padding(.top, 2)
+                }
                 if direction == .termToDefinition, !card.phonetic.isEmpty {
                     Text(card.phonetic)
                         .font(.title3)

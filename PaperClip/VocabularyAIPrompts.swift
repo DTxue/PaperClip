@@ -75,6 +75,35 @@ enum VocabularyAIPrompts {
         """
     }
 
+    static func englishDefinitions(cards: [VocabularyEnglishDefinitionInput]) -> String {
+        let items = cards.enumerated().map { index, card in
+            """
+            \(index + 1). term: \(card.term)
+               Chinese meaning: \(card.definition)
+               partOfSpeech: \(card.partOfSpeech.isEmpty ? "N/A" : card.partOfSpeech)
+               example: \(card.example.isEmpty ? "N/A" : card.example)
+            """
+        }.joined(separator: "\n")
+
+        return """
+        You are an English vocabulary assistant for Chinese middle school students.
+        Write one short English definition for each vocabulary card.
+
+        Requirements:
+        1. Use very simple and common English words for Grade 7-9 learners.
+        2. Explain the meaning shown by the Chinese meaning. Do not explain a different meaning.
+        3. Use 5-14 English words when possible.
+        4. Use one simple phrase or one simple sentence. Avoid rare words, idioms, and complex clauses.
+        5. Do not use Chinese.
+        6. For a single English word, do not use that exact word to define itself.
+        7. Return every item with the same 1-based index. Return only valid JSON, no Markdown code block:
+        {"items":[{"index":1,"englishDefinition":"..."},{"index":2,"englishDefinition":"..."}]}
+
+        Vocabulary cards:
+        \(items)
+        """
+    }
+
     static func gradingQuestionText(
         index: Int,
         term: String,

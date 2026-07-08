@@ -74,6 +74,37 @@ extension AIService {
         )
     }
 
+    static func generateEnglishDefinitions(
+        cards: [VocabularyEnglishDefinitionInput]
+    ) async throws -> [VocabularyGeneratedEnglishDefinition] {
+        guard !cards.isEmpty else { return [] }
+
+        let configuration = AIRequestConfiguration.deepSeek(
+            modelName: AIService.defaultDeepSeekInferenceID,
+            maxOutputTokens: 4_000
+        )
+        let result = try await requestDecoded(
+            VocabularyEnglishDefinitionGenerationResult.self,
+            VocabularyAIPrompts.englishDefinitions(cards: cards),
+            configuration: configuration
+        )
+
+        var generated: [VocabularyGeneratedEnglishDefinition] = []
+        generated.reserveCapacity(cards.count)
+        for item in result.items {
+            let cardIndex = item.index - 1
+            guard cards.indices.contains(cardIndex) else { continue }
+            let definition = item.englishDefinition
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !definition.isEmpty else { continue }
+            generated.append(VocabularyGeneratedEnglishDefinition(
+                cardID: cards[cardIndex].cardID,
+                englishDefinition: definition
+            ))
+        }
+        return generated
+    }
+
     static func gradeVocabularyTest(
         cards: [(term: String, definition: String)],
         handwritingImages: [UIImage?]

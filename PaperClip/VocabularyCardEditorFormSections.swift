@@ -9,6 +9,7 @@ struct VocabularyCardEditorFormSections: View {
             TextField("释义", text: $draft.definition, axis: .vertical)
         }
         Section("扩展内容") {
+            TextField("英文释义", text: $draft.englishDefinition, axis: .vertical)
             TextField("音标", text: $draft.phonetic)
             TextField("例句", text: $draft.example, axis: .vertical)
             TextField("词性", text: $draft.partOfSpeech)

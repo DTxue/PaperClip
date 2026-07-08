@@ -5,6 +5,7 @@ extension VocabularyDeckSettingsView {
         do {
             isDeletingDeck = true
             cancelGeneration()
+            cancelDefinitionGeneration()
             try modelContext.deleteVocabularyDeckCascade(deckID: request.id)
             try modelContext.saveOrRollbackIfNeeded()
             dismiss()

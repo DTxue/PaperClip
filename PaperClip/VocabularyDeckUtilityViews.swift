@@ -14,6 +14,10 @@ struct VocabularyDeckSettingsView: View {
     @State var generationTaskSlot = ViewTaskSlot()
     @State var generatedCount = 0
     @State var generateError: String?
+    @State var definitionGenerationTaskSlot = ViewTaskSlot()
+    @State var isGeneratingDefinitions = false
+    @State var generatedDefinitionCount = 0
+    @State var definitionGenerateError: String?
     @State var saveError: String?
     @State var alert: AppAlert?
     @State var deckDeleteRequest: VocabularyDeckDeleteRequest?
@@ -75,6 +79,16 @@ struct VocabularyDeckSettingsView: View {
                 weightDerivation: $weightDerivation
             )
 
+            VocabularyDeckEnglishDefinitionSection(
+                snapshot: snapshot,
+                isGenerating: isGeneratingDefinitions,
+                generatedCount: generatedDefinitionCount,
+                generateError: definitionGenerateError,
+                onGenerate: {
+                    startGeneratingEnglishDefinitions(snapshot)
+                }
+            )
+
             VocabularyDeckDistractorLibrarySection(
                 snapshot: snapshot,
                 isGenerating: isGenerating,
@@ -102,6 +116,7 @@ struct VocabularyDeckSettingsView: View {
         }
         .onDisappear {
             cancelGeneration()
+            cancelDefinitionGeneration()
             if !isDeletingDeck {
                 saveDeckTitle()
             }

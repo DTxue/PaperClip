@@ -4,9 +4,53 @@ struct VocabularyDeckSettingsSnapshot {
     let cards: [VocabularyCard]
     let freshCacheCount: Int
 
+    var englishDefinitionCount: Int {
+        cards.filter { !$0.englishDefinition.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }.count
+    }
+
+    var missingEnglishDefinitionCount: Int {
+        cards.count - englishDefinitionCount
+    }
+
     init(cards: [VocabularyCard], freshCacheCount: Int) {
         self.cards = cards
         self.freshCacheCount = freshCacheCount
+    }
+}
+
+struct VocabularyDeckEnglishDefinitionSection: View {
+    let snapshot: VocabularyDeckSettingsSnapshot
+    let isGenerating: Bool
+    let generatedCount: Int
+    let generateError: String?
+    let onGenerate: () -> Void
+
+    var body: some View {
+        Section {
+            LabeledContent("英文释义") {
+                Text("\(snapshot.englishDefinitionCount) / \(snapshot.cards.count) 已生成")
+                    .foregroundStyle(snapshot.missingEnglishDefinitionCount == 0 ? .green : .secondary)
+            }
+            if isGenerating {
+                HStack(spacing: 10) {
+                    ProgressView()
+                    Text("正在生成 \(generatedCount) / \(snapshot.missingEnglishDefinitionCount)...")
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                Button("用 DeepSeek 生成英文释义", systemImage: "sparkles", action: onGenerate)
+                    .disabled(snapshot.cards.isEmpty || snapshot.missingEnglishDefinitionCount == 0)
+            }
+            if let generateError {
+                Text(generateError)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+        } header: {
+            Text("英文释义")
+        } footer: {
+            Text("只补全缺失的英文释义，不覆盖已手动编辑的内容。释义会使用简单英文，显示在「单词 → 释义」闪卡正面，帮助先按英文线索猜中文释义。")
+        }
     }
 }
 

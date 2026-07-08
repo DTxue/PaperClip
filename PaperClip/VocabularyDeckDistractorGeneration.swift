@@ -33,3 +33,37 @@ func generateVocabularyDistractorCaches(
 
     return generatedCaches
 }
+
+@MainActor
+func generateVocabularyEnglishDefinitions(
+    for cards: [VocabularyCard],
+    isCurrent: () -> Bool,
+    onProgress: (Int) -> Void
+) async throws -> [VocabularyGeneratedEnglishDefinition] {
+    let batchSize = 30
+    var generatedDefinitions: [VocabularyGeneratedEnglishDefinition] = []
+    generatedDefinitions.reserveCapacity(cards.count)
+
+    var startIndex = cards.startIndex
+    while startIndex < cards.endIndex {
+        let endIndex = cards.index(startIndex, offsetBy: batchSize, limitedBy: cards.endIndex) ?? cards.endIndex
+        let batch = cards[startIndex..<endIndex].map { card in
+            VocabularyEnglishDefinitionInput(
+                cardID: card.id,
+                term: card.term,
+                definition: card.definition,
+                partOfSpeech: card.partOfSpeech,
+                example: card.example
+            )
+        }
+
+        let result = try await AIService.generateEnglishDefinitions(cards: batch)
+        try Task.checkCancellation()
+        guard isCurrent() else { throw CancellationError() }
+        generatedDefinitions.append(contentsOf: result)
+        onProgress(result.count)
+        startIndex = endIndex
+    }
+
+    return generatedDefinitions
+}

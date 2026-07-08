@@ -23,11 +23,13 @@ struct VocabularyCardEditorModelsTests {
         var draft = VocabularyCardEditDraft()
         draft.term = "  word  "
         draft.definition = "\nmeaning\t"
+        draft.englishDefinition = " a simple meaning "
         draft.example = " keep spacing "
 
         let snapshot = draft.snapshot
         expect(snapshot.term == "word")
         expect(snapshot.definition == "meaning")
+        expect(snapshot.englishDefinition == "a simple meaning")
         expect(snapshot.example == " keep spacing ")
     }
 

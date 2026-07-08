@@ -80,6 +80,7 @@ final class VocabularyCard {
     var deckID: UUID
     var term: String
     var definition: String
+    var englishDefinition: String = ""
     var phonetic: String
     var example: String
     var partOfSpeech: String
@@ -94,6 +95,7 @@ final class VocabularyCard {
         deckID: UUID,
         term: String,
         definition: String,
+        englishDefinition: String = "",
         phonetic: String = "",
         example: String = "",
         partOfSpeech: String = "",
@@ -107,6 +109,7 @@ final class VocabularyCard {
         self.deckID = deckID
         self.term = term
         self.definition = definition
+        self.englishDefinition = englishDefinition
         self.phonetic = phonetic
         self.example = example
         self.partOfSpeech = partOfSpeech

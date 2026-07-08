@@ -13,6 +13,28 @@ struct VocabularyDistractorResult: Decodable, Sendable {
     let distractorTiles: [String]
 }
 
+struct VocabularyEnglishDefinitionInput: Sendable {
+    let cardID: UUID
+    let term: String
+    let definition: String
+    let partOfSpeech: String
+    let example: String
+}
+
+struct VocabularyGeneratedEnglishDefinition: Sendable {
+    let cardID: UUID
+    let englishDefinition: String
+}
+
+struct VocabularyEnglishDefinitionGenerationResult: Decodable, Sendable {
+    struct Item: Decodable, Sendable {
+        let index: Int
+        let englishDefinition: String
+    }
+
+    let items: [Item]
+}
+
 struct DistractorConfig: Sendable {
     var totalCount: Int = 8
     var weightInflection: Int = 3

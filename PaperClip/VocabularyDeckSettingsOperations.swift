@@ -68,6 +68,87 @@ extension VocabularyDeckSettingsView {
         isGenerating = false
     }
 
+    @MainActor
+    func startGeneratingEnglishDefinitions(_ snapshot: VocabularyDeckSettingsSnapshot) {
+        definitionGenerationTaskSlot.cancel()
+        isGeneratingDefinitions = false
+        _ = definitionGenerationTaskSlot.start { taskID in
+            await generateEnglishDefinitions(snapshot, taskID: taskID)
+            definitionGenerationTaskSlot.finish(taskID)
+        }
+    }
+
+    @MainActor
+    func generateEnglishDefinitions(_ snapshot: VocabularyDeckSettingsSnapshot, taskID: UUID) async {
+        guard !isGeneratingDefinitions else { return }
+
+        let targets = snapshot.cards.filter {
+            $0.englishDefinition.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+        guard !targets.isEmpty else { return }
+
+        isGeneratingDefinitions = true
+        generatedDefinitionCount = 0
+        definitionGenerateError = nil
+        saveError = nil
+
+        let generatedDefinitions: [VocabularyGeneratedEnglishDefinition]
+        do {
+            generatedDefinitions = try await generateVocabularyEnglishDefinitions(
+                for: targets,
+                isCurrent: { definitionGenerationTaskSlot.isCurrent(taskID) },
+                onProgress: { generatedDefinitionCount += $0 }
+            )
+        } catch is CancellationError {
+            guard definitionGenerationTaskSlot.isCurrent(taskID) else { return }
+            isGeneratingDefinitions = false
+            return
+        } catch {
+            guard definitionGenerationTaskSlot.isCurrent(taskID) else { return }
+            definitionGenerateError = "第 \(generatedDefinitionCount + 1) 项失败：\(error.localizedDescription)"
+            isGeneratingDefinitions = false
+            return
+        }
+
+        do {
+            try Task.checkCancellation()
+            guard definitionGenerationTaskSlot.isCurrent(taskID) else { return }
+            var cardByID: [UUID: VocabularyCard] = [:]
+            cardByID.reserveCapacity(targets.count)
+            for card in targets {
+                cardByID[card.id] = card
+            }
+            for item in generatedDefinitions {
+                guard let card = cardByID[item.cardID],
+                      card.englishDefinition.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                else { continue }
+                card.englishDefinition = item.englishDefinition
+                card.updatedAt = .now
+            }
+            deck.updatedAt = .now
+            try modelContext.saveOrRollbackIfNeeded()
+            definitionGenerateError = nil
+            saveError = nil
+        } catch is CancellationError {
+            guard definitionGenerationTaskSlot.isCurrent(taskID) else { return }
+            isGeneratingDefinitions = false
+            return
+        } catch {
+            guard definitionGenerationTaskSlot.isCurrent(taskID) else { return }
+            modelContext.rollback()
+            saveError = "无法保存英文释义：\(error.localizedDescription)"
+        }
+
+        guard definitionGenerationTaskSlot.isCurrent(taskID) else { return }
+        refreshDeckSettingsSnapshot()
+        isGeneratingDefinitions = false
+    }
+
+    func cancelDefinitionGeneration() {
+        definitionGenerationTaskSlot.cancel()
+        isGeneratingDefinitions = false
+    }
+
     private var currentDistractorConfig: DistractorConfig {
         DistractorConfig(
             totalCount: totalCount,
