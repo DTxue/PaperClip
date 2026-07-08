@@ -33,6 +33,24 @@ struct VocabularyEnglishDefinitionGenerationResult: Decodable, Sendable {
     }
 
     let items: [Item]
+
+    enum CodingKeys: String, CodingKey {
+        case items
+    }
+
+    init(items: [Item]) {
+        self.items = items
+    }
+
+    init(from decoder: Decoder) throws {
+        if let array = try? [Item](from: decoder) {
+            items = array
+            return
+        }
+
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        items = try container.decode([Item].self, forKey: .items)
+    }
 }
 
 struct DistractorConfig: Sendable {

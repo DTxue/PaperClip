@@ -71,6 +71,7 @@ run_swift_test AIServiceResponseDecodingTests \
     PaperClip/AIResponseJSONValueExtractor.swift \
     PaperClip/AIResponseJSONSanitizer.swift \
     PaperClip/AIDecodingSupport.swift \
+    PaperClip/AIVocabularyModels.swift \
     Tests/AIServiceResponseDecodingTests.swift
 
 run_swift_test ImageJPEGProfileTests \

@@ -7,7 +7,9 @@ struct AIServiceResponseDecodingTests {
         testSanitizedJSONValueEscapesInvalidBackslashes()
         testValidEscapesArePreserved()
         testDecodedJSONValueUsesSanitizedContentAndSnakeCaseKeys()
-        print("AIServiceResponseDecodingTests: 4 passed")
+        testVocabularyEnglishDefinitionsDecodeTopLevelArray()
+        testVocabularyEnglishDefinitionsDecodeItemsObject()
+        print("AIServiceResponseDecodingTests: 6 passed")
     }
 
     private static func testSanitizedJSONValueRemovesFenceAndText() {
@@ -58,6 +60,39 @@ struct AIServiceResponseDecodingTests {
         expect(
             value.displayTitle == "函数",
             "AI decoding should sanitize content and use snake-case keys"
+        )
+    }
+
+    private static func testVocabularyEnglishDefinitionsDecodeTopLevelArray() {
+        let content = """
+        [{"index":1,"englishDefinition":"the feeling of being friends"},{"index":2,"englishDefinition":"always telling the truth and being fair"}]
+        """
+
+        let value = try! AIResponseDecodingSupport.decodedJSONValue(
+            VocabularyEnglishDefinitionGenerationResult.self,
+            from: content
+        )
+        expect(
+            value.items.map(\.englishDefinition) == [
+                "the feeling of being friends",
+                "always telling the truth and being fair"
+            ],
+            "English definition generation should accept top-level array responses"
+        )
+    }
+
+    private static func testVocabularyEnglishDefinitionsDecodeItemsObject() {
+        let content = """
+        {"items":[{"index":1,"englishDefinition":"to use something and give it back later"}]}
+        """
+
+        let value = try! AIResponseDecodingSupport.decodedJSONValue(
+            VocabularyEnglishDefinitionGenerationResult.self,
+            from: content
+        )
+        expect(
+            value.items.first?.englishDefinition == "to use something and give it back later",
+            "English definition generation should still accept the prompted items object"
         )
     }
 
