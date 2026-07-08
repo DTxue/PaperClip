@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct StatCard<Content: View>: View {
+    @Environment(\.paperClipAppPalette) private var palette
+
     let title: String
     let icon: String
     @ViewBuilder let content: Content
@@ -9,13 +11,13 @@ struct StatCard<Content: View>: View {
         VStack(alignment: .leading, spacing: 14) {
             Label(title, systemImage: icon)
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(palette.secondaryTextColor)
             content
         }
         .padding(18)
-        .background(.background, in: RoundedRectangle(cornerRadius: 18))
+        .background(palette.panelBackgroundColor, in: RoundedRectangle(cornerRadius: 18))
         .overlay {
-            RoundedRectangle(cornerRadius: 18).stroke(.quaternary)
+            RoundedRectangle(cornerRadius: 18).stroke(palette.borderColor.opacity(0.7))
         }
     }
 }

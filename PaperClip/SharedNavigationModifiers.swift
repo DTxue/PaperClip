@@ -15,8 +15,10 @@ struct PaperClipNavigationSplitView<Sidebar: View, Detail: View>: View {
     var body: some View {
         NavigationSplitView(columnVisibility: .constant(.all)) {
             sidebar
+                .paperClipThemedSurface(.sidebar)
         } detail: {
             detail
+                .paperClipThemedSurface(.page)
         }
         .paperClipSplitView()
     }
@@ -27,6 +29,7 @@ extension View {
     /// 只集中仓库约定的标题、固定列宽和移除折叠按钮，避免各页面重复手写。
     func paperClipSidebarColumn(_ title: String) -> some View {
         self
+            .paperClipThemedSurface(.sidebar)
             .navigationTitle(title)
             .navigationSplitViewColumnWidth(min: 180, ideal: 220)
             .toolbar(removing: .sidebarToggle)

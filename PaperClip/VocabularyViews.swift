@@ -53,6 +53,7 @@ struct VocabularyHomeView: View {
             .padding(.vertical, 24)
             .frame(maxWidth: .infinity)
         }
+        .paperClipThemedSurface(.page)
         .navigationTitle("英语")
         .onAppear {
             refreshHome()

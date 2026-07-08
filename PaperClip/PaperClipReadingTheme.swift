@@ -1,6 +1,74 @@
 import SwiftUI
 import UIKit
 
+enum PaperClipAppTheme: String, CaseIterable, Identifiable {
+    static let storageKey = "paperClipAppTheme"
+    static let defaultValue = PaperClipAppTheme.system
+
+    case system
+    case paper
+    case warmGray
+    case lowLight
+    case amber
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .system: "默认"
+        case .paper: "柔和纸白"
+        case .warmGray: "暖灰"
+        case .lowLight: "墨绿低光"
+        case .amber: "琥珀夜读"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .system:
+            "保持系统原生界面色彩。"
+        case .paper:
+            "降低纯白亮度，用暖白和深灰提升长时间阅读舒适度。"
+        case .warmGray:
+            "用中性暖灰降低背景眩光，适合作为日常护眼主题。"
+        case .lowLight:
+            "深灰绿背景配柔和浅色文字，适合暗光环境。"
+        case .amber:
+            "深暖色背景配米色文字，适合夜间低亮度使用。"
+        }
+    }
+
+    var suggestedColorScheme: ColorScheme? {
+        switch self {
+        case .system:
+            nil
+        case .paper, .warmGray:
+            .light
+        case .lowLight, .amber:
+            .dark
+        }
+    }
+
+    func palette(for colorScheme: ColorScheme) -> PaperClipReadingPalette {
+        switch self {
+        case .system:
+            colorScheme == .dark ? .systemDark : .systemLight
+        case .paper:
+            .paper
+        case .warmGray:
+            .warmGray
+        case .lowLight:
+            .lowLight
+        case .amber:
+            .amber
+        }
+    }
+
+    static func resolve(_ rawValue: String) -> PaperClipAppTheme {
+        PaperClipAppTheme(rawValue: rawValue) ?? defaultValue
+    }
+}
+
 enum PaperClipReadingTheme: String, CaseIterable, Identifiable {
     static let storageKey = "paperClipReadingTheme"
     static let defaultValue = PaperClipReadingTheme.warmGray
@@ -39,9 +107,13 @@ enum PaperClipReadingTheme: String, CaseIterable, Identifiable {
     }
 
     func palette(for colorScheme: ColorScheme) -> PaperClipReadingPalette {
+        palette(for: colorScheme, appTheme: .system)
+    }
+
+    func palette(for colorScheme: ColorScheme, appTheme: PaperClipAppTheme) -> PaperClipReadingPalette {
         switch self {
         case .system:
-            colorScheme == .dark ? .systemDark : .systemLight
+            appTheme.palette(for: colorScheme)
         case .paper:
             .paper
         case .warmGray:
@@ -183,9 +255,61 @@ private struct PaperClipReadingThemeKey: EnvironmentKey {
     static let defaultValue = PaperClipReadingTheme.defaultValue
 }
 
+private struct PaperClipAppThemeKey: EnvironmentKey {
+    static let defaultValue = PaperClipAppTheme.defaultValue
+}
+
+private struct PaperClipAppPaletteKey: EnvironmentKey {
+    static let defaultValue = PaperClipAppTheme.defaultValue.palette(for: .light)
+}
+
 extension EnvironmentValues {
     var paperClipReadingTheme: PaperClipReadingTheme {
         get { self[PaperClipReadingThemeKey.self] }
         set { self[PaperClipReadingThemeKey.self] = newValue }
+    }
+
+    var paperClipAppTheme: PaperClipAppTheme {
+        get { self[PaperClipAppThemeKey.self] }
+        set { self[PaperClipAppThemeKey.self] = newValue }
+    }
+
+    var paperClipAppPalette: PaperClipReadingPalette {
+        get { self[PaperClipAppPaletteKey.self] }
+        set { self[PaperClipAppPaletteKey.self] = newValue }
+    }
+}
+
+enum PaperClipThemeSurfaceStyle {
+    case page
+    case sidebar
+
+    func backgroundColor(from palette: PaperClipReadingPalette) -> Color {
+        switch self {
+        case .page:
+            palette.pageBackgroundColor
+        case .sidebar:
+            palette.panelBackgroundColor
+        }
+    }
+}
+
+private struct PaperClipThemeSurfaceModifier: ViewModifier {
+    @Environment(\.paperClipAppPalette) private var palette
+
+    let style: PaperClipThemeSurfaceStyle
+
+    func body(content: Content) -> some View {
+        content
+            .scrollContentBackground(.hidden)
+            .foregroundStyle(palette.primaryTextColor)
+            .background(style.backgroundColor(from: palette).ignoresSafeArea())
+            .tint(palette.accentColor)
+    }
+}
+
+extension View {
+    func paperClipThemedSurface(_ style: PaperClipThemeSurfaceStyle = .page) -> some View {
+        modifier(PaperClipThemeSurfaceModifier(style: style))
     }
 }

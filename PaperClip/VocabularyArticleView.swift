@@ -8,6 +8,7 @@ struct VocabularyArticleView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.paperClipAppTheme) private var appTheme
     @Environment(\.paperClipReadingTheme) private var readingTheme
     @StateObject private var speechRecognizer = VocabularyArticleSpeechRecognizer()
     @State private var cards: [VocabularyCard] = []
@@ -23,7 +24,7 @@ struct VocabularyArticleView: View {
     @State private var alert: AppAlert?
 
     private var readingPalette: PaperClipReadingPalette {
-        readingTheme.palette(for: colorScheme)
+        readingTheme.palette(for: colorScheme, appTheme: appTheme)
     }
 
     var body: some View {

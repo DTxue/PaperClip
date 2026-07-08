@@ -30,6 +30,7 @@ struct StatisticsView: View {
             .padding(.vertical, 24)
             .frame(maxWidth: .infinity)
         }
+        .paperClipThemedSurface(.page)
         .navigationTitle("学习统计")
         .navigationBarTitleDisplayMode(.large)
         .task {

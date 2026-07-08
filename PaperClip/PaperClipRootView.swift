@@ -1,8 +1,11 @@
 import SwiftUI
 
 struct AppRootView: View {
+    @Environment(\.colorScheme) private var systemColorScheme
+
     @State private var startupError: AppAlert?
     @AppStorage("appColorScheme") private var appColorScheme = "system"
+    @AppStorage(PaperClipAppTheme.storageKey) private var appThemeRaw = PaperClipAppTheme.defaultValue.rawValue
     @AppStorage(PaperClipReadingTheme.storageKey) private var readingThemeRaw = PaperClipReadingTheme.defaultValue.rawValue
 
     init(startupError: AppAlert?) {
@@ -17,15 +20,37 @@ struct AppRootView: View {
         }
     }
 
+    private var resolvedColorScheme: ColorScheme? {
+        preferredColorScheme ?? appTheme.suggestedColorScheme
+    }
+
     private var readingTheme: PaperClipReadingTheme {
         PaperClipReadingTheme.resolve(readingThemeRaw)
+    }
+
+    private var appTheme: PaperClipAppTheme {
+        PaperClipAppTheme.resolve(appThemeRaw)
+    }
+
+    private var effectiveColorScheme: ColorScheme {
+        resolvedColorScheme ?? systemColorScheme
+    }
+
+    private var appPalette: PaperClipReadingPalette {
+        appTheme.palette(for: effectiveColorScheme)
     }
 
     var body: some View {
         RootView()
             .appAlert($startupError)
+            .environment(\.paperClipAppTheme, appTheme)
+            .environment(\.paperClipAppPalette, appPalette)
             .environment(\.paperClipReadingTheme, readingTheme)
-            .paperClipColorScheme(preferredColorScheme)
+            .tint(appPalette.accentColor)
+            .background(appPalette.pageBackgroundColor.ignoresSafeArea())
+            .toolbarBackground(appPalette.panelBackgroundColor, for: .tabBar)
+            .toolbarBackground(.visible, for: .tabBar)
+            .paperClipColorScheme(resolvedColorScheme)
     }
 }
 

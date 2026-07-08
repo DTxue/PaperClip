@@ -223,6 +223,8 @@ private struct VocabularyHomeDeckLink: View {
 }
 
 private struct VocabularyHomeFolderCard: View {
+    @Environment(\.paperClipAppPalette) private var palette
+
     let title: String
     let deckCount: Int
     let cardCount: Int
@@ -237,16 +239,18 @@ private struct VocabularyHomeFolderCard: View {
                 .lineLimit(2)
             Text("\(deckCount) 个词集 · \(cardCount) 个词组")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(palette.secondaryTextColor)
         }
         .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
         .padding(18)
-        .background(.background, in: RoundedRectangle(cornerRadius: 18))
-        .overlay { RoundedRectangle(cornerRadius: 18).stroke(.quaternary) }
+        .background(palette.panelBackgroundColor, in: RoundedRectangle(cornerRadius: 18))
+        .overlay { RoundedRectangle(cornerRadius: 18).stroke(palette.borderColor.opacity(0.7)) }
     }
 }
 
 private struct VocabularyHomeDeckCard: View {
+    @Environment(\.paperClipAppPalette) private var palette
+
     let title: String
     let cardCount: Int
 
@@ -260,11 +264,11 @@ private struct VocabularyHomeDeckCard: View {
                 .lineLimit(2)
             Text("\(cardCount) 个词组")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(palette.secondaryTextColor)
         }
         .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
         .padding(18)
-        .background(.background, in: RoundedRectangle(cornerRadius: 18))
-        .overlay { RoundedRectangle(cornerRadius: 18).stroke(.quaternary) }
+        .background(palette.panelBackgroundColor, in: RoundedRectangle(cornerRadius: 18))
+        .overlay { RoundedRectangle(cornerRadius: 18).stroke(palette.borderColor.opacity(0.7)) }
     }
 }
