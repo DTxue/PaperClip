@@ -14,7 +14,6 @@ extension VocabularyDeckView {
 extension View {
     func vocabularyDeckPresentation(owner: VocabularyDeckView) -> some View {
         self
-            .searchable(text: owner.$searchText, prompt: "搜索单词或释义")
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
                     Menu("开始学习", systemImage: "play.fill") {

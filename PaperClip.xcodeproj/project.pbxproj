@@ -657,11 +657,13 @@
 		A100000000000000000010AF /* MistakeCardRecognitionProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010AF /* MistakeCardRecognitionProcessing.swift */; };
 		A100000000000000000010B0 /* PDFExamPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010B0 /* PDFExamPersistence.swift */; };
 		A100000000000000000010B1 /* PDFDocumentCascadeDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010B1 /* PDFDocumentCascadeDeletion.swift */; };
+		A10000000000000000001235 /* PaperClipReadingTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001235 /* PaperClipReadingTheme.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A20000000000000000000001 /* PaperClipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperClipApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		A20000000000000000001235 /* PaperClipReadingTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperClipReadingTheme.swift; sourceTree = "<group>"; };
 		A200000000000000000000F63 /* AppAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAlert.swift; sourceTree = "<group>"; };
 		A200000000000000000000F64 /* PDFDocumentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentModels.swift; sourceTree = "<group>"; };
 		A20000000000000000001175 /* PDFDocumentEditDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentEditDraft.swift; sourceTree = "<group>"; };
@@ -1339,6 +1341,7 @@
 				A20000000000000000001123 /* PaperClipModelContainerFactory.swift */,
 				A20000000000000000001124 /* PaperClipRootView.swift */,
 				A20000000000000000001125 /* PaperClipStartup.swift */,
+				A20000000000000000001235 /* PaperClipReadingTheme.swift */,
 				A20000000000000000000002 /* Models.swift */,
 				A200000000000000000000F63 /* AppAlert.swift */,
 				A200000000000000000000F64 /* PDFDocumentModels.swift */,
@@ -2076,6 +2079,7 @@
 				A10000000000000000001123 /* PaperClipModelContainerFactory.swift in Sources */,
 				A10000000000000000001124 /* PaperClipRootView.swift in Sources */,
 				A10000000000000000001125 /* PaperClipStartup.swift in Sources */,
+				A10000000000000000001235 /* PaperClipReadingTheme.swift in Sources */,
 				A10000000000000000000002 /* Models.swift in Sources */,
 				A100000000000000000000F63 /* AppAlert.swift in Sources */,
 				A100000000000000000000F64 /* PDFDocumentModels.swift in Sources */,

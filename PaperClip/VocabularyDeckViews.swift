@@ -31,7 +31,9 @@ struct VocabularyDeckView: View {
         } detail: {
             Group {
                 switch selection {
-                case .words: wordList(snapshot)
+                case .words:
+                    wordList(snapshot)
+                        .searchable(text: $searchText, prompt: "搜索单词或释义")
                 case .article: VocabularyArticleView(deck: deck)
                 case .mastery: VocabularyMasteryView(deck: deck)
                 case .scores: VocabularyStudySessionsView(deck: deck)

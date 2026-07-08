@@ -1,11 +1,14 @@
 import Foundation
 import SwiftData
 import SwiftUI
+import UIKit
 
 struct VocabularyArticleView: View {
     let deck: VocabularyDeck
 
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.paperClipReadingTheme) private var readingTheme
     @StateObject private var speechRecognizer = VocabularyArticleSpeechRecognizer()
     @State private var cards: [VocabularyCard] = []
     @State private var article: VocabularyGeneratedArticle?
@@ -18,6 +21,10 @@ struct VocabularyArticleView: View {
     @State private var completionFeedbackTick = 0
     @State private var isGenerating = false
     @State private var alert: AppAlert?
+
+    private var readingPalette: PaperClipReadingPalette {
+        readingTheme.palette(for: colorScheme)
+    }
 
     var body: some View {
         Group {
@@ -80,29 +87,36 @@ struct VocabularyArticleView: View {
 
     private func articleContent(_ article: VocabularyGeneratedArticle) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(article.title)
-                        .font(.title2.weight(.semibold))
-                    Text("由 \(article.modelName) 生成 · \(cards.count) 个词条")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
+            VStack(alignment: .leading, spacing: 24) {
+                VocabularyArticleHeaderView(
+                    title: article.title,
+                    modelName: article.modelName,
+                    cardCount: cards.count,
+                    palette: readingPalette
+                )
 
-                Picker("词生文模式", selection: $viewMode) {
-                    ForEach(VocabularyArticleViewMode.allCases) { mode in
-                        Label(mode.title, systemImage: mode.systemImage)
-                            .tag(mode)
+                HStack {
+                    Picker("词生文模式", selection: $viewMode) {
+                        ForEach(VocabularyArticleViewMode.allCases) { mode in
+                            Label(mode.title, systemImage: mode.systemImage)
+                                .tag(mode)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .frame(maxWidth: 360)
+
+                    Spacer(minLength: 0)
                 }
-                .pickerStyle(.segmented)
 
                 if viewMode == .reading {
-                    VocabularyArticleReadingTextView(articleText: article.articleText) {
+                    VocabularyArticleReadingTextView(articleText: article.articleText, palette: readingPalette) {
                         viewMode = .recitation
                     }
                 } else {
-                    VocabularyArticleRecitationSummaryView(histories: recitationHistories)
+                    VocabularyArticleRecitationSummaryView(
+                        histories: recitationHistories,
+                        palette: readingPalette
+                    )
 
                     recitationControls
 
@@ -111,80 +125,97 @@ struct VocabularyArticleView: View {
                         revealedSentenceCount: recitation.revealedSentenceCount,
                         currentSentenceIndex: recitation.currentSentenceIndex,
                         currentWordIndex: recitation.currentWordIndex,
-                        isComplete: recitation.isComplete
+                        isComplete: recitation.isComplete,
+                        palette: readingPalette
                     )
 
                     if let mismatch = recitation.lastMismatchWord {
                         Label("检测到不匹配：\(mismatch)。请从当前句开头重新背诵。", systemImage: "exclamationmark.triangle")
                             .font(.callout)
                             .foregroundStyle(.orange)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 12)
+                            .background(readingPalette.warningBackgroundColor, in: RoundedRectangle(cornerRadius: 8))
                     }
                 }
             }
-            .padding(28)
-            .frame(maxWidth: 900, alignment: .leading)
+            .padding(.horizontal, 32)
+            .padding(.vertical, 28)
+            .frame(maxWidth: 980, alignment: .leading)
         }
+        .background(readingPalette.pageBackgroundColor)
     }
 
     private var recitationControls: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                Button(
-                    speechRecognizer.isRecording ? "停止背诵" : speechRecognizer.isStarting ? "正在启动" : "开始背诵",
-                    systemImage: speechRecognizer.isRecording ? "stop.circle" : "mic.circle"
-                ) {
-                    Task {
-                        if speechRecognizer.isRecording {
-                            speechRecognizer.stop()
-                        } else {
-                            await startListening()
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .center, spacing: 14) {
+                HStack(spacing: 10) {
+                    Button(
+                        speechRecognizer.isRecording ? "停止背诵" : speechRecognizer.isStarting ? "正在启动" : "开始背诵",
+                        systemImage: speechRecognizer.isRecording ? "stop.circle" : "mic.circle"
+                    ) {
+                        Task {
+                            if speechRecognizer.isRecording {
+                                speechRecognizer.stop()
+                            } else {
+                                await startListening()
+                            }
                         }
                     }
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(recitation.sentences.isEmpty || recitation.isComplete || speechRecognizer.isStarting)
+                    .buttonStyle(.borderedProminent)
+                    .disabled(recitation.sentences.isEmpty || recitation.isComplete || speechRecognizer.isStarting)
 
-                Button("重置", systemImage: "arrow.counterclockwise") {
-                    speechRecognizer.stop()
-                    listeningBaseline = nil
-                    sessionStartedAt = nil
-                    stuckSentenceIndexes = []
-                    recitation.reset()
+                    Button("重置", systemImage: "arrow.counterclockwise") {
+                        speechRecognizer.stop()
+                        listeningBaseline = nil
+                        sessionStartedAt = nil
+                        stuckSentenceIndexes = []
+                        recitation.reset()
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(recitation.sentences.isEmpty)
                 }
-                .buttonStyle(.bordered)
-                .disabled(recitation.sentences.isEmpty)
-            }
 
-            HStack(spacing: 14) {
-                Label(
-                    recitation.isComplete ? "已完成" : "第 \(min(recitation.currentSentenceIndex + 1, recitation.sentences.count))/\(recitation.sentences.count) 句",
-                    systemImage: recitation.isComplete ? "checkmark.circle.fill" : "text.alignleft"
+                Spacer(minLength: 12)
+
+                VocabularyArticleRecitationStatusView(
+                    sentenceText: recitation.isComplete
+                        ? "已完成"
+                        : "第 \(min(recitation.currentSentenceIndex + 1, recitation.sentences.count))/\(recitation.sentences.count) 句",
+                    progressText: recitation.currentProgressText,
+                    isRecording: speechRecognizer.isRecording,
+                    isComplete: recitation.isComplete,
+                    palette: readingPalette
                 )
-                Label(recitation.currentProgressText, systemImage: "waveform")
-                if speechRecognizer.isRecording {
-                    Label("正在听写", systemImage: "mic.fill")
-                        .foregroundStyle(.blue)
-                }
             }
-            .font(.callout)
-            .foregroundStyle(.secondary)
 
             if speechRecognizer.isRecording || !speechRecognizer.transcript.isEmpty {
+                Divider()
+                    .overlay(readingPalette.borderColor)
+
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("识别文本")
+                    Label("识别文本", systemImage: "quote.bubble")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                    Text(speechRecognizer.transcript.isEmpty ? "..." : speechRecognizer.transcript)
-                        .font(.callout)
-                        .foregroundStyle(.primary)
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundStyle(readingPalette.secondaryTextColor)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        Text(speechRecognizer.transcript.isEmpty ? "..." : speechRecognizer.transcript)
+                            .font(.callout)
+                            .foregroundStyle(readingPalette.primaryTextColor)
+                            .textSelection(.enabled)
+                            .padding(.vertical, 2)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding(.top, 4)
             }
         }
-        .padding(16)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .padding(.vertical, 16)
+        .padding(.horizontal, 18)
+        .background(readingPalette.panelBackgroundColor, in: RoundedRectangle(cornerRadius: 8))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(readingPalette.borderColor.opacity(0.7), lineWidth: 1)
+        }
     }
 
     private func loadData() {
@@ -334,8 +365,68 @@ private enum VocabularyArticleViewMode: String, CaseIterable, Identifiable {
     }
 }
 
+private struct VocabularyArticleHeaderView: View {
+    let title: String
+    let modelName: String
+    let cardCount: Int
+    let palette: PaperClipReadingPalette
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(palette.primaryTextColor)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 10) {
+                Label(modelName, systemImage: "cpu")
+                Divider()
+                    .frame(height: 14)
+                    .overlay(palette.borderColor)
+                Label("\(cardCount) 个词条", systemImage: "textformat.abc")
+            }
+            .font(.subheadline)
+            .foregroundStyle(palette.secondaryTextColor)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.bottom, 2)
+    }
+}
+
+private struct VocabularyArticleRecitationStatusView: View {
+    let sentenceText: String
+    let progressText: String
+    let isRecording: Bool
+    let isComplete: Bool
+    let palette: PaperClipReadingPalette
+
+    var body: some View {
+        HStack(spacing: 8) {
+            statusLabel(
+                sentenceText,
+                systemImage: isComplete ? "checkmark.circle.fill" : "text.alignleft",
+                tint: isComplete ? .green : palette.secondaryTextColor
+            )
+            statusLabel(progressText, systemImage: "waveform", tint: palette.secondaryTextColor)
+            if isRecording {
+                statusLabel("正在听写", systemImage: "mic.fill", tint: palette.accentColor)
+            }
+        }
+        .font(.callout)
+    }
+
+    private func statusLabel(_ text: String, systemImage: String, tint: Color) -> some View {
+        Label(text, systemImage: systemImage)
+            .foregroundStyle(tint)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .background(palette.chipBackgroundColor, in: Capsule())
+    }
+}
+
 private struct VocabularyArticleRecitationSummaryView: View {
     let histories: [VocabularyArticleRecitationHistory]
+    let palette: PaperClipReadingPalette
 
     private let columns = [
         GridItem(.adaptive(minimum: 150), spacing: 12, alignment: .leading)
@@ -368,7 +459,11 @@ private struct VocabularyArticleRecitationSummaryView: View {
         .font(.callout)
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+        .background(palette.panelBackgroundColor, in: RoundedRectangle(cornerRadius: 8))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(palette.borderColor.opacity(0.7), lineWidth: 1)
+        }
     }
 
     private func metric(_ title: String, value: String, systemImage: String) -> some View {
@@ -376,15 +471,16 @@ private struct VocabularyArticleRecitationSummaryView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(palette.secondaryTextColor)
                 Text(value)
                     .font(.callout.weight(.semibold))
+                    .foregroundStyle(palette.primaryTextColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
             }
         } icon: {
             Image(systemName: systemImage)
-                .foregroundStyle(.blue)
+                .foregroundStyle(palette.accentColor)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -392,23 +488,102 @@ private struct VocabularyArticleRecitationSummaryView: View {
 
 private struct VocabularyArticleReadingTextView: View {
     let articleText: String
+    let palette: PaperClipReadingPalette
     let onStartRecitation: () -> Void
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Text(articleText)
-                .font(.title3)
-                .lineSpacing(7)
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
+    private var wordCount: Int {
+        VocabularyArticleTextNormalizer.words(from: articleText).count
+    }
 
-            Button("进入背诵", systemImage: "mic.circle") {
-                onStartRecitation()
+    private var sentenceCount: Int {
+        VocabularyArticleSentence.split(articleText).count
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(alignment: .firstTextBaseline, spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("阅读")
+                        .font(.headline)
+                        .foregroundStyle(palette.primaryTextColor)
+                    Text("\(sentenceCount) 句 · \(wordCount) 词")
+                        .font(.caption)
+                        .foregroundStyle(palette.secondaryTextColor)
+                }
+
+                Spacer(minLength: 12)
+
+                Button("进入背诵", systemImage: "mic.circle") {
+                    onStartRecitation()
+                }
+                .buttonStyle(.borderedProminent)
             }
-            .buttonStyle(.borderedProminent)
+
+            VocabularyArticleSelectableTextView(text: articleText, palette: palette)
+                .padding(.horizontal, 4)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(18)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+        .padding(.vertical, 22)
+        .padding(.horizontal, 24)
+        .background(palette.panelBackgroundColor, in: RoundedRectangle(cornerRadius: 8))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(palette.borderColor.opacity(0.7), lineWidth: 1)
+        }
+    }
+}
+
+private struct VocabularyArticleSelectableTextView: UIViewRepresentable {
+    let text: String
+    let palette: PaperClipReadingPalette
+
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.isScrollEnabled = false
+        textView.backgroundColor = .clear
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.adjustsFontForContentSizeCategory = true
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textView.setContentHuggingPriority(.defaultLow, for: .vertical)
+        return textView
+    }
+
+    func updateUIView(_ textView: UITextView, context: Context) {
+        textView.attributedText = attributedText
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextView, context: Context) -> CGSize? {
+        guard let width = proposal.width else { return nil }
+        let size = uiView.sizeThatFits(
+            CGSize(width: width, height: .greatestFiniteMagnitude)
+        )
+        return CGSize(width: width, height: size.height)
+    }
+
+    private var attributedText: NSAttributedString {
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 9
+        paragraphStyle.paragraphSpacing = 12
+
+        return NSAttributedString(
+            string: text,
+            attributes: [
+                .font: Self.readingFont,
+                .foregroundColor: palette.primaryText,
+                .paragraphStyle: paragraphStyle
+            ]
+        )
+    }
+
+    private static var readingFont: UIFont {
+        let descriptor = UIFontDescriptor
+            .preferredFontDescriptor(withTextStyle: .title3)
+            .withDesign(.serif) ?? UIFontDescriptor.preferredFontDescriptor(withTextStyle: .title3)
+        let font = UIFont(descriptor: descriptor, size: 0)
+        return UIFontMetrics(forTextStyle: .title3).scaledFont(for: font)
     }
 }
 
@@ -418,68 +593,97 @@ private struct VocabularyArticleMaskedTextView: View {
     let currentSentenceIndex: Int
     let currentWordIndex: Int
     let isComplete: Bool
+    let palette: PaperClipReadingPalette
 
     var body: some View {
-        LazyVStack(alignment: .leading, spacing: 10) {
-            ForEach(sentences.indices, id: \.self) { index in
-                let isRevealed = index < revealedSentenceCount || isComplete
-                let isCurrent = index == currentSentenceIndex && !isComplete
-                let visiblePrefix = isCurrent
-                    ? VocabularyArticleDisplayText.prefix(
-                        sentences[index].text,
-                        matchedWordCount: currentWordIndex
-                    )
-                    : ""
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("背诵稿")
+                    .font(.headline)
+                    .foregroundStyle(palette.primaryTextColor)
+                Spacer(minLength: 12)
+                Text("\(sentences.count) 句")
+                    .font(.caption)
+                    .foregroundStyle(palette.secondaryTextColor)
+            }
 
-                VStack(alignment: .leading, spacing: 6) {
-                    ZStack(alignment: .leading) {
-                        Text(sentences[index].text)
-                            .font(.title3)
-                            .lineSpacing(5)
-                            .foregroundStyle(isRevealed ? .primary : .secondary)
-                            .blur(radius: isRevealed ? 0 : 4)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                        if !isRevealed {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(.regularMaterial)
-                                .opacity(isCurrent ? 0.72 : 0.92)
-                        }
-
-                        if !visiblePrefix.isEmpty {
-                            Text(visiblePrefix)
-                                .font(.title3)
-                                .lineSpacing(5)
-                                .foregroundStyle(.primary)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                    }
-
-                    if isCurrent, let currentSentence = sentences[safe: index], !currentSentence.words.isEmpty {
-                        ProgressView(
-                            value: Double(currentWordIndex),
-                            total: Double(currentSentence.words.count)
+            LazyVStack(alignment: .leading, spacing: 10) {
+                ForEach(sentences.indices, id: \.self) { index in
+                    let isRevealed = index < revealedSentenceCount || isComplete
+                    let isCurrent = index == currentSentenceIndex && !isComplete
+                    let visiblePrefix = isCurrent
+                        ? VocabularyArticleDisplayText.prefix(
+                            sentences[index].text,
+                            matchedWordCount: currentWordIndex
                         )
-                        .tint(.blue)
+                        : ""
+
+                    HStack(alignment: .top, spacing: 12) {
+                        Text("\(index + 1)")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(isCurrent ? .white : palette.secondaryTextColor)
+                            .frame(width: 28, height: 28)
+                            .background(
+                                Circle()
+                                    .fill(isCurrent ? palette.accentColor : palette.chipBackgroundColor)
+                            )
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            ZStack(alignment: .leading) {
+                                Text(sentences[index].text)
+                                    .font(.system(.title3, design: .serif))
+                                    .lineSpacing(7)
+                                    .foregroundStyle(isRevealed ? palette.primaryTextColor : palette.secondaryTextColor)
+                                    .blur(radius: isRevealed ? 0 : 4)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                                if !isRevealed {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(palette.maskOverlayColor)
+                                        .opacity(isCurrent ? 0.70 : 0.92)
+                                }
+
+                                if !visiblePrefix.isEmpty {
+                                    Text(visiblePrefix)
+                                        .font(.system(.title3, design: .serif))
+                                        .lineSpacing(7)
+                                        .foregroundStyle(palette.primaryTextColor)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                            }
+
+                            if isCurrent, let currentSentence = sentences[safe: index], !currentSentence.words.isEmpty {
+                                ProgressView(
+                                    value: Double(currentWordIndex),
+                                    total: Double(currentSentence.words.count)
+                                )
+                                .tint(palette.accentColor)
+                            }
+                        }
                     }
-                }
-                .padding(.vertical, 8)
-                .padding(.horizontal, 10)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(isCurrent ? Color.accentColor.opacity(0.08) : Color.clear)
-                )
-                .overlay {
-                    if isCurrent {
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.accentColor.opacity(0.35), lineWidth: 1)
+                            .fill(isCurrent ? palette.accentColor.opacity(0.10) : palette.rowBackgroundColor.opacity(0.70))
+                    )
+                    .overlay {
+                        if isCurrent {
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(palette.accentColor.opacity(0.40), lineWidth: 1)
+                        }
                     }
                 }
             }
         }
-        .padding(18)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 8))
+        .padding(.vertical, 20)
+        .padding(.horizontal, 22)
+        .background(palette.panelBackgroundColor, in: RoundedRectangle(cornerRadius: 8))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(palette.borderColor.opacity(0.7), lineWidth: 1)
+        }
     }
 }
 

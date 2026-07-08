@@ -3,6 +3,7 @@ import SwiftUI
 struct AppRootView: View {
     @State private var startupError: AppAlert?
     @AppStorage("appColorScheme") private var appColorScheme = "system"
+    @AppStorage(PaperClipReadingTheme.storageKey) private var readingThemeRaw = PaperClipReadingTheme.defaultValue.rawValue
 
     init(startupError: AppAlert?) {
         _startupError = State(initialValue: startupError)
@@ -16,9 +17,14 @@ struct AppRootView: View {
         }
     }
 
+    private var readingTheme: PaperClipReadingTheme {
+        PaperClipReadingTheme.resolve(readingThemeRaw)
+    }
+
     var body: some View {
         RootView()
             .appAlert($startupError)
+            .environment(\.paperClipReadingTheme, readingTheme)
             .paperClipColorScheme(preferredColorScheme)
     }
 }
