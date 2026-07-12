@@ -28,6 +28,7 @@ struct VocabularyArticleView: View {
     @State private var isConfirmingReplacement = false
     @State private var generationConfiguration = VocabularyArticleGenerationConfiguration.default
     @State private var pendingGenerationConfiguration: VocabularyArticleGenerationConfiguration?
+    @State private var pendingExistingSeriesID: String?
     @State private var generationID: UUID?
     @State private var generationTask: Task<Void, Never>?
     @State private var alert: AppAlert?
@@ -91,10 +92,14 @@ struct VocabularyArticleView: View {
                 guard let configuration = pendingGenerationConfiguration else { return }
                 startArticleGeneration(
                     configuration: configuration,
-                    replacementConfirmed: true
+                    replacementConfirmed: true,
+                    expectedSeriesID: pendingExistingSeriesID
                 )
             }
-            Button("取消", role: .cancel) {}
+            Button("取消", role: .cancel) {
+                pendingGenerationConfiguration = nil
+                pendingExistingSeriesID = nil
+            }
         } message: {
             Text("生成完成后会显示新的故事系列；旧文章和旧背诵记录仍会保留。")
         }
@@ -125,6 +130,7 @@ struct VocabularyArticleView: View {
             isGenerating = false
             generationProgressText = ""
             pendingGenerationConfiguration = nil
+            pendingExistingSeriesID = nil
             speechRecognizer.stop()
         }
         .sensoryFeedback(.success, trigger: completionFeedbackTick)
@@ -295,12 +301,14 @@ struct VocabularyArticleView: View {
         saveGenerationConfiguration(generationConfiguration)
         isShowingGenerationSettings = false
         pendingGenerationConfiguration = generationConfiguration
+        pendingExistingSeriesID = articles.first?.sourceCardSnapshotHash
 
         switch VocabularyArticleReplacementPolicy.nextStep(hasExistingArticle: !articles.isEmpty) {
         case .generate:
             startArticleGeneration(
                 configuration: generationConfiguration,
-                replacementConfirmed: false
+                replacementConfirmed: false,
+                expectedSeriesID: pendingExistingSeriesID
             )
         case .confirmReplacement:
             isConfirmingReplacement = true
@@ -309,7 +317,8 @@ struct VocabularyArticleView: View {
 
     private func startArticleGeneration(
         configuration: VocabularyArticleGenerationConfiguration,
-        replacementConfirmed: Bool
+        replacementConfirmed: Bool,
+        expectedSeriesID: String?
     ) {
         guard !isGenerating else { return }
         let requestID = UUID()
@@ -320,6 +329,7 @@ struct VocabularyArticleView: View {
             await generateArticleSeries(
                 configuration: configuration,
                 replacementConfirmed: replacementConfirmed,
+                expectedSeriesID: expectedSeriesID,
                 requestID: requestID
             )
         }
@@ -328,6 +338,7 @@ struct VocabularyArticleView: View {
     private func generateArticleSeries(
         configuration: VocabularyArticleGenerationConfiguration,
         replacementConfirmed: Bool,
+        expectedSeriesID: String?,
         requestID: UUID
     ) async {
         do {
@@ -338,6 +349,7 @@ struct VocabularyArticleView: View {
                     generationID = nil
                     generationTask = nil
                     pendingGenerationConfiguration = nil
+                    pendingExistingSeriesID = nil
                 }
             }
 
@@ -347,7 +359,9 @@ struct VocabularyArticleView: View {
                 deckID: deck.id,
                 configuration: configuration,
                 replacementConfirmed: replacementConfirmed,
-                modelContext: modelContext
+                expectedSeriesID: expectedSeriesID,
+                modelContext: modelContext,
+                isCurrentRequest: { generationID == requestID }
             ) { current, total in
                 generationProgressText = "正在生成第 \(current)/\(total) 篇..."
             }

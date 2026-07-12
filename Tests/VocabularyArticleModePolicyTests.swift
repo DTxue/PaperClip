@@ -8,6 +8,7 @@ struct VocabularyArticleModePolicyTests {
         testCustomGenreCanDriveAStorySeries()
         testQualityPolicyRequestsRevisionForLongOrIncompleteStories()
         testQualityPolicyEnforcesPresetLengthSentenceAndDialogueRules()
+        testGenerationCommitPolicyRejectsStaleState()
 
         expect(
             VocabularyArticleReplacementPolicy.nextStep(hasExistingArticle: false) == .generate,
@@ -85,6 +86,69 @@ struct VocabularyArticleModePolicyTests {
         expect(
             plan.stories.map(\.theme) == ["校园生活", "侦探悬疑", "校园生活"],
             "selected genres should rotate across the series"
+        )
+    }
+
+    private static func testGenerationCommitPolicyRejectsStaleState() {
+        expect(
+            VocabularyArticleGenerationCommitPolicy.canCommit(
+                expectedSeriesID: "series-1",
+                currentSeriesID: "series-1",
+                expectedCardFingerprint: "cards-1",
+                currentCardFingerprint: "cards-1",
+                replacementConfirmed: true,
+                isCancelled: false,
+                isCurrentRequest: true
+            ),
+            "an unchanged confirmed generation may be committed"
+        )
+        expect(
+            !VocabularyArticleGenerationCommitPolicy.canCommit(
+                expectedSeriesID: "series-1",
+                currentSeriesID: "series-2",
+                expectedCardFingerprint: "cards-1",
+                currentCardFingerprint: "cards-1",
+                replacementConfirmed: true,
+                isCancelled: false,
+                isCurrentRequest: true
+            ),
+            "a generation must not overwrite a series that changed after confirmation"
+        )
+        expect(
+            !VocabularyArticleGenerationCommitPolicy.canCommit(
+                expectedSeriesID: nil,
+                currentSeriesID: nil,
+                expectedCardFingerprint: "cards-1",
+                currentCardFingerprint: "cards-2",
+                replacementConfirmed: false,
+                isCancelled: false,
+                isCurrentRequest: true
+            ),
+            "a generation must not commit after its source cards change"
+        )
+        expect(
+            !VocabularyArticleGenerationCommitPolicy.canCommit(
+                expectedSeriesID: nil,
+                currentSeriesID: nil,
+                expectedCardFingerprint: "cards-1",
+                currentCardFingerprint: "cards-1",
+                replacementConfirmed: false,
+                isCancelled: true,
+                isCurrentRequest: true
+            ),
+            "a cancelled generation must not commit"
+        )
+        expect(
+            !VocabularyArticleGenerationCommitPolicy.canCommit(
+                expectedSeriesID: nil,
+                currentSeriesID: nil,
+                expectedCardFingerprint: "cards-1",
+                currentCardFingerprint: "cards-1",
+                replacementConfirmed: false,
+                isCancelled: false,
+                isCurrentRequest: false
+            ),
+            "a stale request must not commit"
         )
     }
 

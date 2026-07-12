@@ -42,6 +42,23 @@ enum VocabularyArticleReplacementPolicy {
     }
 }
 
+enum VocabularyArticleGenerationCommitPolicy {
+    static func canCommit(
+        expectedSeriesID: String?,
+        currentSeriesID: String?,
+        expectedCardFingerprint: String,
+        currentCardFingerprint: String,
+        replacementConfirmed: Bool,
+        isCancelled: Bool,
+        isCurrentRequest: Bool
+    ) -> Bool {
+        guard !isCancelled, isCurrentRequest else { return false }
+        guard expectedSeriesID == currentSeriesID else { return false }
+        guard expectedCardFingerprint == currentCardFingerprint else { return false }
+        return expectedSeriesID == nil || replacementConfirmed
+    }
+}
+
 enum VocabularyArticleGradePreset: String, CaseIterable, Identifiable {
     case juniorOneTwo
     case juniorThree
