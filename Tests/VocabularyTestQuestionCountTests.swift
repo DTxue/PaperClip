@@ -8,7 +8,8 @@ struct VocabularyTestQuestionCountTests {
         testClampedQuestionCountRespectsMinimum()
         testBatchCardCountsAreSummedBeforeClamping()
         testSliderRequiresNonDegenerateRange()
-        print("VocabularyTestQuestionCountTests: 23 passed")
+        testSelectableRangeSupportsDiscreteAdjustment()
+        print("VocabularyTestQuestionCountTests: 26 passed")
     }
 
     private static func testClampedQuestionCountBounds() {
@@ -47,6 +48,18 @@ struct VocabularyTestQuestionCountTests {
         expect(!VocabularyTestQuestionCount.allowsSlider(maximumQuestionCount: 1))
         expect(!VocabularyTestQuestionCount.allowsSlider(maximumQuestionCount: 2))
         expect(VocabularyTestQuestionCount.allowsSlider(maximumQuestionCount: 3))
+    }
+
+    private static func testSelectableRangeSupportsDiscreteAdjustment() {
+        expect(
+            VocabularyTestQuestionCount.selectableRange(maximumQuestionCount: 10) == 6...10
+        )
+        expect(
+            VocabularyTestQuestionCount.selectableRange(maximumQuestionCount: 3) == 2...3
+        )
+        expect(
+            VocabularyTestQuestionCount.selectableRange(maximumQuestionCount: 1) == 1...1
+        )
     }
 
     private static func expect(

@@ -17,11 +17,17 @@ enum VocabularyTestQuestionCount {
         return max(minimum(maximumQuestionCount: maximumQuestionCount), min(maximumQuestionCount, count))
     }
 
+    static func selectableRange(maximumQuestionCount: Int) -> ClosedRange<Int> {
+        let maximumQuestionCount = clamped(maximumQuestionCount)
+        return minimum(maximumQuestionCount: maximumQuestionCount)...maximumQuestionCount
+    }
+
     static func maximum(inBatchCardCounts cardCounts: [Int]) -> Int {
         clamped(cardCounts.reduce(0, +))
     }
 
     static func allowsSlider(maximumQuestionCount: Int) -> Bool {
-        maximumQuestionCount > minimum(maximumQuestionCount: maximumQuestionCount)
+        let range = selectableRange(maximumQuestionCount: maximumQuestionCount)
+        return range.lowerBound < range.upperBound
     }
 }

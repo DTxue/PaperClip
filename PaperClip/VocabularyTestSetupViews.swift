@@ -2,7 +2,7 @@ import SwiftUI
 
 extension VocabularyTestView {
     func setupView(_ snapshot: VocabularyTestViewSnapshot) -> some View {
-        let minimumQuestionCount = VocabularyTestQuestionCount.minimum(
+        let selectableRange = VocabularyTestQuestionCount.selectableRange(
             maximumQuestionCount: snapshot.maximumQuestionCount
         )
         let resolvedQuestionCount = VocabularyTestQuestionCount.clamped(
@@ -12,17 +12,27 @@ extension VocabularyTestView {
 
         return Form {
             Section("题量") {
-                LabeledContent("题目数量") {
-                    Text("\(resolvedQuestionCount) 题")
-                        .monospacedDigit()
+                Stepper(
+                    value: questionCountStepperValue(
+                        maximumQuestionCount: snapshot.maximumQuestionCount
+                    ),
+                    in: selectableRange,
+                    step: 1
+                ) {
+                    LabeledContent("题目数量") {
+                        Text("\(resolvedQuestionCount) 题")
+                            .monospacedDigit()
+                    }
                 }
+                .disabled(snapshot.deckCards.isEmpty)
+                .accessibilityValue("\(resolvedQuestionCount) 题")
 
                 if VocabularyTestQuestionCount.allowsSlider(
                     maximumQuestionCount: snapshot.maximumQuestionCount
                 ) {
                     Slider(
                         value: questionCountSliderValue(maximumQuestionCount: snapshot.maximumQuestionCount),
-                        in: Double(minimumQuestionCount)...Double(snapshot.maximumQuestionCount),
+                        in: Double(selectableRange.lowerBound)...Double(selectableRange.upperBound),
                         step: 1
                     )
                     .disabled(snapshot.deckCards.isEmpty)

@@ -1,6 +1,23 @@
 import SwiftUI
 
 extension VocabularyTestView {
+    func questionCountStepperValue(maximumQuestionCount: Int) -> Binding<Int> {
+        Binding(
+            get: {
+                VocabularyTestQuestionCount.clamped(
+                    questionCount,
+                    maximumQuestionCount: maximumQuestionCount
+                )
+            },
+            set: {
+                questionCount = VocabularyTestQuestionCount.clamped(
+                    $0,
+                    maximumQuestionCount: maximumQuestionCount
+                )
+            }
+        )
+    }
+
     func questionCountSliderValue(maximumQuestionCount: Int) -> Binding<Double> {
         Binding(
             get: {
