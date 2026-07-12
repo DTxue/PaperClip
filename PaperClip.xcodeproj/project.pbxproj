@@ -453,6 +453,7 @@
 		A10000000000000000001233 /* VocabularyArticleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001233 /* VocabularyArticleView.swift */; };
 		A10000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift */; };
 		A10000000000000000001236 /* VocabularyArticleModePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001236 /* VocabularyArticleModePolicy.swift */; };
+		A10000000000000000001239 /* VocabularyArticleGenerationFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001239 /* VocabularyArticleGenerationFlow.swift */; };
 		A100000000000000000000F37 /* VocabularyMasteryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F37 /* VocabularyMasteryViews.swift */; };
 		A10000000000000000001023 /* VocabularyMasteryCardRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001023 /* VocabularyMasteryCardRows.swift */; };
 		A100000000000000000010D4 /* VocabularyMasteryDetailRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010D4 /* VocabularyMasteryDetailRows.swift */; };
@@ -1097,6 +1098,7 @@
 			A20000000000000000001233 /* VocabularyArticleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleView.swift; sourceTree = "<group>"; };
 			A20000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleSpeechRecognizer.swift; sourceTree = "<group>"; };
 			A20000000000000000001236 /* VocabularyArticleModePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleModePolicy.swift; sourceTree = "<group>"; };
+			A20000000000000000001239 /* VocabularyArticleGenerationFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleGenerationFlow.swift; sourceTree = "<group>"; };
 			A200000000000000000011A7 /* VocabularyStudySessionMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionMetrics.swift; sourceTree = "<group>"; };
 			A200000000000000000011A8 /* VocabularyStudySessionDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionDraft.swift; sourceTree = "<group>"; };
 			A200000000000000000011BE /* VocabularyStudySessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionItem.swift; sourceTree = "<group>"; };
@@ -1799,6 +1801,7 @@
 				A20000000000000000001233 /* VocabularyArticleView.swift */,
 				A20000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift */,
 				A20000000000000000001236 /* VocabularyArticleModePolicy.swift */,
+				A20000000000000000001239 /* VocabularyArticleGenerationFlow.swift */,
 				A200000000000000000000F37 /* VocabularyMasteryViews.swift */,
 				A20000000000000000001023 /* VocabularyMasteryCardRows.swift */,
 				A200000000000000000010D4 /* VocabularyMasteryDetailRows.swift */,
@@ -2537,6 +2540,7 @@
 				A10000000000000000001233 /* VocabularyArticleView.swift in Sources */,
 				A10000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift in Sources */,
 				A10000000000000000001236 /* VocabularyArticleModePolicy.swift in Sources */,
+				A10000000000000000001239 /* VocabularyArticleGenerationFlow.swift in Sources */,
 				A100000000000000000000F37 /* VocabularyMasteryViews.swift in Sources */,
 				A10000000000000000001023 /* VocabularyMasteryCardRows.swift in Sources */,
 				A100000000000000000010D4 /* VocabularyMasteryDetailRows.swift in Sources */,

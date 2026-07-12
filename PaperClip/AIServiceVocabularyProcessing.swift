@@ -30,11 +30,12 @@ extension AIService {
             VocabularyAIPrompts.article(story: story),
             configuration: configuration
         )
-        let revisionReasons = VocabularyArticleQualityPolicy.revisionReasons(
+        var revisionReasons = VocabularyArticleQualityPolicy.revisionReasons(
             articleText: result.article,
             story: story
         )
-        if !revisionReasons.isEmpty {
+        var revisionCount = 0
+        while !revisionReasons.isEmpty, revisionCount < 2 {
             result = try await requestDecoded(
                 VocabularyArticleGenerationResult.self,
                 VocabularyAIPrompts.reviseArticle(
@@ -46,13 +47,14 @@ extension AIService {
                 ),
                 configuration: configuration
             )
+            revisionCount += 1
+            revisionReasons = VocabularyArticleQualityPolicy.revisionReasons(
+                articleText: result.article,
+                story: story
+            )
         }
-        let finalRevisionReasons = VocabularyArticleQualityPolicy.revisionReasons(
-            articleText: result.article,
-            story: story
-        )
-        guard finalRevisionReasons.isEmpty else {
-            throw VocabularyArticleQualityError.validationFailed(finalRevisionReasons)
+        guard revisionReasons.isEmpty else {
+            throw VocabularyArticleQualityError.validationFailed(revisionReasons)
         }
         let title = result.title.trimmingCharacters(in: .whitespacesAndNewlines)
         return VocabularyArticleDraft(

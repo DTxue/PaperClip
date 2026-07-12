@@ -121,6 +121,20 @@ extension ModelContext {
             }
     }
 
+    func fetchVocabularyGeneratedArticleArchive(
+        deckID: UUID
+    ) throws -> [VocabularyGeneratedArticle] {
+        let descriptor = FetchDescriptor<VocabularyGeneratedArticle>(
+            predicate: #Predicate<VocabularyGeneratedArticle> { article in
+                article.deckID == deckID
+            },
+            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+        )
+        let articles = try fetch(descriptor)
+        guard let currentSeriesID = articles.first?.sourceCardSnapshotHash else { return [] }
+        return articles.filter { $0.sourceCardSnapshotHash != currentSeriesID }
+    }
+
     @discardableResult
     func insertVocabularyGeneratedArticleSeries(
         deckID: UUID,
@@ -237,5 +251,29 @@ extension ModelContext {
         )
         insert(history)
         return history
+    }
+}
+
+enum VocabularyArticleSeriesTransaction {
+    @MainActor
+    static func commit(
+        modelContext: ModelContext,
+        deckID: UUID,
+        drafts: [VocabularyArticleDraft],
+        saving: @MainActor (ModelContext) throws -> Void = { try $0.save() }
+    ) throws -> [VocabularyGeneratedArticle] {
+        let articles = try modelContext.insertVocabularyGeneratedArticleSeries(
+            deckID: deckID,
+            drafts: drafts
+        )
+        do {
+            try saving(modelContext)
+            return articles
+        } catch {
+            for article in articles {
+                modelContext.delete(article)
+            }
+            throw error
+        }
     }
 }

@@ -21,20 +21,6 @@ enum VocabularyArticleViewMode: String, CaseIterable, Identifiable {
     }
 }
 
-enum VocabularyArticleModePolicy {
-    static func canSelect(
-        _ targetMode: VocabularyArticleViewMode,
-        currentMode: VocabularyArticleViewMode,
-        isRecitationComplete: Bool
-    ) -> Bool {
-        if currentMode == .recitation, targetMode == .reading {
-            return isRecitationComplete
-        }
-
-        return true
-    }
-}
-
 enum VocabularyArticleGenerationStep: Equatable {
     case generate
     case confirmReplacement
@@ -239,10 +225,33 @@ enum VocabularyArticleQualityPolicy {
     ) -> [String] {
         let articleWords = VocabularyArticleTextNormalizer.words(from: articleText)
         var reasons: [String] = []
+        if articleWords.count < story.targetWordRange.lowerBound {
+            reasons.append(
+                "Article needs at least \(story.targetWordRange.lowerBound) English words."
+            )
+        }
         if articleWords.count > story.targetWordRange.upperBound {
             reasons.append(
                 "Article exceeds \(story.targetWordRange.upperBound) English words."
             )
+        }
+
+        let hasLongSentence = VocabularyArticleSentence.split(articleText).contains { sentence in
+            sentence.words.count > story.gradePreset.maximumSentenceWords
+        }
+        if hasLongSentence {
+            reasons.append(
+                "Keep every sentence within \(story.gradePreset.maximumSentenceWords) words per sentence."
+            )
+        }
+
+        let dialogueMarkerCount = articleText.reduce(into: 0) { count, character in
+            if character == "\"" || character == "“" || character == "”" {
+                count += 1
+            }
+        }
+        if dialogueMarkerCount < 4 {
+            reasons.append("Include at least two lines of natural dialogue in quotation marks.")
         }
 
         for card in story.cards {

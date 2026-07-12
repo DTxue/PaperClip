@@ -292,6 +292,29 @@ struct VocabularyPersistenceTests {
         expect(currentSeries.map(\.id) == storedStories.map(\.id))
         expect(currentSeries.map(\.title) == ["The First Clue", "The Second Clue"])
         expect(currentSeries.allSatisfy { $0.sourceCardSnapshotHash == "series-2" })
+        let archivedArticles = try context.fetchVocabularyGeneratedArticleArchive(deckID: deck.id)
+        expect(archivedArticles.map(\.id) == [storedArticle.id])
+        let failedDraft = VocabularyArticleDraft(
+            title: "Must Not Persist",
+            articleText: "This pending story must be removed after a failed save.",
+            coveredTerms: ["memory"],
+            sourceCardSnapshotHash: "failed-series",
+            modelName: "deepseek-v4-pro",
+            promptVersion: 2
+        )
+        do {
+            _ = try VocabularyArticleSeriesTransaction.commit(
+                modelContext: context,
+                deckID: deck.id,
+                drafts: [failedDraft],
+                saving: { _ in throw ExpectedSaveFailure() }
+            )
+            expect(false)
+        } catch is ExpectedSaveFailure {
+            // Expected: the transaction must remove its pending inserts before rethrowing.
+        }
+        let articlesAfterFailedSave = try context.fetch(FetchDescriptor<VocabularyGeneratedArticle>())
+        expect(!articlesAfterFailedSave.contains { $0.sourceCardSnapshotHash == "failed-series" })
         let firstStoryHistory = context.recordVocabularyArticleRecitationHistory(
             article: storedStories[0],
             duration: 20,
@@ -435,4 +458,6 @@ struct VocabularyPersistenceTests {
             fatalError("Expectation failed", file: file, line: line)
         }
     }
+
+    private struct ExpectedSaveFailure: Error {}
 }

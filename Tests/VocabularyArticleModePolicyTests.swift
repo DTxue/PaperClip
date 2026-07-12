@@ -7,33 +7,7 @@ struct VocabularyArticleModePolicyTests {
         testSeniorPresetControlsStorySizeAndLength()
         testCustomGenreCanDriveAStorySeries()
         testQualityPolicyRequestsRevisionForLongOrIncompleteStories()
-
-        expect(
-            VocabularyArticleModePolicy.canSelect(
-                .recitation,
-                currentMode: .reading,
-                isRecitationComplete: false
-            ),
-            "reading should be able to enter recitation"
-        )
-
-        expect(
-            !VocabularyArticleModePolicy.canSelect(
-                .reading,
-                currentMode: .recitation,
-                isRecitationComplete: false
-            ),
-            "unfinished recitation must not switch back to reading"
-        )
-
-        expect(
-            VocabularyArticleModePolicy.canSelect(
-                .reading,
-                currentMode: .recitation,
-                isRecitationComplete: true
-            ),
-            "completed recitation may return to reading"
-        )
+        testQualityPolicyEnforcesPresetLengthSentenceAndDialogueRules()
 
         expect(
             VocabularyArticleReplacementPolicy.nextStep(hasExistingArticle: false) == .generate,
@@ -80,7 +54,7 @@ struct VocabularyArticleModePolicyTests {
             "a stale generation must never be committed"
         )
 
-        print("VocabularyArticleModePolicyTests: generation and mode policies passed")
+        print("VocabularyArticleModePolicyTests: generation policies passed")
     }
 
     private static func testGenerationPlanCoversEveryCardWithoutOverloadingStories() {
@@ -178,6 +152,43 @@ struct VocabularyArticleModePolicyTests {
         expect(reasons.contains(where: { $0.contains("160") }), "overlong stories should be revised")
         expect(reasons.contains(where: { $0.contains("solve") }), "missing target terms should be revised")
         expect(reasons.contains(where: { $0.contains("clue") }), "every missing target term should be reported")
+    }
+
+    private static func testQualityPolicyEnforcesPresetLengthSentenceAndDialogueRules() {
+        let story = VocabularyArticleStoryPlan(
+            index: 0,
+            totalCount: 1,
+            cards: [
+                VocabularyArticleCardInput(term: "solve", definition: "解决"),
+                VocabularyArticleCardInput(term: "clue", definition: "线索")
+            ],
+            theme: "校园生活",
+            gradePreset: .juniorOneTwo,
+            targetWordRange: 120...160
+        )
+        let shortReasons = VocabularyArticleQualityPolicy.revisionReasons(
+            articleText: "We solve the clue.",
+            story: story
+        )
+        expect(shortReasons.contains(where: { $0.contains("at least 120") }), "short stories should be revised")
+
+        let longSentence = (["solve", "clue"] + Array(repeating: "ordinary", count: 13))
+            .joined(separator: " ") + "."
+        let sentenceReasons = VocabularyArticleQualityPolicy.revisionReasons(
+            articleText: longSentence,
+            story: story
+        )
+        expect(sentenceReasons.contains(where: { $0.contains("14 words per sentence") }), "long sentences should be revised")
+
+        let words = ["solve", "clue"] + Array(repeating: "ordinary", count: 118)
+        let noDialogueStory = stride(from: 0, to: words.count, by: 10)
+            .map { words[$0..<min($0 + 10, words.count)].joined(separator: " ") + "." }
+            .joined(separator: " ")
+        let dialogueReasons = VocabularyArticleQualityPolicy.revisionReasons(
+            articleText: noDialogueStory,
+            story: story
+        )
+        expect(dialogueReasons.contains(where: { $0.contains("dialogue") }), "stories without dialogue should be revised")
     }
 
     private static func expect(

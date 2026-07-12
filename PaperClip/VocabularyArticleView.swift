@@ -13,6 +13,7 @@ struct VocabularyArticleView: View {
     @StateObject private var speechRecognizer = VocabularyArticleSpeechRecognizer()
     @State private var cards: [VocabularyCard] = []
     @State private var articles: [VocabularyGeneratedArticle] = []
+    @State private var archivedArticles: [VocabularyGeneratedArticle] = []
     @State private var article: VocabularyGeneratedArticle?
     @State private var recitation = VocabularyArticleRecitationState(sentences: [])
     @State private var recitationHistories: [VocabularyArticleRecitationHistory] = []
@@ -38,21 +39,6 @@ struct VocabularyArticleView: View {
 
     private var readingPalette: PaperClipReadingPalette {
         readingTheme.palette(for: colorScheme, appTheme: appTheme)
-    }
-
-    private var modeSelection: Binding<VocabularyArticleViewMode> {
-        Binding(
-            get: { viewMode },
-            set: { targetMode in
-                guard VocabularyArticleModePolicy.canSelect(
-                    targetMode,
-                    currentMode: viewMode,
-                    isRecitationComplete: recitation.isComplete
-                ) else { return }
-
-                viewMode = targetMode
-            }
-        )
     }
 
     var body: some View {
@@ -147,9 +133,10 @@ struct VocabularyArticleView: View {
     private func articleContent(_ article: VocabularyGeneratedArticle) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                if articles.count > 1 {
+                if articles.count > 1 || !archivedArticles.isEmpty {
                     VocabularyArticleSeriesSelector(
                         articles: articles,
+                        archivedArticles: archivedArticles,
                         selectedArticleID: article.id,
                         onSelect: selectArticle
                     )
@@ -163,15 +150,10 @@ struct VocabularyArticleView: View {
                 )
 
                 HStack {
-                    Picker("词生文模式", selection: modeSelection) {
+                    Picker("词生文模式", selection: $viewMode) {
                         ForEach(VocabularyArticleViewMode.allCases) { mode in
                             Label(mode.title, systemImage: mode.systemImage)
                                 .tag(mode)
-                                .disabled(!VocabularyArticleModePolicy.canSelect(
-                                    mode,
-                                    currentMode: viewMode,
-                                    isRecitationComplete: recitation.isComplete
-                                ))
                         }
                     }
                     .pickerStyle(.segmented)
@@ -294,6 +276,7 @@ struct VocabularyArticleView: View {
         do {
             cards = try modelContext.fetchVocabularyArticleCards(deckID: deck.id)
             articles = try modelContext.fetchVocabularyGeneratedArticleSeries(deckID: deck.id)
+            archivedArticles = try modelContext.fetchVocabularyGeneratedArticleArchive(deckID: deck.id)
             article = articles.first
             resetRecitation()
             loadRecitationHistories()
@@ -360,54 +343,19 @@ struct VocabularyArticleView: View {
 
             try Task.checkCancellation()
 
-            let latestCards = try modelContext.fetchVocabularyArticleCards(deckID: deck.id)
-            guard !latestCards.isEmpty else {
-                cards = []
-                articles = []
-                article = nil
-                return
-            }
-
-            let inputs = latestCards.map { VocabularyArticleCardInput(card: $0) }
-            let plan = VocabularyArticleGenerationPlan.make(
-                cards: inputs,
-                configuration: configuration
-            )
-            let seriesID = [
-                "v2",
-                VocabularyArticleSourceFingerprint.make(cards: inputs),
-                requestID.uuidString.lowercased()
-            ].joined(separator: ":")
-            var drafts: [VocabularyArticleDraft] = []
-            drafts.reserveCapacity(plan.stories.count)
-            for story in plan.stories {
-                try Task.checkCancellation()
-                generationProgressText = "正在生成第 \(story.index + 1)/\(story.totalCount) 篇..."
-                drafts.append(try await AIService.generateVocabularyArticle(
-                    story: story,
-                    seriesID: seriesID
-                ))
-            }
-            try Task.checkCancellation()
-
-            let existingSeries = try modelContext.fetchVocabularyGeneratedArticleSeries(deckID: deck.id)
-            guard VocabularyArticleReplacementPolicy.canCommit(
-                hasExistingArticle: !existingSeries.isEmpty,
-                replacementConfirmed: replacementConfirmed,
-                isCancelled: Task.isCancelled,
-                isCurrentRequest: generationID == requestID
-            ) else {
-                return
-            }
-
-            let storedArticles = try modelContext.insertVocabularyGeneratedArticleSeries(
+            let output = try await VocabularyArticleGenerationFlow.generate(
                 deckID: deck.id,
-                drafts: drafts
-            )
-            try modelContext.save()
-            cards = latestCards
-            articles = storedArticles
-            article = storedArticles.first
+                configuration: configuration,
+                replacementConfirmed: replacementConfirmed,
+                modelContext: modelContext
+            ) { current, total in
+                generationProgressText = "正在生成第 \(current)/\(total) 篇..."
+            }
+            guard generationID == requestID else { return }
+            cards = output.cards
+            articles = output.articles
+            archivedArticles = output.archivedArticles
+            article = output.articles.first
             resetRecitation()
             loadRecitationHistories()
             viewMode = .reading
@@ -548,11 +496,15 @@ struct VocabularyArticleView: View {
 
 private struct VocabularyArticleSeriesSelector: View {
     let articles: [VocabularyGeneratedArticle]
+    let archivedArticles: [VocabularyGeneratedArticle]
     let selectedArticleID: UUID
     let onSelect: (VocabularyGeneratedArticle) -> Void
 
-    private var selectedIndex: Int {
-        (articles.firstIndex { $0.id == selectedArticleID } ?? 0) + 1
+    private var selectedLabel: String {
+        if let index = articles.firstIndex(where: { $0.id == selectedArticleID }) {
+            return "第 \(index + 1)/\(articles.count) 篇"
+        }
+        return "历史文章"
     }
 
     var body: some View {
@@ -563,19 +515,37 @@ private struct VocabularyArticleSeriesSelector: View {
             Spacer(minLength: 8)
 
             Menu {
-                ForEach(Array(articles.enumerated()), id: \.element.id) { index, article in
-                    Button {
-                        onSelect(article)
-                    } label: {
-                        if article.id == selectedArticleID {
-                            Label("第 \(index + 1) 篇 · \(article.title)", systemImage: "checkmark")
-                        } else {
-                            Text("第 \(index + 1) 篇 · \(article.title)")
+                Section("当前系列") {
+                    ForEach(Array(articles.enumerated()), id: \.element.id) { index, article in
+                        Button {
+                            onSelect(article)
+                        } label: {
+                            if article.id == selectedArticleID {
+                                Label("第 \(index + 1) 篇 · \(article.title)", systemImage: "checkmark")
+                            } else {
+                                Text("第 \(index + 1) 篇 · \(article.title)")
+                            }
+                        }
+                    }
+                }
+
+                if !archivedArticles.isEmpty {
+                    Section("历史文章") {
+                        ForEach(archivedArticles, id: \.id) { article in
+                            Button {
+                                onSelect(article)
+                            } label: {
+                                if article.id == selectedArticleID {
+                                    Label(article.title, systemImage: "checkmark")
+                                } else {
+                                    Text(article.title)
+                                }
+                            }
                         }
                     }
                 }
             } label: {
-                Label("第 \(selectedIndex)/\(articles.count) 篇", systemImage: "chevron.up.chevron.down")
+                Label(selectedLabel, systemImage: "chevron.up.chevron.down")
             }
             .buttonStyle(.bordered)
         }
