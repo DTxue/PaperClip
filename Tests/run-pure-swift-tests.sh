@@ -52,12 +52,18 @@ run_swift_test VocabularyAIPromptsTests \
     PaperClip/AIDecodingSupport.swift \
     PaperClip/AIVocabularyModels.swift \
     PaperClip/VocabularyArticleRecitation.swift \
+    PaperClip/VocabularyArticleModePolicy.swift \
     PaperClip/VocabularyAIPrompts.swift \
     Tests/VocabularyAIPromptsTests.swift
 
 run_swift_test VocabularyArticleRecitationTests \
     PaperClip/VocabularyArticleRecitation.swift \
     Tests/VocabularyArticleRecitationTests.swift
+
+run_swift_test VocabularyArticleModePolicyTests \
+    PaperClip/VocabularyArticleRecitation.swift \
+    PaperClip/VocabularyArticleModePolicy.swift \
+    Tests/VocabularyArticleModePolicyTests.swift
 
 run_swift_test AIServiceErrorMessageSupportTests \
     PaperClip/AIServiceError.swift \

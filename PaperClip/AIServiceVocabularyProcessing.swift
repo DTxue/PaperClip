@@ -17,24 +17,51 @@ extension VocabularyArticleCardInput {
 }
 
 extension AIService {
-    static func generateVocabularyArticle(cards: [VocabularyArticleCardInput]) async throws -> VocabularyArticleDraft {
+    static func generateVocabularyArticle(
+        story: VocabularyArticleStoryPlan,
+        seriesID: String
+    ) async throws -> VocabularyArticleDraft {
         let configuration = AIRequestConfiguration.deepSeek(
             modelName: AIService.defaultDeepSeekInferenceID,
-            maxOutputTokens: 12_000
+            maxOutputTokens: min(2_048, max(768, story.targetWordRange.upperBound * 5))
         )
-        let result = try await requestDecoded(
+        var result = try await requestDecoded(
             VocabularyArticleGenerationResult.self,
-            VocabularyAIPrompts.article(cards: cards),
+            VocabularyAIPrompts.article(story: story),
             configuration: configuration
         )
+        let revisionReasons = VocabularyArticleQualityPolicy.revisionReasons(
+            articleText: result.article,
+            story: story
+        )
+        if !revisionReasons.isEmpty {
+            result = try await requestDecoded(
+                VocabularyArticleGenerationResult.self,
+                VocabularyAIPrompts.reviseArticle(
+                    title: result.title,
+                    article: result.article,
+                    coveredTerms: result.coveredTerms,
+                    story: story,
+                    reasons: revisionReasons
+                ),
+                configuration: configuration
+            )
+        }
+        let finalRevisionReasons = VocabularyArticleQualityPolicy.revisionReasons(
+            articleText: result.article,
+            story: story
+        )
+        guard finalRevisionReasons.isEmpty else {
+            throw VocabularyArticleQualityError.validationFailed(finalRevisionReasons)
+        }
         let title = result.title.trimmingCharacters(in: .whitespacesAndNewlines)
         return VocabularyArticleDraft(
             title: title.isEmpty ? "Vocabulary Story" : title,
             articleText: result.article.trimmingCharacters(in: .whitespacesAndNewlines),
-            coveredTerms: result.coveredTerms,
-            sourceCardSnapshotHash: VocabularyArticleSourceFingerprint.make(cards: cards),
+            coveredTerms: story.cards.map(\.term),
+            sourceCardSnapshotHash: seriesID,
             modelName: AIService.defaultDeepSeekInferenceID,
-            promptVersion: 1
+            promptVersion: 2
         )
     }
 

@@ -3,11 +3,61 @@ import Foundation
 @main
 struct VocabularyAIPromptsTests {
     static func main() {
+        testArticlePromptUsesTheSelectedReadingPreset()
+        testArticleRevisionPromptPreservesTheStoryContract()
         testSplitPromptContainsJSONContract()
         testDistractorPromptFallsBackForBlankHints()
         testDistractorPromptUsesWeightedBreakdown()
         testGradingQuestionTextMarksMissingAnswer()
-        print("VocabularyAIPromptsTests: 4 passed")
+        print("VocabularyAIPromptsTests: 6 passed")
+    }
+
+    private static func testArticlePromptUsesTheSelectedReadingPreset() {
+        let story = VocabularyArticleStoryPlan(
+            index: 0,
+            totalCount: 3,
+            cards: [
+                VocabularyArticleCardInput(term: "solve", definition: "解决"),
+                VocabularyArticleCardInput(term: "clue", definition: "线索")
+            ],
+            theme: "侦探悬疑",
+            gradePreset: .juniorOneTwo,
+            targetWordRange: 120...160
+        )
+
+        let prompt = VocabularyAIPrompts.article(story: story)
+
+        expect(prompt.contains("Chinese Grade 7–8 learners"))
+        expect(prompt.contains("侦探悬疑"))
+        expect(prompt.contains("120–160 English words"))
+        expect(prompt.contains("no more than 14 words"))
+        expect(prompt.contains("goal, a problem, a turning point, and a satisfying ending"))
+        expect(prompt.contains("natural dialogue"))
+        expect(prompt.contains("term: solve"))
+        expect(prompt.contains("term: clue"))
+    }
+
+    private static func testArticleRevisionPromptPreservesTheStoryContract() {
+        let story = VocabularyArticleStoryPlan(
+            index: 1,
+            totalCount: 2,
+            cards: [VocabularyArticleCardInput(term: "clue", definition: "线索")],
+            theme: "校园生活",
+            gradePreset: .juniorThree,
+            targetWordRange: 150...190
+        )
+        let prompt = VocabularyAIPrompts.reviseArticle(
+            title: "A Long Day",
+            article: "The original story.",
+            coveredTerms: [],
+            story: story,
+            reasons: ["Article exceeds 190 English words.", "Missing target term: clue"]
+        )
+
+        expect(prompt.contains("The original story."))
+        expect(prompt.contains("Article exceeds 190 English words."))
+        expect(prompt.contains("Missing target term: clue"))
+        expect(prompt.contains(#"{"title":"...","article":"...","coveredTerms":["..."]}"#))
     }
 
     private static func testSplitPromptContainsJSONContract() {

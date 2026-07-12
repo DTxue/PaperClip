@@ -264,6 +264,54 @@ struct VocabularyPersistenceTests {
         expect(fetchedHistories.first?.stuckSentenceIndexes == [0, 1])
         expect(fetchedHistories.first?.duration == 42)
 
+        let storyDrafts = [
+            VocabularyArticleDraft(
+                title: "The First Clue",
+                articleText: "A short first story.",
+                coveredTerms: ["memory"],
+                sourceCardSnapshotHash: "series-2",
+                modelName: "deepseek-v4-pro",
+                promptVersion: 2
+            ),
+            VocabularyArticleDraft(
+                title: "The Second Clue",
+                articleText: "A short second story.",
+                coveredTerms: ["focus"],
+                sourceCardSnapshotHash: "series-2",
+                modelName: "deepseek-v4-pro",
+                promptVersion: 2
+            )
+        ]
+        let storedStories = try context.insertVocabularyGeneratedArticleSeries(
+            deckID: deck.id,
+            drafts: storyDrafts
+        )
+        try context.save()
+        let currentSeries = try context.fetchVocabularyGeneratedArticleSeries(deckID: deck.id)
+        expect(storedStories.count == 2)
+        expect(currentSeries.map(\.id) == storedStories.map(\.id))
+        expect(currentSeries.map(\.title) == ["The First Clue", "The Second Clue"])
+        expect(currentSeries.allSatisfy { $0.sourceCardSnapshotHash == "series-2" })
+        let firstStoryHistory = context.recordVocabularyArticleRecitationHistory(
+            article: storedStories[0],
+            duration: 20,
+            sentenceCount: 1,
+            wordCount: 4,
+            stuckSentenceIndexes: []
+        )
+        _ = context.recordVocabularyArticleRecitationHistory(
+            article: storedStories[1],
+            duration: 30,
+            sentenceCount: 1,
+            wordCount: 4,
+            stuckSentenceIndexes: [0]
+        )
+        try context.save()
+        let firstStoryHistories = try context.fetchVocabularyArticleRecitationHistories(
+            articleID: storedStories[0].id
+        )
+        expect(firstStoryHistories.map(\.id) == [firstStoryHistory.id])
+
         let scoreSessions = try context.fetchVocabularyScoreSessions(
             deckID: deck.id,
             limit: 100,

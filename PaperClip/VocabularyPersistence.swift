@@ -102,6 +102,56 @@ extension ModelContext {
         return try fetchFirst(descriptor)
     }
 
+    func fetchVocabularyGeneratedArticleSeries(
+        deckID: UUID
+    ) throws -> [VocabularyGeneratedArticle] {
+        let descriptor = FetchDescriptor<VocabularyGeneratedArticle>(
+            predicate: #Predicate<VocabularyGeneratedArticle> { article in
+                article.deckID == deckID
+            },
+            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+        )
+        let articles = try fetch(descriptor)
+        guard let seriesID = articles.first?.sourceCardSnapshotHash else { return [] }
+        return articles
+            .filter { $0.sourceCardSnapshotHash == seriesID }
+            .sorted { lhs, rhs in
+                if lhs.createdAt != rhs.createdAt { return lhs.createdAt < rhs.createdAt }
+                return lhs.id.uuidString < rhs.id.uuidString
+            }
+    }
+
+    @discardableResult
+    func insertVocabularyGeneratedArticleSeries(
+        deckID: UUID,
+        drafts: [VocabularyArticleDraft]
+    ) throws -> [VocabularyGeneratedArticle] {
+        let now = Date()
+        var articles: [VocabularyGeneratedArticle] = []
+        articles.reserveCapacity(drafts.count)
+
+        for (index, draft) in drafts.enumerated() {
+            let coveredTermsData = try JSONEncoder().encode(draft.coveredTerms)
+            let coveredTermsJSON = String(data: coveredTermsData, encoding: .utf8) ?? "[]"
+            let timestamp = now.addingTimeInterval(Double(index) / 1_000)
+            let article = VocabularyGeneratedArticle(
+                deckID: deckID,
+                title: draft.title,
+                articleText: draft.articleText,
+                coveredTermsJSON: coveredTermsJSON,
+                sourceCardSnapshotHash: draft.sourceCardSnapshotHash,
+                modelName: draft.modelName,
+                promptVersion: draft.promptVersion,
+                createdAt: timestamp,
+                updatedAt: timestamp
+            )
+            insert(article)
+            articles.append(article)
+        }
+
+        return articles
+    }
+
     @discardableResult
     func upsertVocabularyGeneratedArticle(
         deckID: UUID,
@@ -145,6 +195,19 @@ extension ModelContext {
             FetchDescriptor<VocabularyArticleRecitationHistory>(
                 predicate: #Predicate<VocabularyArticleRecitationHistory> { history in
                     history.deckID == deckID && history.articleSnapshotHash == articleSnapshotHash
+                },
+                sortBy: [SortDescriptor(\.completedAt, order: .reverse)]
+            )
+        )
+    }
+
+    func fetchVocabularyArticleRecitationHistories(
+        articleID: UUID
+    ) throws -> [VocabularyArticleRecitationHistory] {
+        try fetch(
+            FetchDescriptor<VocabularyArticleRecitationHistory>(
+                predicate: #Predicate<VocabularyArticleRecitationHistory> { history in
+                    history.articleID == articleID
                 },
                 sortBy: [SortDescriptor(\.completedAt, order: .reverse)]
             )

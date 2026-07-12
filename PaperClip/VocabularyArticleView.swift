@@ -12,6 +12,7 @@ struct VocabularyArticleView: View {
     @Environment(\.paperClipReadingTheme) private var readingTheme
     @StateObject private var speechRecognizer = VocabularyArticleSpeechRecognizer()
     @State private var cards: [VocabularyCard] = []
+    @State private var articles: [VocabularyGeneratedArticle] = []
     @State private var article: VocabularyGeneratedArticle?
     @State private var recitation = VocabularyArticleRecitationState(sentences: [])
     @State private var recitationHistories: [VocabularyArticleRecitationHistory] = []
@@ -21,10 +22,37 @@ struct VocabularyArticleView: View {
     @State private var stuckSentenceIndexes: Set<Int> = []
     @State private var completionFeedbackTick = 0
     @State private var isGenerating = false
+    @State private var generationProgressText = ""
+    @State private var isShowingGenerationSettings = false
+    @State private var isConfirmingReplacement = false
+    @State private var generationConfiguration = VocabularyArticleGenerationConfiguration.default
+    @State private var pendingGenerationConfiguration: VocabularyArticleGenerationConfiguration?
+    @State private var generationID: UUID?
+    @State private var generationTask: Task<Void, Never>?
     @State private var alert: AppAlert?
+
+    @AppStorage("vocabularyArticle.gradePreset") private var storedGradePreset = VocabularyArticleGradePreset.juniorOneTwo.rawValue
+    @AppStorage("vocabularyArticle.preferredStoryCount") private var storedStoryCount = 3
+    @AppStorage("vocabularyArticle.selectedGenres") private var storedGenres = "campus|adventure"
+    @AppStorage("vocabularyArticle.customGenre") private var storedCustomGenre = ""
 
     private var readingPalette: PaperClipReadingPalette {
         readingTheme.palette(for: colorScheme, appTheme: appTheme)
+    }
+
+    private var modeSelection: Binding<VocabularyArticleViewMode> {
+        Binding(
+            get: { viewMode },
+            set: { targetMode in
+                guard VocabularyArticleModePolicy.canSelect(
+                    targetMode,
+                    currentMode: viewMode,
+                    isRecitationComplete: recitation.isComplete
+                ) else { return }
+
+                viewMode = targetMode
+            }
+        )
     }
 
     var body: some View {
@@ -41,10 +69,10 @@ struct VocabularyArticleView: View {
                 ContentUnavailableView {
                     Label("还没有词生文", systemImage: "text.book.closed")
                 } description: {
-                    Text("使用当前词集中所有内容生成一篇适合背诵的英文文章。")
+                    Text("把当前词集拆分成适合单独阅读和背诵的英文故事系列。")
                 } actions: {
                     Button("生成词生文", systemImage: "wand.and.stars") {
-                        Task { await generateArticle() }
+                        presentGenerationSettings()
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(isGenerating)
@@ -53,7 +81,7 @@ struct VocabularyArticleView: View {
         }
         .overlay {
             if isGenerating {
-                ProgressView("正在生成词生文...")
+                ProgressView(generationProgressText.isEmpty ? "正在生成词生文..." : generationProgressText)
                     .padding(20)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
             }
@@ -62,11 +90,35 @@ struct VocabularyArticleView: View {
             ToolbarItemGroup(placement: .primaryAction) {
                 if article != nil {
                     Button("重新生成", systemImage: "arrow.triangle.2.circlepath") {
-                        Task { await generateArticle() }
+                        presentGenerationSettings()
                     }
                     .disabled(isGenerating)
                 }
             }
+        }
+        .confirmationDialog(
+            "替换现有词生文？",
+            isPresented: $isConfirmingReplacement,
+            titleVisibility: .visible
+        ) {
+            Button("重新生成并替换", role: .destructive) {
+                guard let configuration = pendingGenerationConfiguration else { return }
+                startArticleGeneration(
+                    configuration: configuration,
+                    replacementConfirmed: true
+                )
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("生成完成后会显示新的故事系列；旧文章和旧背诵记录仍会保留。")
+        }
+        .sheet(isPresented: $isShowingGenerationSettings) {
+            VocabularyArticleGenerationSettingsView(
+                configuration: $generationConfiguration,
+                cardCount: cards.count,
+                onCancel: { isShowingGenerationSettings = false },
+                onGenerate: submitGenerationSettings
+            )
         }
         .appAlert($alert)
         .task(id: deck.id) {
@@ -81,6 +133,12 @@ struct VocabularyArticleView: View {
             }
         }
         .onDisappear {
+            generationTask?.cancel()
+            generationTask = nil
+            generationID = nil
+            isGenerating = false
+            generationProgressText = ""
+            pendingGenerationConfiguration = nil
             speechRecognizer.stop()
         }
         .sensoryFeedback(.success, trigger: completionFeedbackTick)
@@ -89,18 +147,31 @@ struct VocabularyArticleView: View {
     private func articleContent(_ article: VocabularyGeneratedArticle) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                if articles.count > 1 {
+                    VocabularyArticleSeriesSelector(
+                        articles: articles,
+                        selectedArticleID: article.id,
+                        onSelect: selectArticle
+                    )
+                }
+
                 VocabularyArticleHeaderView(
                     title: article.title,
                     modelName: article.modelName,
-                    cardCount: cards.count,
+                    cardCount: coveredTermCount(article),
                     palette: readingPalette
                 )
 
                 HStack {
-                    Picker("词生文模式", selection: $viewMode) {
+                    Picker("词生文模式", selection: modeSelection) {
                         ForEach(VocabularyArticleViewMode.allCases) { mode in
                             Label(mode.title, systemImage: mode.systemImage)
                                 .tag(mode)
+                                .disabled(!VocabularyArticleModePolicy.canSelect(
+                                    mode,
+                                    currentMode: viewMode,
+                                    isRecitationComplete: recitation.isComplete
+                                ))
                         }
                     }
                     .pickerStyle(.segmented)
@@ -222,7 +293,8 @@ struct VocabularyArticleView: View {
     private func loadData() {
         do {
             cards = try modelContext.fetchVocabularyArticleCards(deckID: deck.id)
-            article = try modelContext.fetchVocabularyGeneratedArticle(deckID: deck.id)
+            articles = try modelContext.fetchVocabularyGeneratedArticleSeries(deckID: deck.id)
+            article = articles.first
             resetRecitation()
             loadRecitationHistories()
         } catch {
@@ -230,33 +302,163 @@ struct VocabularyArticleView: View {
         }
     }
 
-    private func generateArticle() async {
+    private func presentGenerationSettings() {
+        generationConfiguration = storedGenerationConfiguration
+        isShowingGenerationSettings = true
+    }
+
+    private func submitGenerationSettings() {
+        guard generationConfiguration.isValid else { return }
+        saveGenerationConfiguration(generationConfiguration)
+        isShowingGenerationSettings = false
+        pendingGenerationConfiguration = generationConfiguration
+
+        switch VocabularyArticleReplacementPolicy.nextStep(hasExistingArticle: !articles.isEmpty) {
+        case .generate:
+            startArticleGeneration(
+                configuration: generationConfiguration,
+                replacementConfirmed: false
+            )
+        case .confirmReplacement:
+            isConfirmingReplacement = true
+        }
+    }
+
+    private func startArticleGeneration(
+        configuration: VocabularyArticleGenerationConfiguration,
+        replacementConfirmed: Bool
+    ) {
+        guard !isGenerating else { return }
+        let requestID = UUID()
+        isGenerating = true
+        generationProgressText = "正在准备故事系列..."
+        generationID = requestID
+        generationTask = Task {
+            await generateArticleSeries(
+                configuration: configuration,
+                replacementConfirmed: replacementConfirmed,
+                requestID: requestID
+            )
+        }
+    }
+
+    private func generateArticleSeries(
+        configuration: VocabularyArticleGenerationConfiguration,
+        replacementConfirmed: Bool,
+        requestID: UUID
+    ) async {
         do {
-            isGenerating = true
-            defer { isGenerating = false }
+            defer {
+                if generationID == requestID {
+                    isGenerating = false
+                    generationProgressText = ""
+                    generationID = nil
+                    generationTask = nil
+                    pendingGenerationConfiguration = nil
+                }
+            }
+
+            try Task.checkCancellation()
 
             let latestCards = try modelContext.fetchVocabularyArticleCards(deckID: deck.id)
             guard !latestCards.isEmpty else {
                 cards = []
+                articles = []
                 article = nil
                 return
             }
 
             let inputs = latestCards.map { VocabularyArticleCardInput(card: $0) }
-            let draft = try await AIService.generateVocabularyArticle(cards: inputs)
-            let storedArticle = try modelContext.upsertVocabularyGeneratedArticle(
+            let plan = VocabularyArticleGenerationPlan.make(
+                cards: inputs,
+                configuration: configuration
+            )
+            let seriesID = [
+                "v2",
+                VocabularyArticleSourceFingerprint.make(cards: inputs),
+                requestID.uuidString.lowercased()
+            ].joined(separator: ":")
+            var drafts: [VocabularyArticleDraft] = []
+            drafts.reserveCapacity(plan.stories.count)
+            for story in plan.stories {
+                try Task.checkCancellation()
+                generationProgressText = "正在生成第 \(story.index + 1)/\(story.totalCount) 篇..."
+                drafts.append(try await AIService.generateVocabularyArticle(
+                    story: story,
+                    seriesID: seriesID
+                ))
+            }
+            try Task.checkCancellation()
+
+            let existingSeries = try modelContext.fetchVocabularyGeneratedArticleSeries(deckID: deck.id)
+            guard VocabularyArticleReplacementPolicy.canCommit(
+                hasExistingArticle: !existingSeries.isEmpty,
+                replacementConfirmed: replacementConfirmed,
+                isCancelled: Task.isCancelled,
+                isCurrentRequest: generationID == requestID
+            ) else {
+                return
+            }
+
+            let storedArticles = try modelContext.insertVocabularyGeneratedArticleSeries(
                 deckID: deck.id,
-                draft: draft
+                drafts: drafts
             )
             try modelContext.save()
             cards = latestCards
-            article = storedArticle
+            articles = storedArticles
+            article = storedArticles.first
             resetRecitation()
             loadRecitationHistories()
             viewMode = .reading
+        } catch is CancellationError {
+            return
         } catch {
+            guard !Task.isCancelled else { return }
             alert = AppAlert(title: "无法生成词生文", error: error)
         }
+    }
+
+    private var storedGenerationConfiguration: VocabularyArticleGenerationConfiguration {
+        let gradePreset = VocabularyArticleGradePreset(rawValue: storedGradePreset) ?? .juniorOneTwo
+        let genres = Set(
+            storedGenres
+                .split(separator: "|")
+                .compactMap { VocabularyArticleGenre(rawValue: String($0)) }
+        )
+        return VocabularyArticleGenerationConfiguration(
+            gradePreset: gradePreset,
+            preferredStoryCount: max(storedStoryCount, 1),
+            selectedGenres: genres,
+            customGenre: storedCustomGenre
+        )
+    }
+
+    private func saveGenerationConfiguration(
+        _ configuration: VocabularyArticleGenerationConfiguration
+    ) {
+        storedGradePreset = configuration.gradePreset.rawValue
+        storedStoryCount = configuration.preferredStoryCount
+        storedGenres = VocabularyArticleGenre.allCases
+            .filter(configuration.selectedGenres.contains)
+            .map(\.rawValue)
+            .joined(separator: "|")
+        storedCustomGenre = configuration.customGenre
+    }
+
+    private func selectArticle(_ selectedArticle: VocabularyGeneratedArticle) {
+        guard selectedArticle.id != article?.id else { return }
+        article = selectedArticle
+        viewMode = .reading
+        resetRecitation()
+        loadRecitationHistories()
+    }
+
+    private func coveredTermCount(_ article: VocabularyGeneratedArticle) -> Int {
+        guard let data = article.coveredTermsJSON.data(using: .utf8),
+              let terms = try? JSONDecoder().decode([String].self, from: data)
+        else { return 0 }
+        return terms.count
     }
 
     private func resetRecitation() {
@@ -313,8 +515,7 @@ struct VocabularyArticleView: View {
 
         do {
             recitationHistories = try modelContext.fetchVocabularyArticleRecitationHistories(
-                deckID: deck.id,
-                articleSnapshotHash: article.sourceCardSnapshotHash
+                articleID: article.id
             )
         } catch {
             alert = AppAlert(title: "无法读取背诵记录", error: error)
@@ -345,24 +546,119 @@ struct VocabularyArticleView: View {
     }
 }
 
-private enum VocabularyArticleViewMode: String, CaseIterable, Identifiable {
-    case reading
-    case recitation
+private struct VocabularyArticleSeriesSelector: View {
+    let articles: [VocabularyGeneratedArticle]
+    let selectedArticleID: UUID
+    let onSelect: (VocabularyGeneratedArticle) -> Void
 
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .reading: "阅读"
-        case .recitation: "背诵"
-        }
+    private var selectedIndex: Int {
+        (articles.firstIndex { $0.id == selectedArticleID } ?? 0) + 1
     }
 
-    var systemImage: String {
-        switch self {
-        case .reading: "text.book.closed"
-        case .recitation: "mic.circle"
+    var body: some View {
+        HStack(spacing: 12) {
+            Label("故事系列", systemImage: "books.vertical")
+                .font(.headline)
+
+            Spacer(minLength: 8)
+
+            Menu {
+                ForEach(Array(articles.enumerated()), id: \.element.id) { index, article in
+                    Button {
+                        onSelect(article)
+                    } label: {
+                        if article.id == selectedArticleID {
+                            Label("第 \(index + 1) 篇 · \(article.title)", systemImage: "checkmark")
+                        } else {
+                            Text("第 \(index + 1) 篇 · \(article.title)")
+                        }
+                    }
+                }
+            } label: {
+                Label("第 \(selectedIndex)/\(articles.count) 篇", systemImage: "chevron.up.chevron.down")
+            }
+            .buttonStyle(.bordered)
         }
+    }
+}
+
+private struct VocabularyArticleGenerationSettingsView: View {
+    @Binding var configuration: VocabularyArticleGenerationConfiguration
+    let cardCount: Int
+    let onCancel: () -> Void
+    let onGenerate: () -> Void
+
+    private var resolvedStoryCount: Int {
+        configuration.resolvedStoryCount(cardCount: cardCount)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("适用年级") {
+                    Picker("年级预设", selection: $configuration.gradePreset) {
+                        ForEach(VocabularyArticleGradePreset.allCases) { preset in
+                            Text(preset.title).tag(preset)
+                        }
+                    }
+                }
+
+                Section("生成篇数") {
+                    Stepper(
+                        "期望生成 \(configuration.preferredStoryCount) 篇",
+                        value: $configuration.preferredStoryCount,
+                        in: 1...20
+                    )
+                    if resolvedStoryCount > configuration.preferredStoryCount {
+                        Text("为覆盖全部 \(cardCount) 个词条并控制每篇长度，实际会生成 \(resolvedStoryCount) 篇。")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Section("故事题材（可多选）") {
+                    ForEach(VocabularyArticleGenre.allCases) { genre in
+                        Toggle(genre.title, isOn: genreBinding(genre))
+                    }
+                    TextField("自定义题材，例如：校园机器人比赛", text: $configuration.customGenre)
+                }
+
+                Section("生成预览") {
+                    LabeledContent("实际篇数", value: "\(resolvedStoryCount) 篇")
+                    LabeledContent("每篇目标词", value: "最多 \(configuration.gradePreset.termsPerStory) 个")
+                    LabeledContent(
+                        "每篇篇幅",
+                        value: "\(configuration.gradePreset.targetWordRange.lowerBound)–\(configuration.gradePreset.targetWordRange.upperBound) 词"
+                    )
+                    LabeledContent("词条覆盖", value: "\(cardCount)/\(cardCount)")
+                }
+            }
+            .navigationTitle("词生文设置")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消", action: onCancel)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("开始生成", action: onGenerate)
+                        .disabled(!configuration.isValid || cardCount == 0)
+                }
+            }
+        }
+        .presentationDetents([.large])
+    }
+
+    private func genreBinding(_ genre: VocabularyArticleGenre) -> Binding<Bool> {
+        Binding(
+            get: { configuration.selectedGenres.contains(genre) },
+            set: { isSelected in
+                if isSelected {
+                    configuration.selectedGenres.insert(genre)
+                } else {
+                    configuration.selectedGenres.remove(genre)
+                }
+            }
+        )
     }
 }
 
