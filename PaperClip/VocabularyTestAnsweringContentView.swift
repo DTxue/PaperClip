@@ -10,6 +10,7 @@ struct VocabularyTestAnsweringContentView: View {
     let currentIndex: Int
     let currentCard: VocabularyCard?
     @Binding var currentDrawing: PKDrawing
+    let answerCanvasSession: VocabularyAnswerCanvasSession
     let currentDrawingReloadToken: Int
     let didFinishAnswering: Bool
     let onAdvance: () -> Void
@@ -30,6 +31,7 @@ struct VocabularyTestAnsweringContentView: View {
                 VocabularyTestDefinitionCard(definition: card.definition)
                 VocabularyAnswerCanvas(
                     drawing: $currentDrawing,
+                    session: answerCanvasSession,
                     reloadToken: currentDrawingReloadToken
                 )
                 VocabularyAnswerAdvanceButton(

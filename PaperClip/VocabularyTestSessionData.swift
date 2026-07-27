@@ -77,6 +77,7 @@ extension VocabularyTestView {
     }
 
     func replaceCurrentDrawing(with drawing: PKDrawing) {
+        answerCanvasSession.prepare(drawing)
         currentDrawing = drawing
         currentDrawingReloadToken &+= 1
     }

@@ -3,9 +3,11 @@ import PencilKit
 extension VocabularyTestView {
     func advanceQuestion() {
         guard batches.indices.contains(currentBatchIndex) else { return }
+        let submittedDrawing = answerCanvasSession.snapshot(fallback: currentDrawing)
+        currentDrawing = submittedDrawing
         let drawingIndex = batches[currentBatchIndex].drawings.count
-        let currentDrawingData = currentDrawingDataForDraft()
-        batches[currentBatchIndex].drawings.append(currentDrawing)
+        let currentDrawingData = DrawingDataSupport.data(from: submittedDrawing)
+        batches[currentBatchIndex].drawings.append(submittedDrawing)
         draftDrawingDataCache.set(
             currentDrawingData,
             for: VocabularyDraftDrawingKey(

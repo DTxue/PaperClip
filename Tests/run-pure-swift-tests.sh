@@ -487,6 +487,14 @@ run_swift_test VocabularyTestQuestionCountTests \
     PaperClip/VocabularyTestQuestionCount.swift \
     Tests/VocabularyTestQuestionCountTests.swift
 
+run_swift_test VocabularyGradingPolicyTests \
+    PaperClip/AIResponseJSONValueExtractor.swift \
+    PaperClip/AIResponseJSONSanitizer.swift \
+    PaperClip/AIDecodingSupport.swift \
+    PaperClip/AIVocabularyModels.swift \
+    PaperClip/VocabularyGradingPolicy.swift \
+    Tests/VocabularyGradingPolicyTests.swift
+
 run_swift_test VocabularyTestQuestionSelectorTests \
     PaperClip/VocabularyModels.swift \
     PaperClip/VocabularyCardDerivedProperties.swift \

@@ -34,6 +34,7 @@ enum VocabularyBatchGradingRunner {
                 await callbacks.clearTask(request.batchID, request.context.taskID)
                 return
             }
+            let hasVisibleAnswers = images.map { $0 != nil }
 
             let maxAttempts = request.automaticRetry ? 2 : 1
             var lastErrorMessage = ""
@@ -50,10 +51,22 @@ enum VocabularyBatchGradingRunner {
                 guard canContinue, !Task.isCancelled else { break }
 
                 do {
-                    let result = try await AIService.gradeVocabularyTest(
-                        cards: request.cards,
-                        handwritingImages: images
-                    )
+                    let result: VocabularyGradingResult
+                    if hasVisibleAnswers.contains(true) {
+                        let aiResult = try await AIService.gradeVocabularyTest(
+                            cards: request.cards,
+                            handwritingImages: images
+                        )
+                        result = VocabularyGradingPolicy.validated(
+                            aiResult,
+                            hasVisibleAnswers: hasVisibleAnswers
+                        )
+                    } else {
+                        result = VocabularyGradingPolicy.validated(
+                            VocabularyGradingResult(items: []),
+                            hasVisibleAnswers: hasVisibleAnswers
+                        )
+                    }
                     await MainActor.run {
                         guard isCurrentBatch() else {
                             return

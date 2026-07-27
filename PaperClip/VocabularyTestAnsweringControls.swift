@@ -29,12 +29,14 @@ struct VocabularyAnswerAdvanceButton: View {
 
 struct VocabularyAnswerCanvas: View {
     @Binding var drawing: PKDrawing
+    let session: VocabularyAnswerCanvasSession
     let reloadToken: Int
 
     var body: some View {
         ZStack {
             VocabularyHandwritingCanvas(
                 drawing: $drawing,
+                session: session,
                 isEnabled: true,
                 reloadToken: reloadToken
             )

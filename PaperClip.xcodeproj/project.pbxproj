@@ -514,6 +514,7 @@
 		A100000000000000000000F4E /* VocabularyHandwritingSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F4E /* VocabularyHandwritingSupport.swift */; };
 		A100000000000000000000FC5 /* VocabularyBatchGradingRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FC5 /* VocabularyBatchGradingRunner.swift */; };
 		A100000000000000000000FC6 /* VocabularyTestPlanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FC6 /* VocabularyTestPlanning.swift */; };
+		B10000000000000000000001 /* VocabularyGradingPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000001 /* VocabularyGradingPolicy.swift */; };
 		A10000000000000000001188 /* VocabularyTestQuestionPriority.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001188 /* VocabularyTestQuestionPriority.swift */; };
 		A1000000000000000000110B /* VocabularyTestQuestionSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000110B /* VocabularyTestQuestionSelector.swift */; };
 			A100000000000000000000FC7 /* VocabularyTestBatchProjection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FC7 /* VocabularyTestBatchProjection.swift */; };
@@ -1171,6 +1172,7 @@
 		A200000000000000000000F4E /* VocabularyHandwritingSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyHandwritingSupport.swift; sourceTree = "<group>"; };
 		A200000000000000000000FC5 /* VocabularyBatchGradingRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyBatchGradingRunner.swift; sourceTree = "<group>"; };
 		A200000000000000000000FC6 /* VocabularyTestPlanning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestPlanning.swift; sourceTree = "<group>"; };
+		B20000000000000000000001 /* VocabularyGradingPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyGradingPolicy.swift; sourceTree = "<group>"; };
 		A20000000000000000001188 /* VocabularyTestQuestionPriority.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestQuestionPriority.swift; sourceTree = "<group>"; };
 		A2000000000000000000110B /* VocabularyTestQuestionSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestQuestionSelector.swift; sourceTree = "<group>"; };
 			A200000000000000000000FC7 /* VocabularyTestBatchProjection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestBatchProjection.swift; sourceTree = "<group>"; };
@@ -1864,6 +1866,7 @@
 				A200000000000000000000F4E /* VocabularyHandwritingSupport.swift */,
 				A200000000000000000000FC5 /* VocabularyBatchGradingRunner.swift */,
 				A200000000000000000000FC6 /* VocabularyTestPlanning.swift */,
+				B20000000000000000000001 /* VocabularyGradingPolicy.swift */,
 				A20000000000000000001188 /* VocabularyTestQuestionPriority.swift */,
 					A2000000000000000000110B /* VocabularyTestQuestionSelector.swift */,
 					A200000000000000000000FC7 /* VocabularyTestBatchProjection.swift */,
@@ -2603,6 +2606,7 @@
 				A100000000000000000000F4E /* VocabularyHandwritingSupport.swift in Sources */,
 				A100000000000000000000FC5 /* VocabularyBatchGradingRunner.swift in Sources */,
 				A100000000000000000000FC6 /* VocabularyTestPlanning.swift in Sources */,
+				B10000000000000000000001 /* VocabularyGradingPolicy.swift in Sources */,
 				A10000000000000000001188 /* VocabularyTestQuestionPriority.swift in Sources */,
 					A1000000000000000000110B /* VocabularyTestQuestionSelector.swift in Sources */,
 					A100000000000000000000FC7 /* VocabularyTestBatchProjection.swift in Sources */,

@@ -18,6 +18,7 @@ struct VocabularyTestView: View {
     @State var currentIndex = 0
     @State var currentDrawing = PKDrawing()
     @State var currentDrawingReloadToken = 0
+    @State var answerCanvasSession = VocabularyAnswerCanvasSession()
     @State var enlargedImage: IdentifiableImage? = nil
     @State var startedAt = Date.now
     @State var didRecordSession = false

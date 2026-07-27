@@ -36,6 +36,7 @@ extension VocabularyTestView {
             currentIndex: currentIndex,
             currentCard: currentCard,
             currentDrawing: $currentDrawing,
+            answerCanvasSession: answerCanvasSession,
             currentDrawingReloadToken: currentDrawingReloadToken,
             didFinishAnswering: didFinishAnswering,
             onAdvance: advanceQuestion,
