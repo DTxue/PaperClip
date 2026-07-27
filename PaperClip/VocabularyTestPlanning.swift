@@ -16,8 +16,8 @@ enum VocabularyTestSessionPlanner {
         requestedQuestionCount: Int
     ) -> VocabularyTestSessionPlan {
         let maximumQuestionCount = VocabularyTestQuestionCount.clamped(deckCards.count)
-        let questionCount = VocabularyTestQuestionCount.clamped(
-            requestedQuestionCount,
+        let questionCount = mode.resolvedQuestionCount(
+            requestedQuestionCount: requestedQuestionCount,
             maximumQuestionCount: maximumQuestionCount
         )
         let selectedCards = VocabularyTestQuestionSelector.questions(
@@ -25,7 +25,7 @@ enum VocabularyTestSessionPlanner {
             deckCards: deckCards,
             states: states,
             recentLogs: recentLogs,
-            limit: mode == .regular ? questionCount : deckCards.count
+            limit: mode == .exam ? deckCards.count : questionCount
         )
         return VocabularyTestSessionPlan(
             mode: mode,

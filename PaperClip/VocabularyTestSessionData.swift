@@ -4,6 +4,22 @@ import PencilKit
 extension VocabularyTestView {
     func startTest() {
         fetchSessionData()
+        guard selectedMode.canStart(cardCount: allCards.count) else {
+            if alert == nil {
+                if selectedMode == .debug {
+                    alert = AppAlert(
+                        title: "无法开始调试",
+                        message: "调试模式需要至少 5 个单词。"
+                    )
+                } else {
+                    alert = AppAlert(
+                        title: "无法开始测验",
+                        message: "词集中没有可用单词。"
+                    )
+                }
+            }
+            return
+        }
         restartGradingSession()
         let recentLogs = fetchRecentReviewLogs(
             limit: VocabularyTestQuestionSelector.recentReviewLogLimit(cardCount: allCards.count)

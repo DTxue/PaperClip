@@ -1,13 +1,6 @@
 import PencilKit
 import UIKit
 
-enum VocabularyTestMode: String, CaseIterable, Identifiable {
-    case regular = "常规"
-    case exam = "考试"
-
-    var id: String { rawValue }
-}
-
 enum VocabularyTestBatchStatus: String, Equatable {
     case answering
     case grading

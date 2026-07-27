@@ -10,7 +10,7 @@ extension VocabularyTestView {
                 VocabularyTestGradingView(message: "AI 正在批改中…")
             case .graded:
                 VocabularyTestResultsView(
-                    title: "测验完成",
+                    title: sessionMode == .debug ? "调试完成" : "测验完成",
                     questions: snapshot.gradedQuestions,
                     enlargedImage: $enlargedImage
                 )

@@ -9,7 +9,10 @@ struct VocabularyTestQuestionCountTests {
         testBatchCardCountsAreSummedBeforeClamping()
         testSliderRequiresNonDegenerateRange()
         testSelectableRangeSupportsDiscreteAdjustment()
-        print("VocabularyTestQuestionCountTests: 26 passed")
+        testDebugModeUsesExactlyFiveQuestions()
+        testDebugModeDoesNotRecordHistory()
+        testDebugModeRequiresFiveCards()
+        print("VocabularyTestQuestionCountTests: 36 passed")
     }
 
     private static func testClampedQuestionCountBounds() {
@@ -60,6 +63,35 @@ struct VocabularyTestQuestionCountTests {
         expect(
             VocabularyTestQuestionCount.selectableRange(maximumQuestionCount: 1) == 1...1
         )
+    }
+
+    private static func testDebugModeUsesExactlyFiveQuestions() {
+        expect(
+            VocabularyTestMode.debug.resolvedQuestionCount(
+                requestedQuestionCount: 1,
+                maximumQuestionCount: 20
+            ) == 5
+        )
+        expect(
+            VocabularyTestMode.debug.resolvedQuestionCount(
+                requestedQuestionCount: 1,
+                maximumQuestionCount: 4
+            ) == 5
+        )
+        expect(VocabularyTestMode.debug.minimumRequiredCardCount == 5)
+    }
+
+    private static func testDebugModeDoesNotRecordHistory() {
+        expect(VocabularyTestMode.regular.recordsHistory)
+        expect(VocabularyTestMode.exam.recordsHistory)
+        expect(!VocabularyTestMode.debug.recordsHistory)
+    }
+
+    private static func testDebugModeRequiresFiveCards() {
+        expect(!VocabularyTestMode.debug.canStart(cardCount: 4))
+        expect(VocabularyTestMode.debug.canStart(cardCount: 5))
+        expect(VocabularyTestMode.regular.canStart(cardCount: 1))
+        expect(VocabularyTestMode.setupModes == [.regular, .debug])
     }
 
     private static func expect(

@@ -1,5 +1,41 @@
 import Foundation
 
+enum VocabularyTestMode: String, CaseIterable, Identifiable {
+    case regular = "常规"
+    case exam = "考试"
+    case debug = "调试"
+
+    static let setupModes: [VocabularyTestMode] = [.regular, .debug]
+    static let debugQuestionCount = 5
+
+    var id: String { rawValue }
+
+    var minimumRequiredCardCount: Int {
+        self == .debug ? Self.debugQuestionCount : 1
+    }
+
+    var recordsHistory: Bool {
+        self != .debug
+    }
+
+    func canStart(cardCount: Int) -> Bool {
+        cardCount >= minimumRequiredCardCount
+    }
+
+    func resolvedQuestionCount(
+        requestedQuestionCount: Int,
+        maximumQuestionCount: Int
+    ) -> Int {
+        if self == .debug {
+            return Self.debugQuestionCount
+        }
+        return VocabularyTestQuestionCount.clamped(
+            requestedQuestionCount,
+            maximumQuestionCount: maximumQuestionCount
+        )
+    }
+}
+
 enum VocabularyTestQuestionCount {
     static let minimumRatio = 0.6
 

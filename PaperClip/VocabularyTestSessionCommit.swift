@@ -1,9 +1,15 @@
 extension VocabularyTestView {
     func finishSessionIfReady() {
         guard !didRecordSession else { return }
-        if sessionMode == .regular {
+        guard let sessionMode else { return }
+
+        if sessionMode != .exam {
             if batches.first?.status == .graded {
-                commitToScheduler(kind: "测验")
+                if sessionMode.recordsHistory {
+                    commitToScheduler(kind: "测验")
+                } else {
+                    didRecordSession = true
+                }
             }
             return
         }
@@ -15,6 +21,10 @@ extension VocabularyTestView {
 
     func commitToScheduler(kind: String) {
         guard !didRecordSession else { return }
+        guard let sessionMode, sessionMode.recordsHistory else {
+            didRecordSession = true
+            return
+        }
         do {
             let didCommit = try VocabularyTestSessionCommitTransaction.commitAndSave(
                 deck: deck,

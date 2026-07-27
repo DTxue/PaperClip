@@ -51,7 +51,7 @@ extension VocabularyTestView {
         Group {
             if batches.isEmpty {
                 setupView(snapshot)
-            } else if sessionMode == .regular {
+            } else if sessionMode != .exam {
                 regularSessionView(snapshot)
             } else if !didFinishAnswering {
                 answeringView(snapshot)
