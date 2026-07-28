@@ -7,13 +7,6 @@ struct VocabularyContextPracticeView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var output: VocabularyContextPracticeOutput?
     @State private var currentIndex = 0
-    @State private var phase = VocabularyContextPracticePhase.preview
-    @State private var response = ""
-    @State private var currentResult: Bool?
-    @State private var sessionItems: [VocabularyStudySessionItem] = []
-    @State private var sessionID = UUID()
-    @State private var sessionStartedAt = Date.now
-    @State private var itemStartedAt = Date.now
     @State private var isGenerating = false
     @State private var generationID: UUID?
     @State private var generationTask: Task<Void, Never>?
@@ -69,9 +62,9 @@ struct VocabularyContextPracticeView: View {
 
     private var introduction: some View {
         ContentUnavailableView {
-            Label("用语境主动回忆", systemImage: "text.bubble")
+            Label("用语境理解单词", systemImage: "text.bubble")
         } description: {
-            Text("从到期和薄弱词中选择最多 \(maximumCardCount) 个词。先理解短句，再遮挡目标词进行回忆。")
+            Text("从到期和薄弱词中选择最多 \(maximumCardCount) 个词，通过短句、搭配和用法提示加深理解。")
         } actions: {
             VStack(spacing: 14) {
                 Picker("适用年级", selection: $storedGradePreset) {
@@ -96,19 +89,14 @@ struct VocabularyContextPracticeView: View {
                     index: currentIndex,
                     total: output?.lesson.items.count ?? 0
                 )
-
-                if phase == .preview {
-                    preview(item)
-                } else {
-                    recall(item)
-                }
+                contextCard(item)
             }
             .padding(28)
             .frame(maxWidth: 820, alignment: .leading)
         }
     }
 
-    private func preview(_ item: VocabularyContextPracticeItem) -> some View {
+    private func contextCard(_ item: VocabularyContextPracticeItem) -> some View {
         VStack(alignment: .leading, spacing: 20) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(item.term)
@@ -133,81 +121,22 @@ struct VocabularyContextPracticeView: View {
                 LabeledContent("用法提示", value: item.usageTip)
             }
 
-            Button("遮住单词，开始回忆", systemImage: "eye.slash") {
-                response = ""
-                currentResult = nil
-                phase = .recall
+            Button(
+                currentIndex + 1 == (output?.lesson.items.count ?? 0)
+                    ? "完成"
+                    : "下一个词",
+                systemImage: "arrow.right"
+            ) {
+                advance()
             }
             .buttonStyle(.borderedProminent)
         }
     }
 
-    private func recall(_ item: VocabularyContextPracticeItem) -> some View {
-        VStack(alignment: .leading, spacing: 22) {
-            Text("根据释义和语境填空")
-                .font(.headline)
-            Text(item.definition)
-                .font(.title2.bold())
-            Text(item.cloze)
-                .font(.system(.title2, design: .serif))
-                .lineSpacing(8)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-
-            TextField("输入缺少的英文", text: $response)
-                .textFieldStyle(.roundedBorder)
-                .font(.title3)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .disabled(currentResult != nil)
-                .submitLabel(.done)
-                .onSubmit {
-                    if currentResult == nil {
-                        check(item)
-                    }
-                }
-
-            if let currentResult {
-                Label(
-                    currentResult ? "回答正确" : "正确答案：\(item.answer)",
-                    systemImage: currentResult
-                        ? "checkmark.circle.fill"
-                        : "xmark.circle.fill"
-                )
-                .font(.headline)
-                .foregroundStyle(currentResult ? Color.green : Color.red)
-
-                Text(item.sentence)
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-
-                Button(
-                    currentIndex + 1 == (output?.lesson.items.count ?? 0)
-                        ? "完成"
-                        : "下一题",
-                    systemImage: "arrow.right"
-                ) {
-                    advance()
-                }
-                .buttonStyle(.borderedProminent)
-            } else {
-                Button("检查", systemImage: "checkmark") {
-                    check(item)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(
-                    response.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                )
-            }
-        }
-    }
-
     private var completion: some View {
-        let correctCount = sessionItems.filter(\.isCorrect).count
         return VocabularySessionCompleteView(
             title: "语境练习完成",
-            message: "本轮完成 \(sessionItems.count) 题，答对 \(correctCount) 题。",
+            message: "本轮学习了 \(output?.lesson.items.count ?? 0) 个词。",
             systemImage: "text.bubble.fill"
         )
     }
@@ -218,10 +147,6 @@ struct VocabularyContextPracticeView: View {
         let requestID = UUID()
         output = nil
         currentIndex = 0
-        phase = .preview
-        response = ""
-        currentResult = nil
-        sessionItems = []
         generationID = requestID
         isGenerating = true
         generationTask = Task {
@@ -245,13 +170,6 @@ struct VocabularyContextPracticeView: View {
 
                 output = generatedOutput
                 currentIndex = 0
-                phase = .preview
-                response = ""
-                currentResult = nil
-                sessionItems = []
-                sessionID = UUID()
-                sessionStartedAt = .now
-                itemStartedAt = .now
             } catch is CancellationError {
                 return
             } catch {
@@ -261,42 +179,7 @@ struct VocabularyContextPracticeView: View {
         }
     }
 
-    private func check(_ item: VocabularyContextPracticeItem) {
-        guard currentResult == nil,
-              let card = output?.cardsByID[item.cardID]
-        else { return }
-
-        do {
-            let sessionItem = try VocabularyContextPracticeFlow.recordAttempt(
-                response: response,
-                item: item,
-                card: card,
-                deck: deck,
-                sessionID: sessionID,
-                sessionStartedAt: sessionStartedAt,
-                previousItems: sessionItems,
-                duration: Date.now.timeIntervalSince(itemStartedAt),
-                modelContext: modelContext
-            )
-            sessionItems.append(sessionItem)
-            currentResult = sessionItem.isCorrect
-        } catch {
-            alert = AppAlert(title: "无法保存语境练习结果", error: error)
-        }
-    }
-
     private func advance() {
-        guard currentResult != nil else { return }
-        let nextIndex = currentIndex + 1
-        currentIndex = nextIndex
-        phase = .preview
-        response = ""
-        currentResult = nil
-        itemStartedAt = .now
+        currentIndex += 1
     }
-}
-
-private enum VocabularyContextPracticePhase {
-    case preview
-    case recall
 }

@@ -6,14 +6,12 @@ struct VocabularyContextPracticeTests {
         try testBuildsLessonByStableCardIndex()
         testRejectsUnexpectedGeneratedIndexes()
         testRejectsUnanswerableContext()
-        testChecksOnlyContextuallyValidAnswers()
-        testPromptFixesMeaningAndClozeContract()
-        testRejectsClozeThatChangesTheSourceSentence()
+        testPromptFixesMeaningAndContextContract()
         try testAcceptsOnlyUserApprovedSourceWordForms()
         testRejectsAnswerUnrelatedToSourceTerm()
         testRejectsUnapprovedGeneratedInflection()
         testEnforcesLocalGenerationConstraints()
-        print("VocabularyContextPracticeTests: 10 passed")
+        print("VocabularyContextPracticeTests: 8 passed")
     }
 
     private static func testBuildsLessonByStableCardIndex() throws {
@@ -43,18 +41,14 @@ struct VocabularyContextPracticeTests {
             .init(
                 index: 2,
                 sentence: "Mia felt grateful when her classmate returned the lost notebook.",
-                cloze: "Mia felt ___ when her classmate returned the lost notebook.",
                 answer: "grateful",
-                acceptedAnswers: ["grateful"],
                 collocation: "feel grateful",
                 usageTip: "常用于 be 或 feel 后。"
             ),
             .init(
                 index: 1,
                 sentence: "Leo did not hesitate when he heard a child call for help.",
-                cloze: "Leo did not ___ when he heard a child call for help.",
                 answer: "hesitate",
-                acceptedAnswers: ["hesitate"],
                 collocation: "hesitate to do something",
                 usageTip: "后接不定式说明犹豫做某事。"
             )
@@ -67,7 +61,10 @@ struct VocabularyContextPracticeTests {
 
         expect(lesson.items.map(\.cardID) == [firstID, secondID])
         expect(lesson.items.map(\.term) == ["hesitate", "grateful"])
-        expect(lesson.items.map(\.answer) == ["hesitate", "grateful"])
+        expect(lesson.items.map(\.collocation) == [
+            "hesitate to do something",
+            "feel grateful"
+        ])
     }
 
     private static func testRejectsUnexpectedGeneratedIndexes() {
@@ -83,18 +80,14 @@ struct VocabularyContextPracticeTests {
         let validItem = VocabularyContextGenerationResult.Item(
             index: 1,
             sentence: "Leo did not hesitate when he heard a child call for help.",
-            cloze: "Leo did not ___ when he heard a child call for help.",
             answer: "hesitate",
-            acceptedAnswers: ["hesitate"],
             collocation: "hesitate to do something",
             usageTip: "后接不定式。"
         )
         let extraItem = VocabularyContextGenerationResult.Item(
             index: 2,
             sentence: "This item does not belong to a source card.",
-            cloze: "This item does not ___ to a source card.",
             answer: "belong",
-            acceptedAnswers: ["belong"],
             collocation: "belong to",
             usageTip: ""
         )
@@ -125,9 +118,7 @@ struct VocabularyContextPracticeTests {
         let invalidItem = VocabularyContextGenerationResult.Item(
             index: 1,
             sentence: "Leo paused before opening the door.",
-            cloze: "Leo paused before opening the door.",
             answer: "hesitate",
-            acceptedAnswers: [],
             collocation: "",
             usageTip: ""
         )
@@ -139,32 +130,13 @@ struct VocabularyContextPracticeTests {
             )
             fatalError("An unanswerable context must be rejected")
         } catch let error as VocabularyContextPracticeValidationError {
-            expect(error.issues.contains { $0.contains("遮挡") })
             expect(error.issues.contains { $0.contains("答案") })
         } catch {
             fatalError("Unexpected error: \(error)")
         }
     }
 
-    private static func testChecksOnlyContextuallyValidAnswers() {
-        let item = VocabularyContextPracticeItem(
-            cardID: UUID(),
-            term: "hesitate",
-            definition: "犹豫",
-            sentence: "Leo hesitated before opening the door.",
-            cloze: "Leo ___ before opening the door.",
-            answer: "hesitated",
-            acceptedAnswers: ["hesitated"],
-            collocation: "hesitate before doing something",
-            usageTip: ""
-        )
-
-        expect(VocabularyContextPracticeAnswerChecker.isCorrect(" Hesitated. ", for: item))
-        expect(!VocabularyContextPracticeAnswerChecker.isCorrect("hesitate", for: item))
-        expect(!VocabularyContextPracticeAnswerChecker.isCorrect("", for: item))
-    }
-
-    private static func testPromptFixesMeaningAndClozeContract() {
+    private static func testPromptFixesMeaningAndContextContract() {
         let card = VocabularyContextCardInput(
             cardID: UUID(),
             term: "conduct",
@@ -186,42 +158,11 @@ struct VocabularyContextPracticeTests {
         expect(prompt.contains("Chinese Grade 7–8 learners"))
         expect(prompt.contains("no more than 14 words"))
         expect(prompt.contains("definition: 实施；进行"))
-        expect(prompt.contains("exactly one ___"))
+        expect(prompt.contains("context-learning examples"))
         expect(prompt.contains("high-constraint"))
-        expect(prompt.contains(#""acceptedAnswers":["..."]"#))
-    }
-
-    private static func testRejectsClozeThatChangesTheSourceSentence() {
-        let card = VocabularyContextCardInput(
-            cardID: UUID(),
-            term: "hesitate",
-            definition: "犹豫",
-            englishDefinition: "",
-            partOfSpeech: "verb",
-            example: "",
-            alternativeAnswers: []
-        )
-        let inconsistentItem = VocabularyContextGenerationResult.Item(
-            index: 1,
-            sentence: "Leo did not hesitate before opening the door.",
-            cloze: "Leo did not ___ before closing the door.",
-            answer: "hesitate",
-            acceptedAnswers: ["hesitate"],
-            collocation: "hesitate before doing something",
-            usageTip: ""
-        )
-
-        do {
-            _ = try VocabularyContextPracticeBuilder.build(
-                cards: [card],
-                generated: .init(items: [inconsistentItem])
-            )
-            fatalError("A cloze that changes the source sentence must be rejected")
-        } catch let error as VocabularyContextPracticeValidationError {
-            expect(error.issues.contains { $0.contains("完整句") })
-        } catch {
-            fatalError("Unexpected error: \(error)")
-        }
+        expect(prompt.contains(#""answer":"...""#))
+        expect(!prompt.contains("cloze"))
+        expect(!prompt.contains("acceptedAnswers"))
     }
 
     private static func testAcceptsOnlyUserApprovedSourceWordForms() throws {
@@ -240,9 +181,7 @@ struct VocabularyContextPracticeTests {
                 .init(
                     index: 1,
                     sentence: "Leo hesitated before opening the door.",
-                    cloze: "Leo ___ before opening the door.",
                     answer: "hesitated",
-                    acceptedAnswers: ["hesitated", "paused"],
                     collocation: "hesitate before doing something",
                     usageTip: "这里用过去式表示已经发生。"
                 )
@@ -250,9 +189,8 @@ struct VocabularyContextPracticeTests {
         )
 
         let item = lesson.items[0]
-        expect(item.acceptedAnswers == ["hesitated"])
-        expect(VocabularyContextPracticeAnswerChecker.isCorrect("hesitated", for: item))
-        expect(!VocabularyContextPracticeAnswerChecker.isCorrect("paused", for: item))
+        expect(item.sentence == "Leo hesitated before opening the door.")
+        expect(item.collocation == "hesitate before doing something")
     }
 
     private static func testRejectsAnswerUnrelatedToSourceTerm() {
@@ -273,9 +211,7 @@ struct VocabularyContextPracticeTests {
                     .init(
                         index: 1,
                         sentence: "Leo paused before opening the door.",
-                        cloze: "Leo ___ before opening the door.",
                         answer: "paused",
-                        acceptedAnswers: ["paused"],
                         collocation: "pause before doing something",
                         usageTip: "这个句子表达动作前的停顿。"
                     )
@@ -307,9 +243,7 @@ struct VocabularyContextPracticeTests {
                     .init(
                         index: 1,
                         sentence: "Mia is openning the window.",
-                        cloze: "Mia is ___ the window.",
                         answer: "openning",
-                        acceptedAnswers: ["openning"],
                         collocation: "open the window",
                         usageTip: "答案必须来自词卡认可的形式。"
                     )
@@ -341,9 +275,7 @@ struct VocabularyContextPracticeTests {
                     .init(
                         index: 1,
                         sentence: "Leo did not hesitate before opening the classroom door.",
-                        cloze: "Leo did not ___ before opening the classroom door.",
                         answer: "hesitate",
-                        acceptedAnswers: ["hesitate"],
                         collocation: "hesitate before doing something",
                         usageTip: "Use it before an infinitive."
                     )

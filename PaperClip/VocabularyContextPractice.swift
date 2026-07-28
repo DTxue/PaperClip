@@ -14,9 +14,7 @@ struct VocabularyContextGenerationResult: Codable, Sendable {
     struct Item: Codable, Sendable {
         let index: Int
         let sentence: String
-        let cloze: String
         let answer: String
-        let acceptedAnswers: [String]
         let collocation: String
         let usageTip: String
     }
@@ -35,9 +33,6 @@ struct VocabularyContextPracticeItem: Identifiable, Equatable, Sendable {
     let term: String
     let definition: String
     let sentence: String
-    let cloze: String
-    let answer: String
-    let acceptedAnswers: [String]
     let collocation: String
     let usageTip: String
 }
@@ -88,12 +83,6 @@ enum VocabularyContextPracticeBuilder {
                 term: card.term,
                 definition: card.definition,
                 sentence: trimmed(generatedItem.sentence),
-                cloze: trimmed(generatedItem.cloze),
-                answer: trimmed(generatedItem.answer),
-                acceptedAnswers: normalizedAcceptedAnswers(
-                    for: generatedItem,
-                    card: card
-                ),
                 collocation: trimmed(generatedItem.collocation),
                 usageTip: trimmed(generatedItem.usageTip)
             )
@@ -109,7 +98,6 @@ enum VocabularyContextPracticeBuilder {
         maximumSentenceWords: Int?
     ) -> [String] {
         let sentence = trimmed(item.sentence)
-        let cloze = trimmed(item.cloze)
         let answer = trimmed(item.answer)
         var issues: [String] = []
 
@@ -122,9 +110,6 @@ enum VocabularyContextPracticeBuilder {
         {
             issues.append("第 \(index) 题的语境句超过词数上限。")
         }
-        if cloze.components(separatedBy: "___").count != 2 {
-            issues.append("第 \(index) 题的遮挡句必须且只能包含一个 ___。")
-        }
         if answer.isEmpty
             || sentence.range(
                 of: answer,
@@ -132,26 +117,6 @@ enum VocabularyContextPracticeBuilder {
             ) == nil
         {
             issues.append("第 \(index) 题的答案必须出现在完整语境句中。")
-        }
-        if !answer.isEmpty,
-           let answerRange = sentence.range(
-               of: answer,
-               options: [.caseInsensitive, .diacriticInsensitive]
-           )
-        {
-            var expectedCloze = sentence
-            expectedCloze.replaceSubrange(answerRange, with: "___")
-            if trimmed(expectedCloze) != cloze {
-                issues.append("第 \(index) 题的遮挡句必须只从完整句中替换答案。")
-            }
-        }
-        if !answer.isEmpty,
-           cloze.range(
-               of: answer,
-               options: [.caseInsensitive, .diacriticInsensitive]
-           ) != nil
-        {
-            issues.append("第 \(index) 题的遮挡句不能泄露答案。")
         }
         if !answer.isEmpty,
            !VocabularyContextPracticeApprovedAnswers.isAllowed(
@@ -173,17 +138,6 @@ enum VocabularyContextPracticeBuilder {
         return issues
     }
 
-    private static func normalizedAcceptedAnswers(
-        for item: VocabularyContextGenerationResult.Item,
-        card: VocabularyContextCardInput
-    ) -> [String] {
-        let answer = trimmed(item.answer)
-        guard !answer.isEmpty,
-              VocabularyContextPracticeApprovedAnswers.isAllowed(answer, for: card)
-        else { return [] }
-        return [answer]
-    }
-
     private static func trimmed(_ value: String) -> String {
         value.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -201,29 +155,6 @@ private enum VocabularyContextPracticeApprovedAnswers {
     }
 
     private static func normalize(_ value: String) -> String {
-        value
-            .folding(
-                options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive],
-                locale: .current
-            )
-            .trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
-            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
-    }
-}
-
-enum VocabularyContextPracticeAnswerChecker {
-    static func isCorrect(
-        _ response: String,
-        for item: VocabularyContextPracticeItem
-    ) -> Bool {
-        let normalizedResponse = normalize(response)
-        guard !normalizedResponse.isEmpty else { return false }
-        return item.acceptedAnswers.contains {
-            normalize($0) == normalizedResponse
-        }
-    }
-
-    static func normalize(_ value: String) -> String {
         value
             .folding(
                 options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive],
