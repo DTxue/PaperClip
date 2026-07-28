@@ -22,11 +22,11 @@ struct VocabularyContextGenerationResult: Codable, Sendable {
     let items: [Item]
 }
 
-struct VocabularyContextPracticeLesson: Equatable, Sendable {
+struct VocabularyContextPracticeLesson: Codable, Equatable, Sendable {
     let items: [VocabularyContextPracticeItem]
 }
 
-struct VocabularyContextPracticeItem: Identifiable, Equatable, Sendable {
+struct VocabularyContextPracticeItem: Codable, Identifiable, Equatable, Sendable {
     var id: UUID { cardID }
 
     let cardID: UUID
@@ -162,6 +162,103 @@ private enum VocabularyContextPracticeApprovedAnswers {
             )
             .trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
             .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+    }
+}
+
+struct VocabularyContextPracticeCacheIdentity: Codable, Equatable, Sendable {
+    let deckID: UUID
+    let sourceFingerprint: String
+    let gradePresetRawValue: String
+    let maximumCardCount: Int
+}
+
+struct VocabularyContextPracticeCacheStore {
+    private static let recordVersion = 1
+
+    private let defaults: UserDefaults
+    private let keyPrefix: String
+
+    init(
+        defaults: UserDefaults = .standard,
+        keyPrefix: String = "vocabulary.contextPractice.cache"
+    ) {
+        self.defaults = defaults
+        self.keyPrefix = keyPrefix
+    }
+
+    func load(
+        identity: VocabularyContextPracticeCacheIdentity
+    ) -> VocabularyContextPracticeLesson? {
+        guard let data = defaults.data(forKey: key(for: identity)),
+              let record = try? JSONDecoder().decode(
+                  VocabularyContextPracticeCacheRecord.self,
+                  from: data
+              ),
+              record.version == Self.recordVersion,
+              record.identity == identity,
+              !record.lesson.items.isEmpty
+        else { return nil }
+        return record.lesson
+    }
+
+    func save(
+        _ lesson: VocabularyContextPracticeLesson,
+        identity: VocabularyContextPracticeCacheIdentity
+    ) throws {
+        guard !lesson.items.isEmpty else { return }
+        let record = VocabularyContextPracticeCacheRecord(
+            version: Self.recordVersion,
+            identity: identity,
+            lesson: lesson
+        )
+        defaults.set(
+            try JSONEncoder().encode(record),
+            forKey: key(for: identity)
+        )
+    }
+
+    func remove(deckID: UUID) {
+        let prefix = deckKeyPrefix(for: deckID)
+        for key in defaults.dictionaryRepresentation().keys where key.hasPrefix(prefix) {
+            defaults.removeObject(forKey: key)
+        }
+    }
+
+    private func key(for identity: VocabularyContextPracticeCacheIdentity) -> String {
+        "\(deckKeyPrefix(for: identity.deckID))\(identity.gradePresetRawValue).\(identity.maximumCardCount)"
+    }
+
+    private func deckKeyPrefix(for deckID: UUID) -> String {
+        "\(keyPrefix).\(deckID.uuidString.lowercased())."
+    }
+}
+
+private struct VocabularyContextPracticeCacheRecord: Codable {
+    let version: Int
+    let identity: VocabularyContextPracticeCacheIdentity
+    let lesson: VocabularyContextPracticeLesson
+}
+
+enum VocabularyContextPracticeSourceFingerprint {
+    static func make(cards: [VocabularyContextCardInput]) -> String {
+        let payload = cards.map { card in
+            [
+                card.cardID.uuidString.lowercased(),
+                card.term,
+                card.definition,
+                card.englishDefinition,
+                card.partOfSpeech,
+                card.example,
+                card.alternativeAnswers.joined(separator: "\u{1D}")
+            ].joined(separator: "\u{1F}")
+        }.joined(separator: "\u{1E}")
+
+        var hash: UInt64 = 14_695_981_039_346_656_037
+        for byte in payload.utf8 {
+            hash ^= UInt64(byte)
+            hash &*= 1_099_511_628_211
+        }
+        return String(hash, radix: 16)
     }
 }
 

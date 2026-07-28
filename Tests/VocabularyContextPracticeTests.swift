@@ -11,7 +11,9 @@ struct VocabularyContextPracticeTests {
         testRejectsAnswerUnrelatedToSourceTerm()
         testRejectsUnapprovedGeneratedInflection()
         testEnforcesLocalGenerationConstraints()
-        print("VocabularyContextPracticeTests: 8 passed")
+        try testCacheReusesOnlyMatchingIdentity()
+        testSourceFingerprintChangesWithCardContent()
+        print("VocabularyContextPracticeTests: 10 passed")
     }
 
     private static func testBuildsLessonByStableCardIndex() throws {
@@ -289,6 +291,95 @@ struct VocabularyContextPracticeTests {
         } catch {
             fatalError("Unexpected error: \(error)")
         }
+    }
+
+    private static func testCacheReusesOnlyMatchingIdentity() throws {
+        let suiteName = "VocabularyContextPracticeTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let store = VocabularyContextPracticeCacheStore(
+            defaults: defaults,
+            keyPrefix: "context-practice-test"
+        )
+        let deckID = UUID()
+        let cardID = UUID()
+        let identity = VocabularyContextPracticeCacheIdentity(
+            deckID: deckID,
+            sourceFingerprint: "cards-v1",
+            gradePresetRawValue: "juniorOneTwo",
+            maximumCardCount: 6
+        )
+        let lesson = VocabularyContextPracticeLesson(items: [
+            VocabularyContextPracticeItem(
+                cardID: cardID,
+                term: "hesitate",
+                definition: "犹豫",
+                sentence: "Leo did not hesitate before opening the door.",
+                collocation: "hesitate before doing something",
+                usageTip: "后接不定式。"
+            )
+        ])
+
+        try store.save(lesson, identity: identity)
+
+        expect(store.load(identity: identity) == lesson)
+        expect(store.load(identity: .init(
+            deckID: deckID,
+            sourceFingerprint: "cards-v2",
+            gradePresetRawValue: "juniorOneTwo",
+            maximumCardCount: 6
+        )) == nil)
+        expect(store.load(identity: .init(
+            deckID: deckID,
+            sourceFingerprint: "cards-v1",
+            gradePresetRawValue: "seniorOneTwo",
+            maximumCardCount: 6
+        )) == nil)
+
+        let seniorIdentity = VocabularyContextPracticeCacheIdentity(
+            deckID: deckID,
+            sourceFingerprint: "cards-v1",
+            gradePresetRawValue: "seniorOneTwo",
+            maximumCardCount: 6
+        )
+        try store.save(lesson, identity: seniorIdentity)
+
+        expect(store.load(identity: identity) == lesson)
+        expect(store.load(identity: seniorIdentity) == lesson)
+    }
+
+    private static func testSourceFingerprintChangesWithCardContent() {
+        let cardID = UUID()
+        let original = VocabularyContextCardInput(
+            cardID: cardID,
+            term: "hesitate",
+            definition: "犹豫",
+            englishDefinition: "pause before doing something",
+            partOfSpeech: "verb",
+            example: "",
+            alternativeAnswers: []
+        )
+        let edited = VocabularyContextCardInput(
+            cardID: cardID,
+            term: "hesitate",
+            definition: "迟疑",
+            englishDefinition: "pause before doing something",
+            partOfSpeech: "verb",
+            example: "",
+            alternativeAnswers: []
+        )
+
+        let originalFingerprint = VocabularyContextPracticeSourceFingerprint.make(
+            cards: [original]
+        )
+        expect(
+            originalFingerprint
+                == VocabularyContextPracticeSourceFingerprint.make(cards: [original])
+        )
+        expect(
+            originalFingerprint
+                != VocabularyContextPracticeSourceFingerprint.make(cards: [edited])
+        )
     }
 
     private static func expect(

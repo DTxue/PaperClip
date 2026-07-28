@@ -7,6 +7,7 @@ struct VocabularyContextPracticeView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var output: VocabularyContextPracticeOutput?
     @State private var currentIndex = 0
+    @State private var isLoadingCache = true
     @State private var isGenerating = false
     @State private var generationID: UUID?
     @State private var generationTask: Task<Void, Never>?
@@ -21,6 +22,10 @@ struct VocabularyContextPracticeView: View {
         VocabularyArticleGradePreset(rawValue: storedGradePreset) ?? .juniorOneTwo
     }
 
+    private var cacheLoadID: String {
+        "\(deck.id.uuidString).\(gradePreset.rawValue).\(maximumCardCount)"
+    }
+
     private var currentItem: VocabularyContextPracticeItem? {
         guard let output,
               output.lesson.items.indices.contains(currentIndex)
@@ -30,7 +35,9 @@ struct VocabularyContextPracticeView: View {
 
     var body: some View {
         Group {
-            if isGenerating {
+            if isLoadingCache {
+                ProgressView("正在读取语境练习…")
+            } else if isGenerating {
                 ProgressView("正在生成本次语境练习…")
             } else if output == nil {
                 introduction
@@ -52,6 +59,9 @@ struct VocabularyContextPracticeView: View {
             }
         }
         .appAlert($alert)
+        .task(id: cacheLoadID) {
+            loadCachedLesson()
+        }
         .onDisappear {
             generationTask?.cancel()
             generationTask = nil
@@ -145,8 +155,7 @@ struct VocabularyContextPracticeView: View {
         guard !isGenerating else { return }
 
         let requestID = UUID()
-        output = nil
-        currentIndex = 0
+        isLoadingCache = false
         generationID = requestID
         isGenerating = true
         generationTask = Task {
@@ -176,6 +185,26 @@ struct VocabularyContextPracticeView: View {
                 guard generationID == requestID, !Task.isCancelled else { return }
                 alert = AppAlert(title: "无法生成语境练习", error: error)
             }
+        }
+    }
+
+    private func loadCachedLesson() {
+        guard !isGenerating else {
+            isLoadingCache = false
+            return
+        }
+
+        defer { isLoadingCache = false }
+        do {
+            output = try VocabularyContextPracticeFlow.loadCached(
+                deck: deck,
+                gradePreset: gradePreset,
+                maximumCardCount: maximumCardCount,
+                modelContext: modelContext
+            )
+            currentIndex = 0
+        } catch {
+            alert = AppAlert(title: "无法读取语境练习", error: error)
         }
     }
 
