@@ -13,6 +13,15 @@ extension VocabularyStudyView {
     }
 
     func buildWordBank(for card: VocabularyCard) {
+        if deck.kind == .sentence {
+            correctTiles = VocabularyWordBankBuilder.sentenceTiles(card.term)
+            wordBankTiles = VocabularyWordBankBuilder.build(
+                correctTiles: correctTiles,
+                distractorTiles: []
+            ).shuffled()
+            return
+        }
+
         let cache = fetchDistractorCache(for: card)
         let correctTiles: [String]
         let distractorTiles: [String]

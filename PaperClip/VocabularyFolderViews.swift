@@ -72,7 +72,7 @@ struct VocabularyFolderRenameView: View {
             } header: {
                 Text("危险操作")
             } footer: {
-                Text("删除文件夹会把其中的词集移回未归档，不会删除单词、复习记录或手写记录。")
+                Text("删除文件夹会把其中的词集和句集移回未归档，不会删除学习条目、复习记录或手写记录。")
             }
         }
         .navigationTitle("文件夹设置")
@@ -86,7 +86,7 @@ struct VocabularyFolderRenameView: View {
         .deleteConfirmationDialog(
             item: $deleteRequest,
             title: { "删除文件夹「\($0.title)」？" },
-            message: { _ in "文件夹内的词集会移回未归档，不会删除单词、复习记录或手写记录。" },
+            message: { _ in "文件夹内的词集和句集会移回未归档，不会删除学习条目、复习记录或手写记录。" },
             onDelete: deleteFolder
         )
         .appAlert($alert)

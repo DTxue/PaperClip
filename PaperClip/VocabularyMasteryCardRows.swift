@@ -2,12 +2,13 @@ import SwiftUI
 
 struct VocabularyMasteryCardRow: View {
     let row: VocabularyMasteryRowData
+    let kind: VocabularyDeckKind
 
     var body: some View {
         DisclosureGroup {
             VStack(spacing: 14) {
                 VocabularyMasteryDirectionView(
-                    title: VocabularyDirection.termToDefinition.title,
+                    title: VocabularyDirection.termToDefinition.title(for: kind),
                     state: row.termState,
                     fsrs: row.termFSRS,
                     weightedResult: row.termWeightedResult,
@@ -15,7 +16,7 @@ struct VocabularyMasteryCardRow: View {
                 )
                 Divider()
                 VocabularyMasteryDirectionView(
-                    title: VocabularyDirection.definitionToTerm.title,
+                    title: VocabularyDirection.definitionToTerm.title(for: kind),
                     state: row.definitionState,
                     fsrs: row.definitionFSRS,
                     weightedResult: row.definitionWeightedResult,

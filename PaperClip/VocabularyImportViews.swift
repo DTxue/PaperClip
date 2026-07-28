@@ -32,6 +32,7 @@ struct VocabularyImportView: View {
                 preset: $preset,
                 text: $text,
                 title: "文本",
+                kind: deck.kind,
                 onChooseFile: { isFileImporterPresented = true }
             )
 
@@ -48,11 +49,11 @@ struct VocabularyImportView: View {
                 text: text,
                 result: importResult,
                 limit: 100,
-                showsExample: true,
+                showsExample: deck.kind.usesWordSpecificFeatures,
                 showsEmptyState: true
             )
         }
-        .navigationTitle("导入单词")
+        .navigationTitle("导入\(deck.kind.itemName)")
         .navigationBarTitleDisplayMode(.inline)
         .editSheetToolbar(
             confirmTitle: summary.importConfirmTitle(),

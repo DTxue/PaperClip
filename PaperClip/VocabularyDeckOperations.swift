@@ -15,7 +15,7 @@ extension VocabularyDeckView {
         } catch {
             allCards = []
             states = []
-            alert = AppAlert(title: "无法读取词集内容", error: error)
+            alert = AppAlert(title: "无法读取\(deck.kind.collectionName)内容", error: error)
         }
     }
 
@@ -28,7 +28,7 @@ extension VocabularyDeckView {
             refreshDeckSnapshot()
             refreshTodayReviewCount()
         } catch {
-            alert = AppAlert(title: "无法删除单词", error: error)
+            alert = AppAlert(title: "无法删除\(deck.kind.itemName)", error: error)
         }
     }
 

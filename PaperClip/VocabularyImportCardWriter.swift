@@ -10,10 +10,11 @@ enum VocabularyImportCardWriter {
     static func insertCards(
         _ rows: [VocabularyImportRow],
         deckID: UUID,
+        kind: VocabularyDeckKind = .word,
         in modelContext: ModelContext
     ) {
         for row in rows {
-            modelContext.insert(makeCard(from: row, deckID: deckID))
+            modelContext.insert(makeCard(from: row, deckID: deckID, kind: kind))
         }
     }
 
@@ -34,7 +35,7 @@ enum VocabularyImportCardWriter {
                     result.skipped += 1
                     continue
                 case .merge:
-                    mergeMissingFields(from: row, into: duplicate)
+                    mergeMissingFields(from: row, into: duplicate, kind: deck.kind)
                     result.skipped += 1
                     continue
                 case .duplicate:
@@ -42,7 +43,7 @@ enum VocabularyImportCardWriter {
                 }
             }
 
-            let card = makeCard(from: row, deckID: deck.id)
+            let card = makeCard(from: row, deckID: deck.id, kind: deck.kind)
             modelContext.insert(card)
             if duplicateStrategy != .duplicate { lookup[key] = card }
             result.imported += 1
@@ -65,24 +66,34 @@ enum VocabularyImportCardWriter {
         )
     }
 
-    private static func makeCard(from row: VocabularyImportRow, deckID: UUID) -> VocabularyCard {
+    private static func makeCard(
+        from row: VocabularyImportRow,
+        deckID: UUID,
+        kind: VocabularyDeckKind
+    ) -> VocabularyCard {
         VocabularyCard(
             deckID: deckID,
             term: row.term,
             definition: row.definition,
-            phonetic: row.phonetic,
-            example: row.example,
-            partOfSpeech: row.partOfSpeech,
+            phonetic: kind.usesWordSpecificFeatures ? row.phonetic : "",
+            example: kind.usesWordSpecificFeatures ? row.example : "",
+            partOfSpeech: kind.usesWordSpecificFeatures ? row.partOfSpeech : "",
             tagsText: row.tags,
             note: row.note,
             alternativeAnswersText: row.alternatives
         )
     }
 
-    private static func mergeMissingFields(from row: VocabularyImportRow, into card: VocabularyCard) {
-        if card.phonetic.isEmpty { card.phonetic = row.phonetic }
-        if card.example.isEmpty { card.example = row.example }
-        if card.partOfSpeech.isEmpty { card.partOfSpeech = row.partOfSpeech }
+    private static func mergeMissingFields(
+        from row: VocabularyImportRow,
+        into card: VocabularyCard,
+        kind: VocabularyDeckKind
+    ) {
+        if kind.usesWordSpecificFeatures {
+            if card.phonetic.isEmpty { card.phonetic = row.phonetic }
+            if card.example.isEmpty { card.example = row.example }
+            if card.partOfSpeech.isEmpty { card.partOfSpeech = row.partOfSpeech }
+        }
         if card.tagsText.isEmpty { card.tagsText = row.tags }
         if card.note.isEmpty { card.note = row.note }
         if card.alternativeAnswersText.isEmpty { card.alternativeAnswersText = row.alternatives }

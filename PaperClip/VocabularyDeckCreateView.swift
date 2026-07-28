@@ -2,6 +2,8 @@ import SwiftData
 import SwiftUI
 
 struct VocabularyDeckCreateView: View {
+    let kind: VocabularyDeckKind
+
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) var modelContext
 
@@ -21,12 +23,16 @@ struct VocabularyDeckCreateView: View {
         VocabularyTextImporter.parse(text, format: preset.format)
     }
 
+    init(kind: VocabularyDeckKind = .word) {
+        self.kind = kind
+    }
+
     var body: some View {
         let importResult = importResult
         let summary = importResult.summary
 
         Form {
-            Section("词集") {
+            Section(kind.collectionName) {
                 TextField("名称", text: Binding(
                     get: { title },
                     set: {
@@ -36,7 +42,7 @@ struct VocabularyDeckCreateView: View {
                 ))
             }
             Section("记忆设置") {
-                Stepper("每日新词：\(dailyNewLimit)", value: $dailyNewLimit, in: 1...100)
+                Stepper(kind.dailyNewLimitText(dailyNewLimit), value: $dailyNewLimit, in: 1...100)
                 Slider(value: $desiredRetention, in: 0.8...0.97, step: 0.01) {
                     Text("目标保持率")
                 } minimumValueLabel: {
@@ -51,7 +57,8 @@ struct VocabularyDeckCreateView: View {
             VocabularyImportTextInputSection(
                 preset: $preset,
                 text: $text,
-                title: "导入单词",
+                title: "导入\(kind.itemName)",
+                kind: kind,
                 onChooseFile: { isFileImporterPresented = true }
             )
 
@@ -64,7 +71,7 @@ struct VocabularyDeckCreateView: View {
                 )
             }
         }
-        .navigationTitle("创建词集")
+        .navigationTitle("创建\(kind.collectionName)")
         .navigationBarTitleDisplayMode(.inline)
         .editSheetToolbar(
             confirmTitle: summary.createConfirmTitle(),

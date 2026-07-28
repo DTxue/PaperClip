@@ -13,9 +13,9 @@ struct VocabularyDeckLoader: View {
                 VocabularyDeckView(deck: deck)
             } else {
                 ContentUnavailableView(
-                    "无法打开词集",
+                    "无法打开学习集",
                     systemImage: "character.book.closed",
-                    description: Text("这个词集可能已被删除。")
+                    description: Text("这个学习集可能已被删除。")
                 )
             }
         }
@@ -30,19 +30,36 @@ struct VocabularyDeckLoader: View {
             deck = try modelContext.fetchVocabularyDeck(id: deckID)
         } catch {
             deck = nil
-            alert = AppAlert(title: "无法读取词集", error: error)
+            alert = AppAlert(title: "无法读取学习集", error: error)
         }
     }
 }
 
 enum VocabularyDeckSection: String, CaseIterable, Identifiable {
-    case words = "单词"
-    case contextPractice = "语境练习"
-    case mastery = "熟练度"
-    case scores = "成绩"
-    case settings = "词集设置"
+    case words
+    case contextPractice
+    case mastery
+    case scores
+    case settings
 
     var id: String { rawValue }
+
+    static func sections(for kind: VocabularyDeckKind) -> [VocabularyDeckSection] {
+        allCases.filter { section in
+            kind.usesWordSpecificFeatures || section != .contextPractice
+        }
+    }
+
+    func title(for kind: VocabularyDeckKind) -> String {
+        switch self {
+        case .words: kind.listTitle
+        case .contextPractice: "语境练习"
+        case .mastery: "熟练度"
+        case .scores: "成绩"
+        case .settings: "\(kind.collectionName)设置"
+        }
+    }
+
     var systemImage: String {
         switch self {
         case .words: "list.bullet"

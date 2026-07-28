@@ -5,9 +5,13 @@ extension VocabularyDeckView {
         List {
             if snapshot.visibleCards.isEmpty {
                 ContentUnavailableView(
-                    searchText.isEmpty ? "还没有单词" : "没有匹配结果",
-                    systemImage: searchText.isEmpty ? "textformat.abc" : "magnifyingglass",
-                    description: Text(searchText.isEmpty ? "新增单词或导入 TXT 文本。" : "尝试其他关键词。")
+                    searchText.isEmpty ? "还没有\(deck.kind.itemName)" : "没有匹配结果",
+                    systemImage: searchText.isEmpty ? deck.kind.systemImage : "magnifyingglass",
+                    description: Text(
+                        searchText.isEmpty
+                            ? "新增\(deck.kind.itemName)或导入 TXT 文本。"
+                            : "尝试其他关键词。"
+                    )
                 )
                 .listRowSeparator(.hidden)
             } else {
@@ -19,14 +23,14 @@ extension VocabularyDeckView {
                             HStack {
                                 Text(card.term)
                                     .font(.headline)
-                                if !card.phonetic.isEmpty {
+                                if deck.kind.usesWordSpecificFeatures, !card.phonetic.isEmpty {
                                     Text(card.phonetic)
                                         .foregroundStyle(.secondary)
                                 }
                             }
                             Text(card.definition)
                                 .foregroundStyle(.secondary)
-                            if !card.example.isEmpty {
+                            if deck.kind.usesWordSpecificFeatures, !card.example.isEmpty {
                                 Text(card.example)
                                     .font(.caption)
                                     .foregroundStyle(.tertiary)
@@ -41,10 +45,12 @@ extension VocabularyDeckView {
                         }
                     }
                     .swipeActions(edge: .leading) {
-                        Button("拆分", systemImage: "scissors") {
-                            cardToSplit = card
+                        if deck.kind.usesWordSpecificFeatures {
+                            Button("拆分", systemImage: "scissors") {
+                                cardToSplit = card
+                            }
+                            .tint(.blue)
                         }
-                        .tint(.blue)
                     }
                 }
             }
@@ -54,7 +60,12 @@ extension VocabularyDeckView {
     func deckOverview(_ snapshot: VocabularyDeckSnapshot) -> some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 170), spacing: 14)], spacing: 14) {
-                VocabularyMetricTile(value: "\(snapshot.visibleCards.count)", label: "单词", icon: "character.book.closed.fill", color: Color.blue)
+                VocabularyMetricTile(
+                    value: "\(snapshot.visibleCards.count)",
+                    label: deck.kind.listTitle,
+                    icon: deck.kind.systemImage,
+                    color: Color.blue
+                )
                 VocabularyMetricTile(
                     value: "\(snapshot.dueDirectionCount)",
                     label: "到期记忆方向",

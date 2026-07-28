@@ -2,7 +2,8 @@ import SwiftUI
 
 struct VocabularyHomeOverview: View {
     let folderCount: Int
-    let deckCount: Int
+    let wordDeckCount: Int
+    let sentenceDeckCount: Int
     let snapshot: VocabularyHomeSnapshot
 
     var body: some View {
@@ -17,16 +18,22 @@ struct VocabularyHomeOverview: View {
                     color: Color.yellow
                 )
                 VocabularyMetricTile(
-                    value: "\(deckCount)",
+                    value: "\(wordDeckCount)",
                     label: "词集",
-                    icon: "books.vertical.fill",
+                    icon: VocabularyDeckKind.word.systemImage,
                     color: Color.accentColor
                 )
                 VocabularyMetricTile(
-                    value: "\(snapshot.totalCardCount)",
-                    label: "单词",
-                    icon: "character.book.closed.fill",
+                    value: "\(sentenceDeckCount)",
+                    label: "句集",
+                    icon: VocabularyDeckKind.sentence.systemImage,
                     color: Color.blue
+                )
+                VocabularyMetricTile(
+                    value: "\(snapshot.totalCardCount)",
+                    label: "学习条目",
+                    icon: "books.vertical.fill",
+                    color: Color.indigo
                 )
                 VocabularyMetricTile(
                     value: "\(snapshot.dueCount)",
@@ -76,19 +83,23 @@ struct VocabularyHomeFolderGrid: View {
                                     onRenameFolder(folder)
                                 }
                             }
-                            .accessibilityLabel("\(folder.title)，\(decks(in: folder).count)个词集")
+                            .accessibilityLabel("\(folder.title)，\(decks(in: folder).count)个学习集")
                         }
                     }
                 }
             }
 
-            VocabularyHomeDeckGrid(
-                title: folders.isEmpty ? "我的词集" : "未归档词集",
-                decks: unfiledDecks,
-                snapshot: snapshot,
-                onMoveDeck: onMoveDeck,
-                onRemoveDeckFromFolder: onRemoveDeckFromFolder
-            )
+            ForEach(VocabularyDeckKind.allCases) { kind in
+                VocabularyHomeDeckGrid(
+                    title: folders.isEmpty ? "我的\(kind.collectionName)" : "未归档\(kind.collectionName)",
+                    kind: kind,
+                    isUnfiled: !folders.isEmpty,
+                    decks: unfiledDecks.filter { $0.kind == kind },
+                    snapshot: snapshot,
+                    onMoveDeck: onMoveDeck,
+                    onRemoveDeckFromFolder: onRemoveDeckFromFolder
+                )
+            }
         }
     }
 
@@ -120,6 +131,8 @@ struct VocabularyHomeFolderGrid: View {
 
 struct VocabularyHomeDeckGrid: View {
     let title: String
+    let kind: VocabularyDeckKind
+    let isUnfiled: Bool
     let decks: [VocabularyDeckRowData]
     let snapshot: VocabularyHomeSnapshot
     let onMoveDeck: (VocabularyDeckRowData) -> Void
@@ -131,9 +144,13 @@ struct VocabularyHomeDeckGrid: View {
                 .font(.title2.bold())
             if decks.isEmpty {
                 ContentUnavailableView(
-                    title == "未归档词集" ? "没有未归档词集" : "还没有词集",
+                    isUnfiled ? "没有未归档\(kind.collectionName)" : "还没有\(kind.collectionName)",
                     systemImage: "tray",
-                    description: Text(title == "未归档词集" ? "移动到文件夹的词集会从这里移出。" : "创建词集后会显示在这里。")
+                    description: Text(
+                        isUnfiled
+                            ? "移动到文件夹的\(kind.collectionName)会从这里移出。"
+                            : "创建\(kind.collectionName)后会显示在这里。"
+                    )
                 )
                 .frame(maxWidth: .infinity, minHeight: 160)
             } else {
@@ -170,17 +187,24 @@ struct VocabularyFolderDeckListView: View {
                     ContentUnavailableView(
                         "文件夹为空",
                         systemImage: "folder",
-                        description: Text("从词集菜单中选择“移至文件夹”即可归档到这里。")
+                        description: Text("从词集或句集菜单中选择“移至文件夹”即可归档到这里。")
                     )
                     .frame(maxWidth: .infinity, minHeight: 320)
                 } else {
-                    VocabularyHomeDeckGrid(
-                        title: "词集",
-                        decks: decks,
-                        snapshot: snapshot,
-                        onMoveDeck: onMoveDeck,
-                        onRemoveDeckFromFolder: onRemoveDeckFromFolder
-                    )
+                    ForEach(VocabularyDeckKind.allCases) { kind in
+                        let matchingDecks = decks.filter { $0.kind == kind }
+                        if !matchingDecks.isEmpty {
+                            VocabularyHomeDeckGrid(
+                                title: kind.collectionName,
+                                kind: kind,
+                                isUnfiled: false,
+                                decks: matchingDecks,
+                                snapshot: snapshot,
+                                onMoveDeck: onMoveDeck,
+                                onRemoveDeckFromFolder: onRemoveDeckFromFolder
+                            )
+                        }
+                    }
                 }
             }
             .frame(maxWidth: 1_200, alignment: .leading)
@@ -204,7 +228,8 @@ private struct VocabularyHomeDeckLink: View {
         } label: {
             VocabularyHomeDeckCard(
                 title: deck.title,
-                cardCount: cardCount
+                cardCount: cardCount,
+                kind: deck.kind
             )
         }
         .buttonStyle(.plain)
@@ -218,7 +243,7 @@ private struct VocabularyHomeDeckLink: View {
                 }
             }
         }
-        .accessibilityLabel("\(deck.title)，\(cardCount)个单词")
+        .accessibilityLabel("\(deck.title)，\(deck.kind.itemCountText(cardCount))")
     }
 }
 
@@ -237,7 +262,7 @@ private struct VocabularyHomeFolderCard: View {
             Text(title)
                 .font(.headline)
                 .lineLimit(2)
-            Text("\(deckCount) 个词集 · \(cardCount) 个词组")
+            Text("\(deckCount) 个学习集 · \(cardCount) 个学习条目")
                 .font(.subheadline)
                 .foregroundStyle(palette.secondaryTextColor)
         }
@@ -253,16 +278,17 @@ private struct VocabularyHomeDeckCard: View {
 
     let title: String
     let cardCount: Int
+    let kind: VocabularyDeckKind
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Image(systemName: "character.book.closed.fill")
+            Image(systemName: kind.systemImage)
                 .font(.title)
                 .foregroundStyle(.accent)
             Text(title)
                 .font(.headline)
                 .lineLimit(2)
-            Text("\(cardCount) 个词组")
+            Text(kind.itemCountText(cardCount))
                 .font(.subheadline)
                 .foregroundStyle(palette.secondaryTextColor)
         }

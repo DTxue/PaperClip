@@ -35,7 +35,7 @@ struct VocabularyStudyView: View {
     var body: some View {
         VStack(spacing: 22) {
             if queue.isEmpty {
-                ContentUnavailableView("没有可学习的单词", systemImage: "brain.head.profile")
+                ContentUnavailableView("没有可学习的\(deck.kind.itemName)", systemImage: "brain.head.profile")
             } else if let card = current {
                 VocabularyProgressHeader(index: index, total: queue.count)
 

@@ -20,17 +20,17 @@ struct VocabularyMasteryView: View {
 
         return List {
             Section("汇总") {
-                LabeledContent("单词数", value: "\(rows.count)")
+                LabeledContent("\(deck.kind.listTitle)数", value: "\(rows.count)")
                 LabeledContent("平均熟练度", value: VocabularyStudySessionFormat.percent(averageMastery))
                 LabeledContent("到期方向", value: "\(dueDirectionCount)")
             }
 
-            Section("单词熟练度") {
+            Section("\(deck.kind.listTitle)熟练度") {
                 if rows.isEmpty {
-                    ContentUnavailableView("还没有单词", systemImage: "textformat.abc")
+                    ContentUnavailableView("还没有\(deck.kind.itemName)", systemImage: deck.kind.systemImage)
                 } else {
                     ForEach(rows) { row in
-                        VocabularyMasteryCardRow(row: row)
+                        VocabularyMasteryCardRow(row: row, kind: deck.kind)
                     }
                 }
             }
@@ -56,7 +56,7 @@ struct VocabularyMasteryView: View {
             }
             Button("取消", role: .cancel) {}
         } message: {
-            Text("这会清除当前词集的熟练度、到期时间和复习记录；单词内容不会删除。")
+            Text("这会清除当前\(deck.kind.collectionName)的熟练度、到期时间和复习记录；\(deck.kind.itemName)内容不会删除。")
         }
         .appAlert($alert)
     }

@@ -23,8 +23,8 @@ struct VocabularyDeckView: View {
 
     var body: some View {
         PaperClipNavigationSplitView {
-            List(VocabularyDeckSection.allCases, selection: $selection) { section in
-                Label(section.rawValue, systemImage: section.systemImage)
+            List(VocabularyDeckSection.sections(for: deck.kind), selection: $selection) { section in
+                Label(section.title(for: deck.kind), systemImage: section.systemImage)
                     .tag(section)
             }
             .paperClipSidebarColumn(deck.title)
@@ -33,7 +33,7 @@ struct VocabularyDeckView: View {
                 switch selection {
                 case .words:
                     wordList(snapshot)
-                        .searchable(text: $searchText, prompt: "搜索单词或释义")
+                        .searchable(text: $searchText, prompt: "搜索\(deck.kind.itemName)或释义")
                 case .contextPractice: VocabularyContextPracticeView(deck: deck)
                 case .mastery: VocabularyMasteryView(deck: deck)
                 case .scores: VocabularyStudySessionsView(deck: deck)
@@ -41,7 +41,7 @@ struct VocabularyDeckView: View {
                 case nil: ContentUnavailableView("请选择内容", systemImage: "character.book.closed")
                 }
             }
-            .navigationTitle(selection?.rawValue ?? deck.title)
+            .navigationTitle(selection?.title(for: deck.kind) ?? deck.title)
         }
         .vocabularyDeckPresentation(owner: self)
     }

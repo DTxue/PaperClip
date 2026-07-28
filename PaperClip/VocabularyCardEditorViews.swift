@@ -14,9 +14,9 @@ struct VocabularyCardEditorLoader: View {
                 VocabularyCardEditorView(deck: deck, card: card)
             } else {
                 ContentUnavailableView(
-                    "无法打开单词",
-                    systemImage: "textformat.abc",
-                    description: Text("这个单词可能已被删除。")
+                    "无法打开\(deck.kind.itemName)",
+                    systemImage: deck.kind.systemImage,
+                    description: Text("这个\(deck.kind.itemName)可能已被删除。")
                 )
             }
         }
@@ -31,7 +31,7 @@ struct VocabularyCardEditorLoader: View {
             card = try modelContext.fetchVocabularyCard(id: cardID)
         } catch {
             card = nil
-            alert = AppAlert(title: "无法读取单词", error: error)
+            alert = AppAlert(title: "无法读取\(deck.kind.itemName)", error: error)
         }
     }
 }
@@ -54,9 +54,9 @@ struct VocabularyCardEditorView: View {
 
     var body: some View {
         Form {
-            VocabularyCardEditorFormSections(draft: $draft)
+            VocabularyCardEditorFormSections(draft: $draft, kind: deck.kind)
         }
-        .navigationTitle(card == nil ? "新增单词" : "编辑单词")
+        .navigationTitle(card == nil ? "新增\(deck.kind.itemName)" : "编辑\(deck.kind.itemName)")
         .navigationBarTitleDisplayMode(.inline)
         .editSheetToolbar(
             isConfirmDisabled: !draft.canSave,
@@ -88,7 +88,7 @@ struct VocabularyCardEditorView: View {
             try modelContext.saveOrRollbackIfNeeded()
             dismiss()
         } catch {
-            alert = AppAlert(title: "无法保存单词", error: error)
+            alert = AppAlert(title: "无法保存\(deck.kind.itemName)", error: error)
         }
     }
 }

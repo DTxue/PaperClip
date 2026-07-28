@@ -7,7 +7,7 @@ struct VocabularyHomeView: View {
     @State var folders: [VocabularyFolderRowData] = []
     @State var decks: [VocabularyDeckRowData] = []
     @State var snapshot = VocabularyHomeSnapshot.empty
-    @State private var isCreatingDeck = false
+    @State private var kindToCreate: VocabularyDeckKind?
     @State private var isCreatingFolder = false
     @State private var deckToMove: VocabularyDeckRowData?
     @State private var folderToRename: VocabularyFolderRowData?
@@ -20,12 +20,16 @@ struct VocabularyHomeView: View {
                     ContentUnavailableView {
                         Label("还没有 ENG 内容", systemImage: "character.book.closed")
                     } description: {
-                        Text("创建词集后，可通过多种 TXT 文本格式导入单词；也可以创建文件夹归档多个词集。")
+                        Text("创建词集学习单词，或创建句集学习短语与句子；两者都支持 TXT 文本导入。")
                     } actions: {
                         Button("创建词集", systemImage: "plus") {
-                            isCreatingDeck = true
+                            kindToCreate = .word
                         }
                         .buttonStyle(.borderedProminent)
+                        Button("创建句集", systemImage: "text.quote") {
+                            kindToCreate = .sentence
+                        }
+                        .buttonStyle(.bordered)
                         Button("创建文件夹", systemImage: "folder.badge.plus") {
                             isCreatingFolder = true
                         }
@@ -35,7 +39,8 @@ struct VocabularyHomeView: View {
                 } else {
                     VocabularyHomeOverview(
                         folderCount: folders.count,
-                        deckCount: decks.count,
+                        wordDeckCount: decks.filter { $0.kind == .word }.count,
+                        sentenceDeckCount: decks.filter { $0.kind == .sentence }.count,
                         snapshot: snapshot
                     )
                     VocabularyHomeFolderGrid(
@@ -62,7 +67,10 @@ struct VocabularyHomeView: View {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     Button("创建词集", systemImage: "character.book.closed") {
-                        isCreatingDeck = true
+                        kindToCreate = .word
+                    }
+                    Button("创建句集", systemImage: "text.quote") {
+                        kindToCreate = .sentence
                     }
                     Button("创建文件夹", systemImage: "folder.badge.plus") {
                         isCreatingFolder = true
@@ -72,11 +80,11 @@ struct VocabularyHomeView: View {
                 }
             }
         }
-        .sheet(isPresented: $isCreatingDeck, onDismiss: {
+        .sheet(item: $kindToCreate, onDismiss: {
             refreshHome()
-        }) {
+        }) { kind in
             NavigationStack {
-                VocabularyDeckCreateView()
+                VocabularyDeckCreateView(kind: kind)
             }
         }
         .sheet(isPresented: $isCreatingFolder, onDismiss: {

@@ -6,13 +6,13 @@ extension VocabularyFlashcardView {
         if sessionFinished {
             VocabularySessionCompleteView(
                 title: "闪卡完成",
-                message: "已完成 \(completedCardIDs.count) 个单词，共进行 \(round) 轮。",
+                message: "已完成 \(deck.kind.itemCountText(completedCardIDs.count))，共进行 \(round) 轮。",
                 systemImage: "checkmark.circle.fill"
             )
         } else if roundFinished {
             roundCompleteView
         } else if queue.isEmpty {
-            ContentUnavailableView("没有可学习的单词", systemImage: "rectangle.on.rectangle")
+            ContentUnavailableView("没有可学习的\(deck.kind.itemName)", systemImage: "rectangle.on.rectangle")
         } else if let card = current {
             currentCardStudyContent(card)
         }
@@ -32,7 +32,7 @@ extension VocabularyFlashcardView {
 
             Picker("方向", selection: $direction) {
                 ForEach(VocabularyDirection.allCases) { direction in
-                    Text(direction.title).tag(direction)
+                    Text(direction.title(for: deck.kind)).tag(direction)
                 }
             }
             .pickerStyle(.segmented)

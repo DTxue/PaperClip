@@ -1,6 +1,39 @@
 import Foundation
 import SwiftData
 
+enum VocabularyDeckKind: String, CaseIterable, Identifiable, Sendable {
+    case word
+    case sentence
+
+    var id: String { rawValue }
+
+    var usesWordSpecificFeatures: Bool {
+        self == .word
+    }
+
+    /// Historical decks store "英语" here and therefore remain word decks.
+    /// The sentence marker keeps the existing V1 store compatible without a schema migration.
+    fileprivate init(sourceLanguage: String) {
+        self = sourceLanguage == Self.sentenceSourceLanguage ? .sentence : .word
+    }
+
+    fileprivate var sourceLanguageStorageValue: String {
+        switch self {
+        case .word: "英语"
+        case .sentence: Self.sentenceSourceLanguage
+        }
+    }
+
+    private static let sentenceSourceLanguage = "英语（句集）"
+}
+
+extension VocabularyDeck {
+    var kind: VocabularyDeckKind {
+        get { VocabularyDeckKind(sourceLanguage: sourceLanguage) }
+        set { sourceLanguage = newValue.sourceLanguageStorageValue }
+    }
+}
+
 extension ModelContext {
     func fetchVocabularyFolder(id: UUID) throws -> VocabularyFolder? {
         let descriptor = FetchDescriptor<VocabularyFolder>(

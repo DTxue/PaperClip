@@ -43,17 +43,18 @@ struct VocabularyDeckSettingsView: View {
 
         Form {
             Section("基本信息") {
-                TextField("词集名称", text: $titleDraft)
+                TextField("\(deck.kind.collectionName)名称", text: $titleDraft)
                     .submitLabel(.done)
                     .onSubmit(saveDeckTitle)
                 if titleDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    Text("词集名称不能为空。")
+                    Text("\(deck.kind.collectionName)名称不能为空。")
                         .font(.caption)
                         .foregroundStyle(.red)
                 }
             }
 
             VocabularyDeckSchedulingSection(
+                kind: deck.kind,
                 dailyNewLimit: Binding(
                     get: { deck.dailyNewLimit },
                     set: {
@@ -70,44 +71,46 @@ struct VocabularyDeckSettingsView: View {
                 )
             )
 
-            VocabularyDeckDistractorConfigSection(
-                totalCount: $totalCount,
-                weightInflection: $weightInflection,
-                weightLookalike: $weightLookalike,
-                weightSynonym: $weightSynonym,
-                weightConfused: $weightConfused,
-                weightDerivation: $weightDerivation
-            )
+            if deck.kind.usesWordSpecificFeatures {
+                VocabularyDeckDistractorConfigSection(
+                    totalCount: $totalCount,
+                    weightInflection: $weightInflection,
+                    weightLookalike: $weightLookalike,
+                    weightSynonym: $weightSynonym,
+                    weightConfused: $weightConfused,
+                    weightDerivation: $weightDerivation
+                )
 
-            VocabularyDeckEnglishDefinitionSection(
-                snapshot: snapshot,
-                isGenerating: isGeneratingDefinitions,
-                generatedCount: generatedDefinitionCount,
-                generateError: definitionGenerateError,
-                onGenerate: {
-                    startGeneratingEnglishDefinitions(snapshot)
-                }
-            )
+                VocabularyDeckEnglishDefinitionSection(
+                    snapshot: snapshot,
+                    isGenerating: isGeneratingDefinitions,
+                    generatedCount: generatedDefinitionCount,
+                    generateError: definitionGenerateError,
+                    onGenerate: {
+                        startGeneratingEnglishDefinitions(snapshot)
+                    }
+                )
 
-            VocabularyDeckDistractorLibrarySection(
-                snapshot: snapshot,
-                isGenerating: isGenerating,
-                generatedCount: generatedCount,
-                saveError: saveError,
-                generateError: generateError,
-                onRegenerate: {
-                    startRegeneratingAll(snapshot)
-                }
-            )
+                VocabularyDeckDistractorLibrarySection(
+                    snapshot: snapshot,
+                    isGenerating: isGenerating,
+                    generatedCount: generatedCount,
+                    saveError: saveError,
+                    generateError: generateError,
+                    onRegenerate: {
+                        startRegeneratingAll(snapshot)
+                    }
+                )
+            }
 
-            VocabularyDeckDangerSection {
+            VocabularyDeckDangerSection(kind: deck.kind) {
                 deckDeleteRequest = VocabularyDeckDeleteRequest(
                     id: deck.id,
                     title: deck.title
                 )
             }
         }
-        .navigationTitle("词集设置")
+        .navigationTitle("\(deck.kind.collectionName)设置")
         .onAppear {
             titleDraft = deck.title
         }
@@ -123,8 +126,10 @@ struct VocabularyDeckSettingsView: View {
         }
         .deleteConfirmationDialog(
             item: $deckDeleteRequest,
-            title: { "删除词集「\($0.title)」？" },
-            message: { _ in "该词集中的单词、复习记录和手写记录都会删除，无法撤销。" },
+            title: { "删除\(deck.kind.collectionName)「\($0.title)」？" },
+            message: { _ in
+                "该\(deck.kind.collectionName)中的\(deck.kind.itemName)、复习记录和手写记录都会删除，无法撤销。"
+            },
             onDelete: deleteDeck
         )
         .appAlert($alert)

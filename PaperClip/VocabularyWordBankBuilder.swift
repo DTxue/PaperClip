@@ -1,12 +1,16 @@
 import Foundation
 
 enum VocabularyWordBankBuilder {
+    static func sentenceTiles(_ sentence: String) -> [String] {
+        sentence.split(whereSeparator: \.isWhitespace).map(String.init)
+    }
+
     static func build(
         correctTiles: [String],
         distractorTiles: [String],
         maximumDistractorCount: Int = 5
     ) -> [VocabularyWordBankTile] {
-        let correctItems = normalized(correctTiles).enumerated().map {
+        let correctItems = trimmed(correctTiles).enumerated().map {
             VocabularyWordBankTile(id: $0.offset, text: $0.element)
         }
         let distractorItems = normalized(distractorTiles)
@@ -48,10 +52,15 @@ enum VocabularyWordBankBuilder {
 
     private static func normalized(_ values: [String]) -> [String] {
         var seen: Set<String> = []
-        return values.compactMap { value in
-            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty, seen.insert(trimmed).inserted else { return nil }
-            return trimmed
+        return trimmed(values).filter { value in
+            seen.insert(value).inserted
+        }
+    }
+
+    private static func trimmed(_ values: [String]) -> [String] {
+        values.compactMap { value in
+            let result = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            return result.isEmpty ? nil : result
         }
     }
 }

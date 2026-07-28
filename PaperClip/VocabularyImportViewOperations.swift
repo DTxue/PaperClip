@@ -37,6 +37,7 @@ extension VocabularyDeckCreateView {
         do {
             try VocabularyImportOperations.createDeck(
                 in: modelContext,
+                kind: kind,
                 title: title,
                 dailyNewLimit: dailyNewLimit,
                 desiredRetention: desiredRetention,

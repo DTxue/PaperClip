@@ -2,25 +2,29 @@ import Foundation
 import SwiftData
 
 enum VocabularyImportOperations {
+    @discardableResult
     static func createDeck(
         in modelContext: ModelContext,
+        kind: VocabularyDeckKind = .word,
         title: String,
         dailyNewLimit: Int,
         desiredRetention: Double,
         sourceName: String,
         preset: VocabularyImportPreset,
         importResult: VocabularyImportResult
-    ) throws {
+    ) throws -> VocabularyDeck {
         let projection = importResult.projection
         let deck = VocabularyDeck(
             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
             dailyNewLimit: dailyNewLimit,
             desiredRetention: desiredRetention
         )
+        deck.kind = kind
         modelContext.insert(deck)
         VocabularyImportCardWriter.insertCards(
             projection.validRows,
             deckID: deck.id,
+            kind: kind,
             in: modelContext
         )
         modelContext.insert(VocabularyImportBatch(
@@ -32,6 +36,7 @@ enum VocabularyImportOperations {
             failedCount: projection.summary.failedCount
         ))
         try modelContext.saveOrRollbackIfNeeded()
+        return deck
     }
 
     static func importRows(

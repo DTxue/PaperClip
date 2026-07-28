@@ -9,12 +9,12 @@ extension VocabularyTestView {
                 if selectedMode == .debug {
                     alert = AppAlert(
                         title: "无法开始调试",
-                        message: "调试模式需要至少 5 个单词。"
+                        message: "调试模式需要至少 5 个\(deck.kind.itemName)。"
                     )
                 } else {
                     alert = AppAlert(
                         title: "无法开始测验",
-                        message: "词集中没有可用单词。"
+                        message: "\(deck.kind.collectionName)中没有可用\(deck.kind.itemName)。"
                     )
                 }
             }

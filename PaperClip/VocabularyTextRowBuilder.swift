@@ -49,7 +49,7 @@ enum VocabularyTextRowBuilder {
             tags: values[safe: 5] ?? "",
             note: values[safe: 6] ?? "",
             alternatives: values[safe: 7] ?? "",
-            error: term.isEmpty || definition.isEmpty ? "单词和释义不能为空" : nil
+            error: term.isEmpty || definition.isEmpty ? "英文内容和释义不能为空" : nil
         )
     }
 

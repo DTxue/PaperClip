@@ -9,7 +9,7 @@ extension VocabularyFlashcardView {
                 Text("本轮完成 \(roundKnownCount) 个，忘记 \(roundLearningCount) 个。")
             }
 
-            Button("继续学习 \(nextRound.count) 个单词", systemImage: "arrow.clockwise") {
+            Button("继续学习 \(deck.kind.itemCountText(nextRound.count))", systemImage: "arrow.clockwise") {
                 startNextRound()
             }
             .buttonStyle(.borderedProminent)
@@ -25,7 +25,9 @@ extension VocabularyFlashcardView {
                 Text(prompt(for: card))
                     .font(.system(.largeTitle, design: .rounded, weight: .semibold))
                     .multilineTextAlignment(.center)
-                if direction == .termToDefinition, !card.englishDefinition.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                if deck.kind.usesWordSpecificFeatures,
+                   direction == .termToDefinition,
+                   !card.englishDefinition.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     Text(card.englishDefinition)
                         .font(.title2.weight(.semibold))
                         .foregroundStyle(.tint)
@@ -33,7 +35,9 @@ extension VocabularyFlashcardView {
                         .lineSpacing(5)
                         .padding(.top, 2)
                 }
-                if direction == .termToDefinition, !card.phonetic.isEmpty {
+                if deck.kind.usesWordSpecificFeatures,
+                   direction == .termToDefinition,
+                   !card.phonetic.isEmpty {
                     Text(card.phonetic)
                         .font(.title3)
                         .foregroundStyle(.secondary)
@@ -43,7 +47,7 @@ extension VocabularyFlashcardView {
                     Text(answer(for: card))
                         .font(.title2)
                         .multilineTextAlignment(.center)
-                    if !card.example.isEmpty {
+                    if deck.kind.usesWordSpecificFeatures, !card.example.isEmpty {
                         Text(card.example)
                             .font(.body)
                             .foregroundStyle(.secondary)

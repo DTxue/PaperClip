@@ -41,13 +41,13 @@ extension VocabularyHomeView {
     func moveDeck(_ row: VocabularyDeckRowData, to folderID: UUID?) {
         do {
             guard let deck = try modelContext.fetchVocabularyDeck(id: row.id) else {
-                alert = AppAlert(title: "无法移动词集", message: "该词集不存在或已被删除。")
+                alert = AppAlert(title: "无法移动学习集", message: "该学习集不存在或已被删除。")
                 refreshHome()
                 return
             }
 
             if let folderID, try modelContext.fetchVocabularyFolder(id: folderID) == nil {
-                alert = AppAlert(title: "无法移动词集", message: "目标文件夹不存在或已被删除。")
+                alert = AppAlert(title: "无法移动学习集", message: "目标文件夹不存在或已被删除。")
                 refreshHome()
                 return
             }
@@ -57,7 +57,7 @@ extension VocabularyHomeView {
             try modelContext.saveOrRollbackIfNeeded()
             refreshHome()
         } catch {
-            alert = AppAlert(title: "无法移动词集", error: error)
+            alert = AppAlert(title: "无法移动学习集", error: error)
         }
     }
 

@@ -34,7 +34,7 @@ extension View {
                         }
                     }
                     .disabled(owner.snapshot.visibleCards.isEmpty)
-                    Button("导入单词", systemImage: "square.and.arrow.down") {
+                    Button("导入\(owner.deck.kind.itemName)", systemImage: "square.and.arrow.down") {
                         owner.isImporting = true
                     }
                 }

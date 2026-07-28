@@ -88,11 +88,11 @@ extension VocabularyTestView {
                 .listRowBackground(Color.clear)
             } footer: {
                 if selectedMode == .debug, !canStart {
-                    Text("调试模式需要词集中至少有 5 个单词。")
+                    Text("调试模式需要\(deck.kind.collectionName)中至少有 5 个\(deck.kind.itemName)。")
                 } else if selectedMode == .debug {
                     Text("调试结果只在当前页面显示，退出后不会出现在历史记录中。")
                 } else {
-                    Text("使用 Apple Pencil 手写英文答案，完成后由 AI 统一批改。题量至少为词集总数的 60%。")
+                    Text("使用 Apple Pencil 手写英文答案，完成后由 AI 统一批改。题量至少为\(deck.kind.collectionName)总数的 60%。")
                 }
             }
         }

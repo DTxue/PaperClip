@@ -11,7 +11,7 @@ extension VocabularyDeckSettingsView {
             dismiss()
         } catch {
             isDeletingDeck = false
-            alert = AppAlert(title: "无法删除词集", error: error)
+            alert = AppAlert(title: "无法删除\(deck.kind.collectionName)", error: error)
         }
     }
 
@@ -26,7 +26,7 @@ extension VocabularyDeckSettingsView {
         } catch {
             cards = []
             freshCacheCount = 0
-            saveError = "无法读取词集设置：\(error.localizedDescription)"
+            saveError = "无法读取\(deck.kind.collectionName)设置：\(error.localizedDescription)"
         }
     }
 
@@ -49,7 +49,7 @@ extension VocabularyDeckSettingsView {
             try modelContext.saveOrRollbackIfNeeded()
             saveError = nil
         } catch {
-            saveError = "无法保存词集设置：\(error.localizedDescription)"
+            saveError = "无法保存\(deck.kind.collectionName)设置：\(error.localizedDescription)"
         }
     }
 

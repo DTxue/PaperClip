@@ -44,6 +44,48 @@ struct VocabularyPersistenceTests {
         context.insert(missingDeckState)
         try context.save()
 
+        expect(deck.kind == .word)
+        deck.kind = .sentence
+        try context.save()
+        let sentenceDeck = try context.fetchVocabularyDeck(id: deck.id)
+        expect(sentenceDeck?.kind == .sentence)
+        expect(VocabularyDeckRowData(deck: deck).kind == .sentence)
+        expect(VocabularyDeckKind.word.usesWordSpecificFeatures)
+        expect(!VocabularyDeckKind.sentence.usesWordSpecificFeatures)
+        deck.kind = .word
+        try context.save()
+
+        let createdSentenceDeck = try VocabularyImportOperations.createDeck(
+            in: context,
+            kind: .sentence,
+            title: "Useful Sentences",
+            dailyNewLimit: 10,
+            desiredRetention: 0.9,
+            sourceName: "sentence-fixture",
+            preset: .tab,
+            importResult: VocabularyImportResult(
+                format: .tab,
+                rows: [
+                    VocabularyImportRow(
+                        id: 0,
+                        term: "take care",
+                        definition: "当心",
+                        phonetic: "/teɪk keə/",
+                        example: "Take care on your way home.",
+                        partOfSpeech: "phrase"
+                    )
+                ]
+            )
+        )
+        expect(createdSentenceDeck.kind == .sentence)
+        let createdSentenceCards = try context.fetchVocabularyCards(deckID: createdSentenceDeck.id)
+        expect(createdSentenceCards.first?.term == "take care")
+        expect(createdSentenceCards.first?.phonetic.isEmpty == true)
+        expect(createdSentenceCards.first?.example.isEmpty == true)
+        expect(createdSentenceCards.first?.partOfSpeech.isEmpty == true)
+        try context.deleteVocabularyDeckCascade(deckID: createdSentenceDeck.id)
+        try context.save()
+
         let cardRow = VocabularyCardRowData(card: card)
         expect(cardRow.matchesSearch(""))
         expect(cardRow.matchesSearch("memo"))
@@ -446,7 +488,7 @@ struct VocabularyPersistenceTests {
         expect(remainingArticles.isEmpty)
         expect(remainingArticleHistories.isEmpty)
 
-        print("VocabularyPersistenceTests: 73 passed")
+        print("VocabularyPersistenceTests: 83 passed")
     }
 
     private static func expect(

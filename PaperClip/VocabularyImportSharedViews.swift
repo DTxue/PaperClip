@@ -19,6 +19,7 @@ struct VocabularyImportTextInputSection: View {
     @Binding var preset: VocabularyImportPreset
     @Binding var text: String
     let title: String
+    var kind: VocabularyDeckKind = .word
     let onChooseFile: () -> Void
 
     var body: some View {
@@ -36,7 +37,11 @@ struct VocabularyImportTextInputSection: View {
         } header: {
             Text(title)
         } footer: {
-            Text("Tab 分隔：每行以 Tab 键隔开单词与释义；每两行一组：奇数行单词、偶数行释义；CSV：每行以逗号隔开，支持引号转义。多字段顺序为：单词、释义、音标、例句、词性、标签、备注、可接受答案。")
+            if kind.usesWordSpecificFeatures {
+                Text("Tab 分隔：每行以 Tab 键隔开单词与释义；每两行一组：奇数行单词、偶数行释义；CSV：每行以逗号隔开，支持引号转义。多字段顺序为：单词、释义、音标、例句、词性、标签、备注、可接受答案。")
+            } else {
+                Text("Tab 分隔：每行以 Tab 键隔开英文短语或句子与中文释义；每两行一组：奇数行英文、偶数行中文；CSV：每行以逗号隔开，支持引号转义。")
+            }
         }
     }
 }

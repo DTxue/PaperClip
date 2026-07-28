@@ -60,13 +60,14 @@ struct VocabularyDeckDeleteRequest: Identifiable, Sendable {
 }
 
 struct VocabularyDeckSchedulingSection: View {
+    let kind: VocabularyDeckKind
     @Binding var dailyNewLimit: Int
     @Binding var desiredRetention: Double
 
     var body: some View {
         Section {
             LabeledContent("调度算法", value: "FSRS-6 · 21 参数")
-            Stepper("每日新词：\(dailyNewLimit)", value: $dailyNewLimit, in: 1...100)
+            Stepper(kind.dailyNewLimitText(dailyNewLimit), value: $dailyNewLimit, in: 1...100)
             Slider(value: $desiredRetention, in: 0.8...0.97, step: 0.01) {
                 Text("目标保持率")
             } minimumValueLabel: {
@@ -87,17 +88,18 @@ struct VocabularyDeckSchedulingSection: View {
 }
 
 struct VocabularyDeckDangerSection: View {
+    let kind: VocabularyDeckKind
     let onDelete: () -> Void
 
     var body: some View {
         Section {
             Button(role: .destructive, action: onDelete) {
-                Label("删除词集", systemImage: "trash")
+                Label("删除\(kind.collectionName)", systemImage: "trash")
             }
         } header: {
             Text("危险操作")
         } footer: {
-            Text("删除词集会同时删除其中的单词、复习记录和手写记录。")
+            Text("删除\(kind.collectionName)会同时删除其中的\(kind.itemName)、复习记录和手写记录。")
         }
     }
 }
