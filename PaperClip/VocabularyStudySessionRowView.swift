@@ -38,6 +38,7 @@ struct VocabularyStudySessionRowView: View {
         switch session.kind {
         case "闪卡": "rectangle.on.rectangle"
         case "学习": "brain.head.profile"
+        case "语境练习": "text.bubble"
         case "测验": "checklist"
         default: "chart.bar"
         }

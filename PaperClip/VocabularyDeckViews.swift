@@ -34,6 +34,7 @@ struct VocabularyDeckView: View {
                 case .words:
                     wordList(snapshot)
                         .searchable(text: $searchText, prompt: "搜索单词或释义")
+                case .contextPractice: VocabularyContextPracticeView(deck: deck)
                 case .article: VocabularyArticleView(deck: deck)
                 case .mastery: VocabularyMasteryView(deck: deck)
                 case .scores: VocabularyStudySessionsView(deck: deck)

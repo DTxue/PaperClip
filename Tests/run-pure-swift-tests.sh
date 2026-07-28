@@ -65,6 +65,11 @@ run_swift_test VocabularyArticleModePolicyTests \
     PaperClip/VocabularyArticleModePolicy.swift \
     Tests/VocabularyArticleModePolicyTests.swift
 
+run_swift_test VocabularyContextPracticeTests \
+    PaperClip/VocabularyContextPractice.swift \
+    PaperClip/VocabularyContextAIPrompts.swift \
+    Tests/VocabularyContextPracticeTests.swift
+
 run_swift_test AIServiceErrorMessageSupportTests \
     PaperClip/AIServiceError.swift \
     PaperClip/AIServicePayloads.swift \

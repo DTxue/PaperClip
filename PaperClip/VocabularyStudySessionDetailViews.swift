@@ -63,6 +63,7 @@ private struct VocabularyStudySessionDetailView: View {
                         VocabularyStudySessionItemRow(
                             item: item,
                             showsRecognizedError: session.kind == "测验"
+                                || session.kind == "语境练习"
                         )
                     }
                 }

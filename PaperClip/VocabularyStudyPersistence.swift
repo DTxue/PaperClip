@@ -33,12 +33,13 @@ extension ModelContext {
         propertiesToFetch: [PartialKeyPath<VocabularyStudySession>] = []
     ) throws -> [VocabularyStudySession] {
         var descriptor = FetchDescriptor<VocabularyStudySession>(
-            predicate: #Predicate<VocabularyStudySession> { session in
-                session.deckID == deckID
+                predicate: #Predicate<VocabularyStudySession> { session in
+                    session.deckID == deckID
                     && (session.kind == "学习"
                         || session.kind == "测验"
+                        || session.kind == "语境练习"
                         || session.kind == "test")
-            },
+                },
             sortBy: [SortDescriptor(\.endedAt, order: .reverse)]
         )
         descriptor.fetchLimit = limit

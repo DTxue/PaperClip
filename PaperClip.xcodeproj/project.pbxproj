@@ -454,6 +454,11 @@
 		A10000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift */; };
 		A10000000000000000001236 /* VocabularyArticleModePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001236 /* VocabularyArticleModePolicy.swift */; };
 		A10000000000000000001239 /* VocabularyArticleGenerationFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001239 /* VocabularyArticleGenerationFlow.swift */; };
+		C0DEC0DE0000000000000001 /* VocabularyContextPractice.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0DEC0DE0000000000000001 /* VocabularyContextPractice.swift */; };
+		C0DEC0DE0000000000000002 /* VocabularyContextAIPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0DEC0DE0000000000000002 /* VocabularyContextAIPrompts.swift */; };
+		C0DEC0DE0000000000000003 /* AIServiceVocabularyContextProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0DEC0DE0000000000000003 /* AIServiceVocabularyContextProcessing.swift */; };
+		C0DEC0DE0000000000000004 /* VocabularyContextPracticeFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0DEC0DE0000000000000004 /* VocabularyContextPracticeFlow.swift */; };
+		C0DEC0DE0000000000000005 /* VocabularyContextPracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0DEC0DE0000000000000005 /* VocabularyContextPracticeView.swift */; };
 		A100000000000000000000F37 /* VocabularyMasteryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F37 /* VocabularyMasteryViews.swift */; };
 		A10000000000000000001023 /* VocabularyMasteryCardRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001023 /* VocabularyMasteryCardRows.swift */; };
 		A100000000000000000010D4 /* VocabularyMasteryDetailRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010D4 /* VocabularyMasteryDetailRows.swift */; };
@@ -1100,6 +1105,11 @@
 			A20000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleSpeechRecognizer.swift; sourceTree = "<group>"; };
 			A20000000000000000001236 /* VocabularyArticleModePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleModePolicy.swift; sourceTree = "<group>"; };
 			A20000000000000000001239 /* VocabularyArticleGenerationFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleGenerationFlow.swift; sourceTree = "<group>"; };
+			D0DEC0DE0000000000000001 /* VocabularyContextPractice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyContextPractice.swift; sourceTree = "<group>"; };
+			D0DEC0DE0000000000000002 /* VocabularyContextAIPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyContextAIPrompts.swift; sourceTree = "<group>"; };
+			D0DEC0DE0000000000000003 /* AIServiceVocabularyContextProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceVocabularyContextProcessing.swift; sourceTree = "<group>"; };
+			D0DEC0DE0000000000000004 /* VocabularyContextPracticeFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyContextPracticeFlow.swift; sourceTree = "<group>"; };
+			D0DEC0DE0000000000000005 /* VocabularyContextPracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyContextPracticeView.swift; sourceTree = "<group>"; };
 			A200000000000000000011A7 /* VocabularyStudySessionMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionMetrics.swift; sourceTree = "<group>"; };
 			A200000000000000000011A8 /* VocabularyStudySessionDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionDraft.swift; sourceTree = "<group>"; };
 			A200000000000000000011BE /* VocabularyStudySessionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionItem.swift; sourceTree = "<group>"; };
@@ -1804,6 +1814,11 @@
 				A20000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift */,
 				A20000000000000000001236 /* VocabularyArticleModePolicy.swift */,
 				A20000000000000000001239 /* VocabularyArticleGenerationFlow.swift */,
+				D0DEC0DE0000000000000001 /* VocabularyContextPractice.swift */,
+				D0DEC0DE0000000000000002 /* VocabularyContextAIPrompts.swift */,
+				D0DEC0DE0000000000000003 /* AIServiceVocabularyContextProcessing.swift */,
+				D0DEC0DE0000000000000004 /* VocabularyContextPracticeFlow.swift */,
+				D0DEC0DE0000000000000005 /* VocabularyContextPracticeView.swift */,
 				A200000000000000000000F37 /* VocabularyMasteryViews.swift */,
 				A20000000000000000001023 /* VocabularyMasteryCardRows.swift */,
 				A200000000000000000010D4 /* VocabularyMasteryDetailRows.swift */,
@@ -2544,6 +2559,11 @@
 				A10000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift in Sources */,
 				A10000000000000000001236 /* VocabularyArticleModePolicy.swift in Sources */,
 				A10000000000000000001239 /* VocabularyArticleGenerationFlow.swift in Sources */,
+				C0DEC0DE0000000000000001 /* VocabularyContextPractice.swift in Sources */,
+				C0DEC0DE0000000000000002 /* VocabularyContextAIPrompts.swift in Sources */,
+				C0DEC0DE0000000000000003 /* AIServiceVocabularyContextProcessing.swift in Sources */,
+				C0DEC0DE0000000000000004 /* VocabularyContextPracticeFlow.swift in Sources */,
+				C0DEC0DE0000000000000005 /* VocabularyContextPracticeView.swift in Sources */,
 				A100000000000000000000F37 /* VocabularyMasteryViews.swift in Sources */,
 				A10000000000000000001023 /* VocabularyMasteryCardRows.swift in Sources */,
 				A100000000000000000010D4 /* VocabularyMasteryDetailRows.swift in Sources */,
