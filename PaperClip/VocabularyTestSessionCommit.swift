@@ -6,7 +6,7 @@ extension VocabularyTestView {
         if sessionMode != .exam {
             if batches.first?.status == .graded {
                 if sessionMode.recordsHistory {
-                    commitToScheduler(kind: "测验")
+                    commitToScheduler(kind: handwritingTestKind.sessionKind)
                 } else {
                     didRecordSession = true
                 }
@@ -16,7 +16,7 @@ extension VocabularyTestView {
 
         guard didFinishAnswering, !batches.isEmpty else { return }
         guard batches.allSatisfy({ $0.status == .graded }) else { return }
-        commitToScheduler(kind: "测验")
+        commitToScheduler(kind: handwritingTestKind.sessionKind)
     }
 
     func commitToScheduler(kind: String) {
@@ -29,6 +29,7 @@ extension VocabularyTestView {
             let didCommit = try VocabularyTestSessionCommitTransaction.commitAndSave(
                 deck: deck,
                 batches: batches,
+                handwritingTestKind: handwritingTestKind,
                 kind: kind,
                 startedAt: startedAt,
                 modelContext: modelContext

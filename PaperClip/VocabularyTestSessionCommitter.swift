@@ -6,6 +6,7 @@ enum VocabularyTestSessionCommitter {
     static func commit(
         deck: VocabularyDeck,
         batches: [VocabularyTestBatch],
+        handwritingTestKind: VocabularyHandwritingTestKind,
         kind: String,
         startedAt: Date,
         modelContext: ModelContext,
@@ -39,9 +40,9 @@ enum VocabularyTestSessionCommitter {
                 try VocabularyMemoryScheduler.record(
                     card: card,
                     deck: deck,
-                    direction: .definitionToTerm,
+                    direction: handwritingTestKind.reviewDirection,
                     rating: isCorrect ? .good : .again,
-                    responseKind: "\(kind)-手写",
+                    responseKind: handwritingTestKind.reviewResponseKind,
                     duration: duration,
                     modelContext: modelContext,
                     saveImmediately: false
@@ -49,9 +50,19 @@ enum VocabularyTestSessionCommitter {
                 sessionItems.append(
                     VocabularyStudySessionItemFactory.makeHandwritingTestAnswer(
                         card: card,
+                        prompt: handwritingTestKind.prompt(
+                            term: card.term,
+                            definition: card.definition
+                        ),
+                        expectedAnswer: handwritingTestKind.referenceAnswer(
+                            term: card.term,
+                            englishDefinition: card.englishDefinition
+                        ),
                         isCorrect: isCorrect,
                         recognizedText: gradingItem?.recognizedText ?? gradingItem?.comment ?? "",
-                        comment: gradingItem?.comment ?? ""
+                        comment: gradingItem?.comment ?? "",
+                        keepsRecognizedTextForCorrectAnswer:
+                            handwritingTestKind == .englishDefinition
                     )
                 )
             }

@@ -32,6 +32,16 @@ extension View {
                         } label: {
                             Label("测验", systemImage: "checklist")
                         }
+                        if owner.deck.kind.usesWordSpecificFeatures {
+                            NavigationLink {
+                                VocabularyTestView(
+                                    deck: owner.deck,
+                                    handwritingTestKind: .englishDefinition
+                                )
+                            } label: {
+                                Label("英文释义手写", systemImage: "pencil.and.outline")
+                            }
+                        }
                     }
                     .disabled(owner.snapshot.visibleCards.isEmpty)
                     Button("导入\(owner.deck.kind.itemName)", systemImage: "square.and.arrow.down") {

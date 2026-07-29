@@ -3,6 +3,7 @@ import PencilKit
 
 struct VocabularyTestAnsweringContentView: View {
     let sessionMode: VocabularyTestMode?
+    let handwritingTestKind: VocabularyHandwritingTestKind
     let snapshot: VocabularyTestViewSnapshot
     let batches: [VocabularyTestBatch]
     let activeBatch: VocabularyTestBatch?
@@ -28,7 +29,12 @@ struct VocabularyTestAnsweringContentView: View {
             progressHeader(progress)
 
             if let card = currentCard {
-                VocabularyTestDefinitionCard(definition: card.definition)
+                VocabularyTestDefinitionCard(
+                    definition: handwritingTestKind.prompt(
+                        term: card.term,
+                        definition: card.definition
+                    )
+                )
                 VocabularyAnswerCanvas(
                     drawing: $currentDrawing,
                     session: answerCanvasSession,

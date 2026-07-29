@@ -17,7 +17,14 @@ extension VocabularyTestView {
                 batchIndex: batchIndex,
                 batchID: batchID,
                 context: taskContext,
-                cards: batches[batchIndex].cards.map { (term: $0.term, definition: $0.definition) },
+                kind: handwritingTestKind,
+                cards: batches[batchIndex].cards.map {
+                    VocabularyHandwritingGradingCard(
+                        term: $0.term,
+                        definition: $0.definition,
+                        englishDefinition: $0.englishDefinition
+                    )
+                },
                 drawings: batches[batchIndex].drawings,
                 automaticRetry: automaticRetry
             ),

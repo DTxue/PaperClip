@@ -12,7 +12,10 @@ struct VocabularyTestQuestionCountTests {
         testDebugModeUsesExactlyFiveQuestions()
         testDebugModeDoesNotRecordHistory()
         testDebugModeRequiresFiveCards()
-        print("VocabularyTestQuestionCountTests: 36 passed")
+        testEnglishDefinitionHandwritingUsesStoredDefinition()
+        testEnglishDefinitionHandwritingRequiresStoredDefinition()
+        testSpellingHandwritingKeepsExistingPromptAndAnswer()
+        print("VocabularyTestQuestionCountTests: 49 passed")
     }
 
     private static func testClampedQuestionCountBounds() {
@@ -92,6 +95,49 @@ struct VocabularyTestQuestionCountTests {
         expect(VocabularyTestMode.debug.canStart(cardCount: 5))
         expect(VocabularyTestMode.regular.canStart(cardCount: 1))
         expect(VocabularyTestMode.setupModes == [.regular, .debug])
+    }
+
+    private static func testEnglishDefinitionHandwritingUsesStoredDefinition() {
+        let kind = VocabularyHandwritingTestKind.englishDefinition
+
+        expect(
+            kind.prompt(
+                term: "deliberate",
+                definition: "深思熟虑的"
+            ) == "deliberate"
+        )
+        expect(
+            kind.referenceAnswer(
+                term: "deliberate",
+                englishDefinition: "done consciously and intentionally"
+            ) == "done consciously and intentionally"
+        )
+        expect(kind.reviewResponseKind == "测验-英文释义手写")
+        expect(kind.reviewDirection == .termToDefinition)
+    }
+
+    private static func testEnglishDefinitionHandwritingRequiresStoredDefinition() {
+        let kind = VocabularyHandwritingTestKind.englishDefinition
+
+        expect(!kind.isEligible(englishDefinition: nil))
+        expect(!kind.isEligible(englishDefinition: ""))
+        expect(!kind.isEligible(englishDefinition: "   \n"))
+        expect(kind.isEligible(englishDefinition: "a short pause"))
+    }
+
+    private static func testSpellingHandwritingKeepsExistingPromptAndAnswer() {
+        let kind = VocabularyHandwritingTestKind.spelling
+
+        expect(kind.prompt(term: "pause", definition: "暂停") == "暂停")
+        expect(
+            kind.referenceAnswer(
+                term: "pause",
+                englishDefinition: "to stop briefly"
+            ) == "pause"
+        )
+        expect(kind.isEligible(englishDefinition: nil))
+        expect(kind.reviewResponseKind == "测验-手写")
+        expect(kind.reviewDirection == .definitionToTerm)
     }
 
     private static func expect(

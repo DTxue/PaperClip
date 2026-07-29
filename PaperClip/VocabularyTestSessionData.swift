@@ -50,10 +50,12 @@ extension VocabularyTestView {
         do {
             let data = try modelContext.fetchVocabularySessionData(
                 deckID: deckID,
-                direction: .definitionToTerm,
+                direction: handwritingTestKind.reviewDirection,
                 statePropertiesToFetch: VocabularyMemoryState.sessionPropertiesToFetch
             )
-            allCards = data.cards
+            allCards = data.cards.filter {
+                handwritingTestKind.isEligible(englishDefinition: $0.englishDefinition)
+            }
             states = data.states
         } catch {
             allCards = []
@@ -66,7 +68,7 @@ extension VocabularyTestView {
         do {
             return try modelContext.fetchVocabularyReviewLogs(
                 deckID: deck.id,
-                direction: .definitionToTerm,
+                direction: handwritingTestKind.reviewDirection,
                 limit: limit,
                 propertiesToFetch: VocabularyReviewLog.testSelectionPropertiesToFetch
             )

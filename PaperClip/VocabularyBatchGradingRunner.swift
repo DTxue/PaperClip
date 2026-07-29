@@ -1,11 +1,18 @@
 import Foundation
 import PencilKit
 
+struct VocabularyHandwritingGradingCard: Sendable {
+    let term: String
+    let definition: String
+    let englishDefinition: String
+}
+
 struct VocabularyBatchGradingRequest {
     let batchIndex: Int
     let batchID: Int
     let context: VocabularyTestGradingTaskContext
-    let cards: [(term: String, definition: String)]
+    let kind: VocabularyHandwritingTestKind
+    let cards: [VocabularyHandwritingGradingCard]
     let drawings: [PKDrawing]
     let automaticRetry: Bool
 }
@@ -53,18 +60,45 @@ enum VocabularyBatchGradingRunner {
                 do {
                     let result: VocabularyGradingResult
                     if hasVisibleAnswers.contains(true) {
-                        let aiResult = try await AIService.gradeVocabularyTest(
-                            cards: request.cards,
-                            handwritingImages: images
-                        )
+                        let aiResult: VocabularyGradingResult
+                        switch request.kind {
+                        case .spelling:
+                            aiResult = try await AIService.gradeVocabularyTest(
+                                cards: request.cards.map { ($0.term, $0.definition) },
+                                handwritingImages: images
+                            )
+                        case .englishDefinition:
+                            aiResult = try await AIService.recognizeVocabularyHandwriting(
+                                prompts: request.cards.map(\.term),
+                                handwritingImages: images
+                            )
+                        }
                         result = VocabularyGradingPolicy.validated(
                             aiResult,
-                            hasVisibleAnswers: hasVisibleAnswers
+                            expectedAnswers: request.cards.map {
+                                request.kind.referenceAnswer(
+                                    term: $0.term,
+                                    englishDefinition: $0.englishDefinition
+                                )
+                            },
+                            hasVisibleAnswers: hasVisibleAnswers,
+                            matchPolicy: request.kind == .englishDefinition
+                                ? .englishDefinition
+                                : .spelling
                         )
                     } else {
                         result = VocabularyGradingPolicy.validated(
                             VocabularyGradingResult(items: []),
-                            hasVisibleAnswers: hasVisibleAnswers
+                            expectedAnswers: request.cards.map {
+                                request.kind.referenceAnswer(
+                                    term: $0.term,
+                                    englishDefinition: $0.englishDefinition
+                                )
+                            },
+                            hasVisibleAnswers: hasVisibleAnswers,
+                            matchPolicy: request.kind == .englishDefinition
+                                ? .englishDefinition
+                                : .spelling
                         )
                     }
                     await MainActor.run {

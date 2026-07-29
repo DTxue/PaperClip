@@ -4,6 +4,7 @@ import PencilKit
 
 struct VocabularyTestView: View {
     let deck: VocabularyDeck
+    let handwritingTestKind: VocabularyHandwritingTestKind
 
     @Environment(\.modelContext) var modelContext
 
@@ -28,7 +29,41 @@ struct VocabularyTestView: View {
     @State var gradingTaskStore = VocabularyTestGradingTaskStore()
     @State var alert: AppAlert?
 
-    init(deck: VocabularyDeck) {
+    init(
+        deck: VocabularyDeck,
+        handwritingTestKind: VocabularyHandwritingTestKind = .spelling
+    ) {
         self.deck = deck
+        self.handwritingTestKind = handwritingTestKind
+    }
+}
+
+extension VocabularyHandwritingTestKind {
+    var navigationTitle: String {
+        switch self {
+        case .spelling: "测验"
+        case .englishDefinition: "英文释义手写"
+        }
+    }
+
+    var completionTitle: String {
+        switch self {
+        case .spelling: "测验完成"
+        case .englishDefinition: "英文释义手写完成"
+        }
+    }
+
+    var gradingMessage: String {
+        switch self {
+        case .spelling: "AI 正在批改中…"
+        case .englishDefinition: "AI 正在识别，系统正在参考批阅…"
+        }
+    }
+
+    var sessionKind: String {
+        switch self {
+        case .spelling: "测验"
+        case .englishDefinition: "英文释义手写"
+        }
     }
 }

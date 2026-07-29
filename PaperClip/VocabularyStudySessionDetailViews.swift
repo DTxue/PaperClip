@@ -42,6 +42,7 @@ private struct VocabularyStudySessionDetailView: View {
 
     var body: some View {
         let snapshot = VocabularyStudySessionDetailSnapshot(session: session)
+        let isEnglishDefinitionHandwriting = session.kind == "英文释义手写"
 
         List {
             Section("本次记录") {
@@ -62,8 +63,9 @@ private struct VocabularyStudySessionDetailView: View {
                         let item = snapshot.incorrectItems[index]
                         VocabularyStudySessionItemRow(
                             item: item,
-                            showsRecognizedError: session.kind == "测验"
+                            showsRecognizedText: session.kind == "测验"
                                 || session.kind == "语境练习"
+                                || isEnglishDefinitionHandwriting
                         )
                     }
                 }
@@ -75,7 +77,10 @@ private struct VocabularyStudySessionDetailView: View {
                 } else {
                     ForEach(snapshot.correctItems.indices, id: \.self) { index in
                         let item = snapshot.correctItems[index]
-                        VocabularyStudySessionItemRow(item: item, showsRecognizedError: false)
+                        VocabularyStudySessionItemRow(
+                            item: item,
+                            showsRecognizedText: isEnglishDefinitionHandwriting
+                        )
                     }
                 }
             }

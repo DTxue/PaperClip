@@ -168,7 +168,7 @@ struct StatisticsVocabularySummary: Equatable {
     private init(rows: [StatisticsVocabularyDeckRow]) { self.rows = rows }
 
     static let learningKinds: Set<String> = ["学习"]
-    static let testKinds: Set<String> = ["测验", "test"]
+    static let testKinds: Set<String> = ["测验", "英文释义手写", "test"]
 
     var hasSessions: Bool {
         !rows.isEmpty

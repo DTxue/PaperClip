@@ -207,6 +207,12 @@ struct VocabularyPersistenceTests {
             startedAt: .now,
             items: []
         )
+        let englishDefinitionHandwritingSession = VocabularyStudySession(
+            deckID: deck.id,
+            kind: "英文释义手写",
+            startedAt: .now,
+            items: []
+        )
         let legacyExamSession = VocabularyStudySession(
             deckID: deck.id,
             kind: "考试",
@@ -267,6 +273,7 @@ struct VocabularyPersistenceTests {
         context.insert(reviewLog)
         context.insert(studySession)
         context.insert(flashcardSession)
+        context.insert(englishDefinitionHandwritingSession)
         context.insert(legacyExamSession)
         context.insert(draft)
         context.insert(handwritingAttempt)
@@ -382,7 +389,7 @@ struct VocabularyPersistenceTests {
             limit: 100,
             propertiesToFetch: [\.kind]
         )
-        expect(scoreSessions.map(\.kind) == ["test"])
+        expect(Set(scoreSessions.map(\.kind)) == ["test", "英文释义手写"])
 
         let resetDeck = VocabularyDeck(title: "Reset Test")
         let resetCard = VocabularyCard(deckID: resetDeck.id, term: "reset", definition: "重置")

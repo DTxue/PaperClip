@@ -7,6 +7,7 @@ enum VocabularyTestSessionCommitTransaction {
     static func commitAndSave(
         deck: VocabularyDeck,
         batches: [VocabularyTestBatch],
+        handwritingTestKind: VocabularyHandwritingTestKind,
         kind: String,
         startedAt: Date,
         modelContext: ModelContext,
@@ -15,6 +16,7 @@ enum VocabularyTestSessionCommitTransaction {
         let didCommit = try VocabularyTestSessionCommitter.commit(
             deck: deck,
             batches: batches,
+            handwritingTestKind: handwritingTestKind,
             kind: kind,
             startedAt: startedAt,
             modelContext: modelContext,

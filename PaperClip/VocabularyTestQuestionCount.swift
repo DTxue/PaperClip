@@ -1,5 +1,57 @@
 import Foundation
 
+enum VocabularyHandwritingTestKind: String, CaseIterable, Identifiable, Sendable {
+    case spelling
+    case englishDefinition
+
+    var id: String { rawValue }
+
+    func isEligible(englishDefinition: String?) -> Bool {
+        switch self {
+        case .spelling:
+            true
+        case .englishDefinition:
+            !(englishDefinition?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        }
+    }
+
+    func prompt(term: String, definition: String) -> String {
+        switch self {
+        case .spelling:
+            definition
+        case .englishDefinition:
+            term
+        }
+    }
+
+    func referenceAnswer(term: String, englishDefinition: String?) -> String {
+        switch self {
+        case .spelling:
+            term
+        case .englishDefinition:
+            englishDefinition ?? ""
+        }
+    }
+
+    var reviewResponseKind: String {
+        switch self {
+        case .spelling:
+            "测验-手写"
+        case .englishDefinition:
+            "测验-英文释义手写"
+        }
+    }
+
+    var reviewDirection: VocabularyDirection {
+        switch self {
+        case .spelling:
+            .definitionToTerm
+        case .englishDefinition:
+            .termToDefinition
+        }
+    }
+}
+
 enum VocabularyTestMode: String, CaseIterable, Identifiable {
     case regular = "常规"
     case exam = "考试"

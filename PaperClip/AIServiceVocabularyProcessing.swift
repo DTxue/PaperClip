@@ -164,7 +164,45 @@ extension AIService {
 
         let configuration = AIRequestConfiguration.doubao(
             modelName: "豆包批改",
-            maxOutputTokens: 512
+            maxOutputTokens: VocabularyGradingOutputBudget.maxTokens(questionCount: count)
+        )
+        return try await requestDecoded(
+            VocabularyGradingResult.self,
+            content: contentItems,
+            configuration: configuration
+        )
+    }
+
+    static func recognizeVocabularyHandwriting(
+        prompts: [String],
+        handwritingImages: [UIImage?]
+    ) async throws -> VocabularyGradingResult {
+        let count = min(prompts.count, handwritingImages.count)
+        guard count > 0 else {
+            return VocabularyGradingResult(items: [])
+        }
+
+        var contentItems: [ResponsesRequest.Content] = []
+        contentItems.reserveCapacity(count * 2 + 1)
+        for i in 0 ..< count {
+            contentItems.append(.text(
+                VocabularyAIPrompts.handwritingRecognitionQuestionText(
+                    index: i,
+                    prompt: prompts[i],
+                    hasAnswer: handwritingImages[i] != nil
+                )
+            ))
+            if let image = handwritingImages[i] {
+                contentItems.append(try imageContent(from: image))
+            }
+        }
+        contentItems.append(.text(
+            VocabularyAIPrompts.handwritingRecognitionInstruction(count: count)
+        ))
+
+        let configuration = AIRequestConfiguration.doubao(
+            modelName: "豆包手写识别",
+            maxOutputTokens: VocabularyGradingOutputBudget.maxTokens(questionCount: count)
         )
         return try await requestDecoded(
             VocabularyGradingResult.self,

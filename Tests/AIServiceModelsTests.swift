@@ -14,6 +14,7 @@ struct AIServiceModelsTests {
         try testSolutionStepFlexibleNumber()
         try testExamGradingFlexibleFields()
         try testVocabularyGradingDefaults()
+        try testVocabularyGradingOutputTokenBudgetScalesWithQuestionCount()
         try testWritingReviewDisplayText()
         try testWritingReviewJSONStorage()
         try testGoodWordsAndSentencesDecoding()
@@ -22,7 +23,7 @@ struct AIServiceModelsTests {
         try testKnowledgeRequestConfiguration()
         try testFixedProviderRequestConfiguration()
 
-        print("AIServiceModelsTests: 20 passed")
+        print("AIServiceModelsTests: 23 passed")
     }
 
     private static func testQuestionRecognitionDefaults() throws {
@@ -87,6 +88,21 @@ struct AIServiceModelsTests {
         let value = try JSONDecoder().decode(VocabularyGradingItem.self, from: data)
         expect(value.comment.isEmpty, "defaults missing comment")
         expect(value.recognizedText.isEmpty, "defaults missing recognized text")
+    }
+
+    private static func testVocabularyGradingOutputTokenBudgetScalesWithQuestionCount() throws {
+        expect(
+            VocabularyGradingOutputBudget.maxTokens(questionCount: 0) == 512,
+            "empty grading requests keep the minimum output budget"
+        )
+        expect(
+            VocabularyGradingOutputBudget.maxTokens(questionCount: 6) > 512,
+            "six-question grading output should not use the old truncation-prone 512 token budget"
+        )
+        expect(
+            VocabularyGradingOutputBudget.maxTokens(questionCount: 60) <= 8_192,
+            "large grading batches should stay under the app's normal doubao answer token ceiling"
+        )
     }
 
     private static func testWritingReviewDisplayText() throws {

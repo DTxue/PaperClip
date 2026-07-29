@@ -156,6 +156,16 @@ struct StatisticsSnapshotTests {
             items: []
         ))
         context.insert(VocabularyStudySession(
+            deckID: testDeckID,
+            kind: "英文释义手写",
+            startedAt: now,
+            endedAt: now,
+            duration: 30,
+            totalCount: 2,
+            correctCount: 1,
+            items: []
+        ))
+        context.insert(VocabularyStudySession(
             deckID: coreDeckID,
             kind: "测验",
             startedAt: oldMonth,
@@ -262,10 +272,10 @@ struct StatisticsSnapshotTests {
         expect(testRow.learningDuration == 0)
         expect(testRow.learningMetrics.totalCount == 0)
         expect(!testRow.hasLearning)
-        expect(testRow.testDuration == 180)
-        expect(testRow.testMetrics.totalCount == 4)
-        expect(testRow.testCorrectCount == 4)
-        expect(testRow.testIncorrectCount == 0)
+        expect(testRow.testDuration == 210)
+        expect(testRow.testMetrics.totalCount == 6)
+        expect(testRow.testCorrectCount == 5)
+        expect(testRow.testIncorrectCount == 1)
         let coreRow = try require(snapshot.vocabularySummary.rows.first { $0.id == coreDeckID })
         expect(coreRow.learningDuration == 60)
         expect(coreRow.learningMetrics.totalCount == 4)

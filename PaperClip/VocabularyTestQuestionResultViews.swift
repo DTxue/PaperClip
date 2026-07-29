@@ -2,6 +2,7 @@ import SwiftUI
 
 struct VocabularyTestQuestionResultRow: View {
     let question: VocabularyGradedQuestion
+    let handwritingTestKind: VocabularyHandwritingTestKind
     @Binding var enlargedImage: IdentifiableImage?
 
     private var item: VocabularyGradingItem? {
@@ -38,11 +39,20 @@ struct VocabularyTestQuestionResultRow: View {
                     .foregroundStyle(.tertiary)
             }
 
-            Text(question.card.definition)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Text(question.card.term)
-                .font(.body.weight(.semibold))
+            switch handwritingTestKind {
+            case .spelling:
+                Text(question.card.definition)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Text(question.card.term)
+                    .font(.body.weight(.semibold))
+            case .englishDefinition:
+                Text(question.card.term)
+                    .font(.body.weight(.semibold))
+                Text("参考释义：\(question.card.englishDefinition)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
 
             if let comment = item?.comment, !comment.isEmpty, comment != "正确" {
                 Text(comment)
@@ -50,10 +60,10 @@ struct VocabularyTestQuestionResultRow: View {
                     .foregroundStyle(.red)
             }
 
-            if item?.isCorrect == false,
+            if (handwritingTestKind == .englishDefinition || item?.isCorrect == false),
                let recognized = item?.recognizedText,
                !recognized.isEmpty {
-                Text("AI 识别：\(recognized)")
+                Text("\(handwritingTestKind == .englishDefinition ? "识别结果" : "AI 识别")：\(recognized)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

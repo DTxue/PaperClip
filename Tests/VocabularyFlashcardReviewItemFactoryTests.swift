@@ -7,7 +7,8 @@ struct VocabularyFlashcardReviewItemFactoryTests {
         testReviewItemUsesRatingOutcome()
         testWordBankItemUsesPlacedWords()
         testHandwritingItemHidesRecognizedTextForCorrectAnswer()
-        print("VocabularyFlashcardReviewItemFactoryTests: 11 passed")
+        testEnglishDefinitionHandwritingStoresReferenceAndRecognition()
+        print("VocabularyFlashcardReviewItemFactoryTests: 15 passed")
     }
 
     private static func testPromptAndAnswerFollowDirection() {
@@ -78,6 +79,23 @@ struct VocabularyFlashcardReviewItemFactoryTests {
         )
         expect(wrongItem.recognizedText == "photosyntesis")
         expect(wrongItem.comment == "拼写错误")
+    }
+
+    private static func testEnglishDefinitionHandwritingStoresReferenceAndRecognition() {
+        let item = VocabularyStudySessionItemFactory.makeHandwritingTestAnswer(
+            card: makeCard(),
+            prompt: "photosynthesis",
+            expectedAnswer: "the way plants use light to make food",
+            isCorrect: true,
+            recognizedText: "The way plants use light to make food.",
+            comment: "正确",
+            keepsRecognizedTextForCorrectAnswer: true
+        )
+
+        expect(item.prompt == "photosynthesis")
+        expect(item.expectedAnswer == "the way plants use light to make food")
+        expect(item.recognizedText == "The way plants use light to make food.")
+        expect(item.isCorrect)
     }
 
     private static func makeCard() -> VocabularyCard {

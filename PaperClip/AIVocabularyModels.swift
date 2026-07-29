@@ -113,3 +113,10 @@ struct VocabularyGradingItem: Codable, Sendable {
 struct VocabularyGradingResult: Codable, Sendable {
     let items: [VocabularyGradingItem]
 }
+
+enum VocabularyGradingOutputBudget {
+    static func maxTokens(questionCount: Int) -> Int {
+        let count = max(0, questionCount)
+        return min(8_192, max(512, 256 + count * 160))
+    }
+}

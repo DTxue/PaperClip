@@ -37,6 +37,7 @@ extension ModelContext {
                     session.deckID == deckID
                     && (session.kind == "学习"
                         || session.kind == "测验"
+                        || session.kind == "英文释义手写"
                         || session.kind == "语境练习"
                         || session.kind == "test")
                 },

@@ -12,6 +12,19 @@ extension VocabularyTestView {
         let canStart = selectedMode.canStart(cardCount: snapshot.deckCards.count)
 
         return Form {
+            if handwritingTestKind == .englishDefinition {
+                Section {
+                    Label("题面显示单词，请手写词卡中保存的英文释义。", systemImage: "text.book.closed")
+                    Text("批阅只忽略大小写、首尾标点和多余空格；其他差异均判为错误。")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } footer: {
+                    if snapshot.deckCards.isEmpty {
+                        Text("当前词集没有已保存英文释义的词卡，请先在词集设置或词卡编辑中补充。")
+                    }
+                }
+            }
+
             Section("模式") {
                 Picker("测验模式", selection: $selectedMode) {
                     ForEach(VocabularyTestMode.setupModes) { mode in
@@ -92,7 +105,12 @@ extension VocabularyTestView {
                 } else if selectedMode == .debug {
                     Text("调试结果只在当前页面显示，退出后不会出现在历史记录中。")
                 } else {
-                    Text("使用 Apple Pencil 手写英文答案，完成后由 AI 统一批改。题量至少为\(deck.kind.collectionName)总数的 60%。")
+                    switch handwritingTestKind {
+                    case .spelling:
+                        Text("使用 Apple Pencil 手写英文答案，完成后由 AI 统一批改。题量至少为\(deck.kind.collectionName)总数的 60%。")
+                    case .englishDefinition:
+                        Text("AI 只识别笔迹，系统再与词卡英文释义严格比较。题量至少为可用词卡总数的 60%。")
+                    }
                 }
             }
         }

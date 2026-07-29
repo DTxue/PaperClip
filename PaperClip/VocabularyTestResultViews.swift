@@ -2,6 +2,7 @@ import SwiftUI
 
 struct VocabularyTestResultsView: View {
     let title: String
+    let handwritingTestKind: VocabularyHandwritingTestKind
     let questions: [VocabularyGradedQuestion]
     @Binding var enlargedImage: IdentifiableImage?
 
@@ -17,6 +18,7 @@ struct VocabularyTestResultsView: View {
                 ForEach(questions) { question in
                     VocabularyTestQuestionResultRow(
                         question: question,
+                        handwritingTestKind: handwritingTestKind,
                         enlargedImage: $enlargedImage
                     )
                     Divider()

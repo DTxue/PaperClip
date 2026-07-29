@@ -40,16 +40,19 @@ enum VocabularyStudySessionItemFactory {
 
     static func makeHandwritingTestAnswer(
         card: VocabularyCard,
+        prompt: String? = nil,
+        expectedAnswer: String? = nil,
         isCorrect: Bool,
         recognizedText: String,
-        comment: String
+        comment: String,
+        keepsRecognizedTextForCorrectAnswer: Bool = false
     ) -> VocabularyStudySessionItem {
         VocabularyStudySessionItem(
             cardID: card.id,
-            prompt: card.definition,
-            expectedAnswer: card.term,
+            prompt: prompt ?? card.definition,
+            expectedAnswer: expectedAnswer ?? card.term,
             isCorrect: isCorrect,
-            recognizedText: isCorrect ? "" : recognizedText,
+            recognizedText: isCorrect && !keepsRecognizedTextForCorrectAnswer ? "" : recognizedText,
             comment: comment
         )
     }

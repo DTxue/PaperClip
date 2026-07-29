@@ -489,6 +489,7 @@ run_swift_test VocabularyWordBankBuilderTests \
     Tests/VocabularyWordBankBuilderTests.swift
 
 run_swift_test VocabularyTestQuestionCountTests \
+    PaperClip/VocabularyCoreEnums.swift \
     PaperClip/VocabularyTestQuestionCount.swift \
     Tests/VocabularyTestQuestionCountTests.swift
 

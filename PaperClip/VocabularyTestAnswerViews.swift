@@ -69,13 +69,14 @@ extension VocabularyTestView {
                 )
             } else {
                 VocabularyTestResultsView(
-                    title: "测验完成",
+                    title: handwritingTestKind.completionTitle,
+                    handwritingTestKind: handwritingTestKind,
                     questions: snapshot.gradedQuestions,
                     enlargedImage: $enlargedImage
                 )
             }
         }
-        .navigationTitle("测验")
+        .navigationTitle(handwritingTestKind.navigationTitle)
         .toolbar {
         }
         .appAlert($alert)

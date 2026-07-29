@@ -2,7 +2,7 @@ import SwiftUI
 
 struct VocabularyStudySessionItemRow: View {
     let item: VocabularyStudySessionItem
-    let showsRecognizedError: Bool
+    let showsRecognizedText: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -19,9 +19,9 @@ struct VocabularyStudySessionItemRow: View {
             Text(item.expectedAnswer)
                 .font(.body.weight(.semibold))
 
-            if showsRecognizedError, let errorText {
-                LabeledContent("错误内容") {
-                    Text(errorText)
+            if showsRecognizedText, let recognizedText {
+                LabeledContent(item.isCorrect ? "识别结果" : "错误内容") {
+                    Text(recognizedText)
                         .multilineTextAlignment(.trailing)
                 }
             }
@@ -34,7 +34,7 @@ struct VocabularyStudySessionItemRow: View {
         .padding(.vertical, 6)
     }
 
-    private var errorText: String? {
+    private var recognizedText: String? {
         let recognized = item.recognizedText.trimmingCharacters(in: .whitespacesAndNewlines)
         return recognized.isEmpty ? nil : recognized
     }

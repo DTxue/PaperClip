@@ -7,10 +7,11 @@ extension VocabularyTestView {
         if let batch = batches.first {
             switch batch.status {
             case .grading, .retrying:
-                VocabularyTestGradingView(message: "AI 正在批改中…")
+                VocabularyTestGradingView(message: handwritingTestKind.gradingMessage)
             case .graded:
                 VocabularyTestResultsView(
-                    title: sessionMode == .debug ? "调试完成" : "测验完成",
+                    title: sessionMode == .debug ? "调试完成" : handwritingTestKind.completionTitle,
+                    handwritingTestKind: handwritingTestKind,
                     questions: snapshot.gradedQuestions,
                     enlargedImage: $enlargedImage
                 )
@@ -29,6 +30,7 @@ extension VocabularyTestView {
     func answeringView(_ snapshot: VocabularyTestViewSnapshot) -> some View {
         VocabularyTestAnsweringContentView(
             sessionMode: sessionMode,
+            handwritingTestKind: handwritingTestKind,
             snapshot: snapshot,
             batches: batches,
             activeBatch: activeBatch,

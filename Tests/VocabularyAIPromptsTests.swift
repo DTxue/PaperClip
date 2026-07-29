@@ -9,7 +9,9 @@ struct VocabularyAIPromptsTests {
         testDistractorPromptFallsBackForBlankHints()
         testDistractorPromptUsesWeightedBreakdown()
         testGradingQuestionTextMarksMissingAnswer()
-        print("VocabularyAIPromptsTests: 6 passed")
+        testGradingInstructionRequiresCompleteItems()
+        testHandwritingRecognitionPromptDoesNotExposeReferenceAnswer()
+        print("VocabularyAIPromptsTests: 8 passed")
     }
 
     private static func testArticlePromptUsesTheSelectedReadingPreset() {
@@ -113,6 +115,31 @@ struct VocabularyAIPromptsTests {
 
         expect(answered == "第1题\n中文含义：书\n正确英文：book")
         expect(missing == "第2题\n中文含义：笔\n正确英文：pen\n（未作答）")
+    }
+
+    private static func testGradingInstructionRequiresCompleteItems() {
+        let prompt = VocabularyAIPrompts.gradingInstruction(count: 6)
+
+        expect(prompt.contains("必须返回恰好 6 个 items"))
+        expect(prompt.contains("index 必须从 1 到 6 连续完整"))
+        expect(prompt.contains("每一道已作答题都不得为空"))
+        expect(prompt.contains(#""recognizedText":"answer""#))
+    }
+
+    private static func testHandwritingRecognitionPromptDoesNotExposeReferenceAnswer() {
+        let question = VocabularyAIPrompts.handwritingRecognitionQuestionText(
+            index: 0,
+            prompt: "deliberate",
+            hasAnswer: true
+        )
+        let instruction = VocabularyAIPrompts.handwritingRecognitionInstruction(count: 3)
+
+        expect(question.contains("题面：deliberate"))
+        expect(!question.contains("done consciously and intentionally"))
+        expect(instruction.contains("只识别"))
+        expect(instruction.contains("不要批改"))
+        expect(instruction.contains("恰好 3 个 items"))
+        expect(instruction.contains(#""recognizedText":"student handwriting""#))
     }
 
     private static func expect(
