@@ -46,6 +46,11 @@ struct VocabularyCardRowData: Identifiable, Equatable {
         ]
     }
 
+    var displayEnglishDefinition: String? {
+        let value = englishDefinition.trimmingCharacters(in: .whitespacesAndNewlines)
+        return value.isEmpty ? nil : value
+    }
+
     func matchesSearch(_ searchText: String) -> Bool {
         searchText.isEmpty
             || term.localizedCaseInsensitiveContains(searchText)

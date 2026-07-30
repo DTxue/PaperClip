@@ -5,7 +5,8 @@ struct VocabularyDeckSnapshotTests {
     static func main() {
         testSearchFiltersVisibleCards()
         testDueDirectionCountUsesInjectedDate()
-        print("VocabularyDeckSnapshotTests: 8 passed")
+        testEnglishDefinitionDisplayText()
+        print("VocabularyDeckSnapshotTests: 10 passed")
     }
 
     private static func testSearchFiltersVisibleCards() {
@@ -75,6 +76,24 @@ struct VocabularyDeckSnapshotTests {
         expect(card.matchesSearch("TERM"))
         expect(card.matchesSearch("def"))
         expect(!card.matchesSearch("missing"))
+    }
+
+    private static func testEnglishDefinitionDisplayText() {
+        let card = VocabularyCardRowData(
+            id: UUID(),
+            term: "deliberate",
+            definition: "故意的",
+            englishDefinition: "  done consciously and intentionally  "
+        )
+        let blankCard = VocabularyCardRowData(
+            id: UUID(),
+            term: "blank",
+            definition: "空白",
+            englishDefinition: " \n "
+        )
+
+        expect(card.displayEnglishDefinition == "done consciously and intentionally")
+        expect(blankCard.displayEnglishDefinition == nil)
     }
 
     private static func expect(

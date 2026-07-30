@@ -28,6 +28,13 @@ extension VocabularyDeckView {
                                         .foregroundStyle(.secondary)
                                 }
                             }
+                            if deck.kind.usesWordSpecificFeatures,
+                               let englishDefinition = card.displayEnglishDefinition {
+                                Text(englishDefinition)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.tint)
+                                    .lineLimit(2)
+                            }
                             Text(card.definition)
                                 .foregroundStyle(.secondary)
                             if deck.kind.usesWordSpecificFeatures, !card.example.isEmpty {
