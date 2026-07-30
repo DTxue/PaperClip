@@ -1,5 +1,15 @@
 import Foundation
 
+enum VocabularyTestQuestionSelectionStrategy: Equatable {
+    case prioritized
+    case random
+    case custom(cardIDs: Set<UUID>)
+
+    var usesReviewPriority: Bool {
+        self == .prioritized
+    }
+}
+
 enum VocabularyTestQuestionSelector {
     static func recentReviewLogLimit(cardCount: Int) -> Int {
         min(1_000, max(100, cardCount * 3))
@@ -50,5 +60,22 @@ enum VocabularyTestQuestionSelector {
         }
         topCandidates.sort { $0.priority > $1.priority }
         return topCandidates.map(\.card)
+    }
+
+    static func randomQuestions(
+        from deckCards: [VocabularyCard],
+        limit: Int,
+        shuffle: ([VocabularyCard]) -> [VocabularyCard] = { $0.shuffled() }
+    ) -> [VocabularyCard] {
+        let cappedLimit = min(max(0, limit), deckCards.count)
+        guard cappedLimit > 0 else { return [] }
+        return Array(shuffle(deckCards).prefix(cappedLimit))
+    }
+
+    static func customQuestions(
+        from deckCards: [VocabularyCard],
+        selectedCardIDs: Set<UUID>
+    ) -> [VocabularyCard] {
+        deckCards.filter { selectedCardIDs.contains($0.id) }
     }
 }

@@ -7,8 +7,10 @@ struct VocabularyTestQuestionSelectorTests {
         testNewCardsRankBeforeReviewedCards()
         testLatestAgainLogRanksAheadOfLatestGoodLog()
         testPriorityUsesLatestReviewLog()
+        testRandomQuestionsUseShuffledOrderAndLimit()
+        testCustomQuestionsKeepOnlySelectedCardsInDeckOrder()
         testAnsweringActionTitles()
-        print("VocabularyTestQuestionSelectorTests: 5 passed")
+        print("VocabularyTestQuestionSelectorTests: 7 passed")
     }
 
     private static func testRecentReviewLogLimitBounds() {
@@ -79,6 +81,41 @@ struct VocabularyTestQuestionSelectorTests {
         )
 
         expect(olderAgainPriority.priority(for: card, now: now) > priorities.priority(for: card, now: now))
+    }
+
+    private static func testRandomQuestionsUseShuffledOrderAndLimit() {
+        let deckID = UUID()
+        let cards = [
+            makeCard(deckID: deckID, term: "first"),
+            makeCard(deckID: deckID, term: "second"),
+            makeCard(deckID: deckID, term: "third")
+        ]
+
+        let selected = VocabularyTestQuestionSelector.randomQuestions(
+            from: cards,
+            limit: 2,
+            shuffle: { Array($0.reversed()) }
+        )
+
+        expect(selected.map(\.term) == ["third", "second"])
+        expect(VocabularyTestQuestionSelector.randomQuestions(from: cards, limit: 0).isEmpty)
+        expect(VocabularyTestQuestionSelector.randomQuestions(from: [], limit: 2).isEmpty)
+    }
+
+    private static func testCustomQuestionsKeepOnlySelectedCardsInDeckOrder() {
+        let deckID = UUID()
+        let cards = [
+            makeCard(deckID: deckID, term: "first"),
+            makeCard(deckID: deckID, term: "second"),
+            makeCard(deckID: deckID, term: "third")
+        ]
+
+        let selected = VocabularyTestQuestionSelector.customQuestions(
+            from: cards,
+            selectedCardIDs: [cards[0].id, cards[2].id]
+        )
+
+        expect(selected.map(\.term) == ["first", "third"])
     }
 
     private static func testAnsweringActionTitles() {

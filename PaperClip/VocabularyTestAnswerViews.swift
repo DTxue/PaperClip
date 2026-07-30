@@ -35,6 +35,40 @@ extension VocabularyTestView {
         )
     }
 
+    func englishDefinitionQuestionCountStepperValue(maximumQuestionCount: Int) -> Binding<Int> {
+        Binding(
+            get: {
+                VocabularyEnglishDefinitionQuestionCount.clamped(
+                    questionCount,
+                    maximumQuestionCount: maximumQuestionCount
+                )
+            },
+            set: {
+                questionCount = VocabularyEnglishDefinitionQuestionCount.clamped(
+                    $0,
+                    maximumQuestionCount: maximumQuestionCount
+                )
+            }
+        )
+    }
+
+    func englishDefinitionQuestionCountSliderValue(maximumQuestionCount: Int) -> Binding<Double> {
+        Binding(
+            get: {
+                Double(VocabularyEnglishDefinitionQuestionCount.clamped(
+                    questionCount,
+                    maximumQuestionCount: maximumQuestionCount
+                ))
+            },
+            set: {
+                questionCount = VocabularyEnglishDefinitionQuestionCount.clamped(
+                    Int($0.rounded()),
+                    maximumQuestionCount: maximumQuestionCount
+                )
+            }
+        )
+    }
+
     var activeBatch: VocabularyTestBatch? {
         guard batches.indices.contains(currentBatchIndex) else { return nil }
         return batches[currentBatchIndex]

@@ -14,8 +14,11 @@ struct VocabularyTestQuestionCountTests {
         testDebugModeRequiresFiveCards()
         testEnglishDefinitionHandwritingUsesStoredDefinition()
         testEnglishDefinitionHandwritingRequiresStoredDefinition()
+        testEnglishDefinitionHandwritingOffersCustomAndRandomModes()
+        testEnglishDefinitionQuestionCountUsesFixedMinimum()
+        testSessionSelectionStrategiesResolveTheirOwnQuestionCounts()
         testSpellingHandwritingKeepsExistingPromptAndAnswer()
-        print("VocabularyTestQuestionCountTests: 49 passed")
+        print("VocabularyTestQuestionCountTests: 71 passed")
     }
 
     private static func testClampedQuestionCountBounds() {
@@ -123,6 +126,75 @@ struct VocabularyTestQuestionCountTests {
         expect(!kind.isEligible(englishDefinition: ""))
         expect(!kind.isEligible(englishDefinition: "   \n"))
         expect(kind.isEligible(englishDefinition: "a short pause"))
+    }
+
+    private static func testEnglishDefinitionHandwritingOffersCustomAndRandomModes() {
+        expect(VocabularyEnglishDefinitionTestMode.allCases == [.custom, .random])
+        expect(VocabularyEnglishDefinitionTestMode.custom.rawValue == "自定义选择")
+        expect(VocabularyEnglishDefinitionTestMode.random.rawValue == "随机检测")
+    }
+
+    private static func testEnglishDefinitionQuestionCountUsesFixedMinimum() {
+        expect(VocabularyEnglishDefinitionQuestionCount.minimum == 5)
+        expect(!VocabularyEnglishDefinitionQuestionCount.canStart(availableQuestionCount: 4))
+        expect(VocabularyEnglishDefinitionQuestionCount.canStart(availableQuestionCount: 5))
+        expect(VocabularyEnglishDefinitionQuestionCount.clamped(1, maximumQuestionCount: 100) == 5)
+        expect(VocabularyEnglishDefinitionQuestionCount.clamped(4, maximumQuestionCount: 10) == 5)
+        expect(VocabularyEnglishDefinitionQuestionCount.clamped(7, maximumQuestionCount: 10) == 7)
+        expect(VocabularyEnglishDefinitionQuestionCount.clamped(80, maximumQuestionCount: 100) == 80)
+        expect(VocabularyEnglishDefinitionQuestionCount.clamped(120, maximumQuestionCount: 100) == 100)
+        expect(VocabularyEnglishDefinitionQuestionCount.selectableRange(maximumQuestionCount: 4) == 5...5)
+        expect(VocabularyEnglishDefinitionQuestionCount.selectableRange(maximumQuestionCount: 5) == 5...5)
+        expect(VocabularyEnglishDefinitionQuestionCount.selectableRange(maximumQuestionCount: 100) == 5...100)
+        expect(!VocabularyEnglishDefinitionQuestionCount.allowsSlider(maximumQuestionCount: 5))
+        expect(VocabularyEnglishDefinitionQuestionCount.allowsSlider(maximumQuestionCount: 6))
+    }
+
+    private static func testSessionSelectionStrategiesResolveTheirOwnQuestionCounts() {
+        expect(
+            VocabularyTestSessionQuestionCountPolicy.standard.resolvedQuestionCount(
+                requestedQuestionCount: 1,
+                maximumQuestionCount: 100,
+                mode: .regular
+            ) == 60
+        )
+        expect(
+            VocabularyTestSessionQuestionCountPolicy.standard.resolvedQuestionCount(
+                requestedQuestionCount: 1,
+                maximumQuestionCount: 100,
+                mode: .debug
+            ) == 5
+        )
+        expect(
+            VocabularyTestSessionQuestionCountPolicy.englishDefinitionRandom.resolvedQuestionCount(
+                requestedQuestionCount: 1,
+                maximumQuestionCount: 100,
+                mode: .regular
+            ) == 5
+        )
+        expect(
+            VocabularyTestSessionQuestionCountPolicy.englishDefinitionRandom.resolvedQuestionCount(
+                requestedQuestionCount: 80,
+                maximumQuestionCount: 100,
+                mode: .regular
+            ) == 80
+        )
+        expect(
+            VocabularyTestSessionQuestionCountPolicy.englishDefinitionCustom.resolvedQuestionCount(
+                requestedQuestionCount: 5,
+                maximumQuestionCount: 100,
+                customSelectionCount: 7,
+                mode: .regular
+            ) == 7
+        )
+        expect(
+            VocabularyTestSessionQuestionCountPolicy.englishDefinitionCustom.resolvedQuestionCount(
+                requestedQuestionCount: 5,
+                maximumQuestionCount: 5,
+                customSelectionCount: 7,
+                mode: .regular
+            ) == 5
+        )
     }
 
     private static func testSpellingHandwritingKeepsExistingPromptAndAnswer() {

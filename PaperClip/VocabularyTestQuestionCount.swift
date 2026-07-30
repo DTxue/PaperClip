@@ -52,6 +52,62 @@ enum VocabularyHandwritingTestKind: String, CaseIterable, Identifiable, Sendable
     }
 }
 
+enum VocabularyEnglishDefinitionTestMode: String, CaseIterable, Identifiable, Sendable {
+    case custom = "自定义选择"
+    case random = "随机检测"
+
+    var id: String { rawValue }
+}
+
+enum VocabularyTestSessionQuestionCountPolicy {
+    case standard
+    case englishDefinitionRandom
+    case englishDefinitionCustom
+
+    func resolvedQuestionCount(
+        requestedQuestionCount: Int,
+        maximumQuestionCount: Int,
+        customSelectionCount: Int = 0,
+        mode: VocabularyTestMode
+    ) -> Int {
+        switch self {
+        case .standard:
+            mode.resolvedQuestionCount(
+                requestedQuestionCount: requestedQuestionCount,
+                maximumQuestionCount: maximumQuestionCount
+            )
+        case .englishDefinitionRandom:
+            VocabularyEnglishDefinitionQuestionCount.clamped(
+                requestedQuestionCount,
+                maximumQuestionCount: maximumQuestionCount
+            )
+        case .englishDefinitionCustom:
+            min(max(0, customSelectionCount), max(0, maximumQuestionCount))
+        }
+    }
+}
+
+enum VocabularyEnglishDefinitionQuestionCount {
+    static let minimum = 5
+
+    static func canStart(availableQuestionCount: Int) -> Bool {
+        availableQuestionCount >= minimum
+    }
+
+    static func clamped(_ count: Int, maximumQuestionCount: Int) -> Int {
+        guard maximumQuestionCount >= minimum else { return minimum }
+        return min(maximumQuestionCount, max(minimum, count))
+    }
+
+    static func selectableRange(maximumQuestionCount: Int) -> ClosedRange<Int> {
+        minimum...max(minimum, maximumQuestionCount)
+    }
+
+    static func allowsSlider(maximumQuestionCount: Int) -> Bool {
+        maximumQuestionCount > minimum
+    }
+}
+
 enum VocabularyTestMode: String, CaseIterable, Identifiable {
     case regular = "常规"
     case exam = "考试"

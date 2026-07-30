@@ -11,6 +11,8 @@ struct VocabularyTestView: View {
     @State var allCards: [VocabularyCard] = []
     @State var states: [VocabularyMemoryState] = []
     @State var selectedMode: VocabularyTestMode = .regular
+    @State var englishDefinitionTestMode: VocabularyEnglishDefinitionTestMode = .random
+    @State var selectedEnglishDefinitionCardIDs: Set<UUID> = []
     @State var sessionMode: VocabularyTestMode?
     @State var questionCount = 5
     @State var latestDraft: VocabularyTestDraft?
