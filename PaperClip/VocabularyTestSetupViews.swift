@@ -199,7 +199,7 @@ extension VocabularyTestView {
                 } else if selectedMode == .debug {
                     Text("调试结果只在当前页面显示，退出后不会出现在历史记录中。")
                 } else {
-                    Text("使用 Apple Pencil 手写英文答案，完成后由 AI 统一批改。题量至少为\(deck.kind.collectionName)总数的 60%。")
+                    Text("使用 Apple Pencil 手写英文答案，完成后由 AI 统一批改。题量最少为 10 题；\(deck.kind.collectionName)不足 10 题时使用全部题目。")
                 }
             }
         }

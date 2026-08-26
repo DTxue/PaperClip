@@ -4,7 +4,7 @@ import Foundation
 struct VocabularyTestQuestionCountTests {
     static func main() {
         testClampedQuestionCountBounds()
-        testMinimumQuestionCountUsesSixtyPercent()
+        testMinimumQuestionCountUsesTenOrAvailableTotal()
         testClampedQuestionCountRespectsMinimum()
         testBatchCardCountsAreSummedBeforeClamping()
         testSliderRequiresNonDegenerateRange()
@@ -34,37 +34,41 @@ struct VocabularyTestQuestionCountTests {
         expect(VocabularyTestQuestionCount.maximum(inBatchCardCounts: [2, 3, 6]) == 11)
     }
 
-    private static func testMinimumQuestionCountUsesSixtyPercent() {
+    private static func testMinimumQuestionCountUsesTenOrAvailableTotal() {
         expect(VocabularyTestQuestionCount.minimum(maximumQuestionCount: 1) == 1)
         expect(VocabularyTestQuestionCount.minimum(maximumQuestionCount: 2) == 2)
-        expect(VocabularyTestQuestionCount.minimum(maximumQuestionCount: 3) == 2)
-        expect(VocabularyTestQuestionCount.minimum(maximumQuestionCount: 5) == 3)
-        expect(VocabularyTestQuestionCount.minimum(maximumQuestionCount: 10) == 6)
-        expect(VocabularyTestQuestionCount.minimum(maximumQuestionCount: 100) == 60)
+        expect(VocabularyTestQuestionCount.minimum(maximumQuestionCount: 3) == 3)
+        expect(VocabularyTestQuestionCount.minimum(maximumQuestionCount: 5) == 5)
+        expect(VocabularyTestQuestionCount.minimum(maximumQuestionCount: 10) == 10)
+        expect(VocabularyTestQuestionCount.minimum(maximumQuestionCount: 100) == 10)
     }
 
     private static func testClampedQuestionCountRespectsMinimum() {
-        expect(VocabularyTestQuestionCount.clamped(1, maximumQuestionCount: 10) == 6)
-        expect(VocabularyTestQuestionCount.clamped(5, maximumQuestionCount: 10) == 6)
-        expect(VocabularyTestQuestionCount.clamped(7, maximumQuestionCount: 10) == 7)
+        expect(VocabularyTestQuestionCount.clamped(1, maximumQuestionCount: 10) == 10)
+        expect(VocabularyTestQuestionCount.clamped(5, maximumQuestionCount: 10) == 10)
+        expect(VocabularyTestQuestionCount.clamped(7, maximumQuestionCount: 10) == 10)
         expect(VocabularyTestQuestionCount.clamped(12, maximumQuestionCount: 10) == 10)
-        expect(VocabularyTestQuestionCount.clamped(1, maximumQuestionCount: 3) == 2)
-        expect(VocabularyTestQuestionCount.clamped(6, maximumQuestionCount: 100) == 60)
+        expect(VocabularyTestQuestionCount.clamped(1, maximumQuestionCount: 3) == 3)
+        expect(VocabularyTestQuestionCount.clamped(6, maximumQuestionCount: 100) == 10)
     }
 
     private static func testSliderRequiresNonDegenerateRange() {
         expect(!VocabularyTestQuestionCount.allowsSlider(maximumQuestionCount: 0))
         expect(!VocabularyTestQuestionCount.allowsSlider(maximumQuestionCount: 1))
-        expect(!VocabularyTestQuestionCount.allowsSlider(maximumQuestionCount: 2))
-        expect(VocabularyTestQuestionCount.allowsSlider(maximumQuestionCount: 3))
+        expect(!VocabularyTestQuestionCount.allowsSlider(maximumQuestionCount: 9))
+        expect(!VocabularyTestQuestionCount.allowsSlider(maximumQuestionCount: 10))
+        expect(VocabularyTestQuestionCount.allowsSlider(maximumQuestionCount: 11))
     }
 
     private static func testSelectableRangeSupportsDiscreteAdjustment() {
         expect(
-            VocabularyTestQuestionCount.selectableRange(maximumQuestionCount: 10) == 6...10
+            VocabularyTestQuestionCount.selectableRange(maximumQuestionCount: 100) == 10...100
         )
         expect(
-            VocabularyTestQuestionCount.selectableRange(maximumQuestionCount: 3) == 2...3
+            VocabularyTestQuestionCount.selectableRange(maximumQuestionCount: 10) == 10...10
+        )
+        expect(
+            VocabularyTestQuestionCount.selectableRange(maximumQuestionCount: 3) == 3...3
         )
         expect(
             VocabularyTestQuestionCount.selectableRange(maximumQuestionCount: 1) == 1...1
@@ -156,7 +160,7 @@ struct VocabularyTestQuestionCountTests {
                 requestedQuestionCount: 1,
                 maximumQuestionCount: 100,
                 mode: .regular
-            ) == 60
+            ) == 10
         )
         expect(
             VocabularyTestSessionQuestionCountPolicy.standard.resolvedQuestionCount(

@@ -145,7 +145,7 @@ enum VocabularyTestMode: String, CaseIterable, Identifiable {
 }
 
 enum VocabularyTestQuestionCount {
-    static let minimumRatio = 0.6
+    static let minimumQuestionCount = 10
 
     static func clamped(_ count: Int) -> Int {
         max(1, count)
@@ -153,7 +153,7 @@ enum VocabularyTestQuestionCount {
 
     static func minimum(maximumQuestionCount: Int) -> Int {
         let maximumQuestionCount = clamped(maximumQuestionCount)
-        return max(1, Int(ceil(Double(maximumQuestionCount) * minimumRatio)))
+        return min(minimumQuestionCount, maximumQuestionCount)
     }
 
     static func clamped(_ count: Int, maximumQuestionCount: Int) -> Int {
