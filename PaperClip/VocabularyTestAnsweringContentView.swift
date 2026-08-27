@@ -14,7 +14,6 @@ struct VocabularyTestAnsweringContentView: View {
     let answerCanvasSession: VocabularyAnswerCanvasSession
     let currentDrawingReloadToken: Int
     let didFinishAnswering: Bool
-    let onAdvance: () -> Void
     let onDrawingChanged: () -> Void
 
     var body: some View {
@@ -40,11 +39,6 @@ struct VocabularyTestAnsweringContentView: View {
                     session: answerCanvasSession,
                     reloadToken: currentDrawingReloadToken
                 )
-                VocabularyAnswerAdvanceButton(
-                    title: actionTitle,
-                    isLastInBatch: isLastInBatch,
-                    onAdvance: onAdvance
-                )
             }
 
             Spacer()
@@ -57,22 +51,6 @@ struct VocabularyTestAnsweringContentView: View {
 
     private var isExam: Bool {
         sessionMode == .exam
-    }
-
-    private var isLastInBatch: Bool {
-        currentIndex + 1 == (activeBatch?.cards.count ?? 0)
-    }
-
-    private var isLastBatch: Bool {
-        currentBatchIndex + 1 == batches.count
-    }
-
-    private var actionTitle: String {
-        VocabularyAnsweringActionTitle.title(
-            isExam: isExam,
-            isLastInBatch: isLastInBatch,
-            isLastBatch: isLastBatch
-        )
     }
 
     @ViewBuilder

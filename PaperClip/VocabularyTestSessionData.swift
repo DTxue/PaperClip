@@ -3,6 +3,8 @@ import PencilKit
 
 extension VocabularyTestView {
     func startTest() {
+        dismissAnswerAdvanceUndo()
+        isConfirmingEmptyAnswer = false
         fetchSessionData()
 
         let selectionStrategy: VocabularyTestQuestionSelectionStrategy
@@ -127,6 +129,8 @@ extension VocabularyTestView {
         guard sessionMode == .exam else { return }
         guard saveDraft() else { return }
 
+        dismissAnswerAdvanceUndo()
+        isConfirmingEmptyAnswer = false
         cancelGradingTasks()
         refreshLatestDraft()
         selectedMode = .exam

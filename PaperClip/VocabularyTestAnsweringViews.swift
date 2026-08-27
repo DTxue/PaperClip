@@ -41,8 +41,7 @@ extension VocabularyTestView {
             answerCanvasSession: answerCanvasSession,
             currentDrawingReloadToken: currentDrawingReloadToken,
             didFinishAnswering: didFinishAnswering,
-            onAdvance: advanceQuestion,
-            onDrawingChanged: scheduleDraftSave
+            onDrawingChanged: handleAnswerDrawingChanged
         )
     }
 

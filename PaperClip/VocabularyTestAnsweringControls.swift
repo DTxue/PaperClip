@@ -1,5 +1,6 @@
 import SwiftUI
 import PencilKit
+import UIKit
 
 struct VocabularyTestDefinitionCard: View {
     let definition: String
@@ -14,16 +15,79 @@ struct VocabularyTestDefinitionCard: View {
     }
 }
 
-struct VocabularyAnswerAdvanceButton: View {
+struct VocabularyPencilOnlyActionButton: UIViewRepresentable {
     let title: String
-    let isLastInBatch: Bool
-    let onAdvance: () -> Void
+    let systemImage: String
+    let action: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(action: action)
+    }
+
+    func makeUIView(context: Context) -> VocabularyPencilOnlyButton {
+        let button = VocabularyPencilOnlyButton(type: .system)
+        button.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.activate),
+            for: .touchUpInside
+        )
+        return button
+    }
+
+    func updateUIView(_ button: VocabularyPencilOnlyButton, context: Context) {
+        context.coordinator.action = action
+        var configuration = UIButton.Configuration.plain()
+        configuration.title = title
+        configuration.image = UIImage(systemName: systemImage)
+        configuration.imagePlacement = .trailing
+        configuration.imagePadding = 6
+        button.configuration = configuration
+        button.accessibilityLabel = title
+        button.accessibilityHint = "使用 Apple Pencil 点击"
+    }
+
+    @MainActor
+    final class Coordinator: NSObject {
+        var action: () -> Void
+
+        init(action: @escaping () -> Void) {
+            self.action = action
+        }
+
+        @objc func activate() {
+            action()
+        }
+    }
+}
+
+final class VocabularyPencilOnlyButton: UIButton {
+    override func beginTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
+        guard touch.type == .pencil else { return false }
+        return super.beginTracking(touch, with: event)
+    }
+
+    override func accessibilityActivate() -> Bool {
+        sendActions(for: .touchUpInside)
+        return true
+    }
+}
+
+struct VocabularyAnswerAdvanceUndoBanner: View {
+    let undo: () -> Void
 
     var body: some View {
-        Button(title, systemImage: isLastInBatch ? "checkmark.circle.fill" : "arrow.right") {
-            onAdvance()
+        HStack(spacing: 12) {
+            Label("已进入下一题", systemImage: "arrow.right.circle")
+            Divider()
+                .frame(height: 20)
+            Button("撤销", action: undo)
+                .fontWeight(.semibold)
         }
-        .buttonStyle(.borderedProminent)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
+        .background(.regularMaterial, in: Capsule())
+        .shadow(radius: 8, y: 3)
+        .accessibilityElement(children: .contain)
     }
 }
 

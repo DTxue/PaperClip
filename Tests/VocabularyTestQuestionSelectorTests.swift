@@ -10,7 +10,9 @@ struct VocabularyTestQuestionSelectorTests {
         testRandomQuestionsUseShuffledOrderAndLimit()
         testCustomQuestionsKeepOnlySelectedCardsInDeckOrder()
         testAnsweringActionTitles()
-        print("VocabularyTestQuestionSelectorTests: 7 passed")
+        testEmptyAnswerRequiresConfirmation()
+        testAdvanceUndoTargetsOnlyTheImmediatelyPreviousAnswer()
+        print("VocabularyTestQuestionSelectorTests: 9 passed")
     }
 
     private static func testRecentReviewLogLimitBounds() {
@@ -139,6 +141,41 @@ struct VocabularyTestQuestionSelectorTests {
             isLastInBatch: true,
             isLastBatch: true
         ) == "提交全卷")
+    }
+
+    private static func testEmptyAnswerRequiresConfirmation() {
+        expect(VocabularyAnswerAdvancePolicy.requiresConfirmation(hasInk: false))
+        expect(!VocabularyAnswerAdvancePolicy.requiresConfirmation(hasInk: true))
+    }
+
+    private static func testAdvanceUndoTargetsOnlyTheImmediatelyPreviousAnswer() {
+        let target = VocabularyAnswerAdvancePolicy.undoTarget(
+            batchIndex: 2,
+            answeredQuestionIndex: 4,
+            drawingIndex: 4,
+            isLastInBatch: false
+        )
+
+        expect(VocabularyAnswerAdvancePolicy.undoDuration == .seconds(3))
+        expect(target != nil)
+        expect(target?.canRestore(
+            currentBatchIndex: 2,
+            currentQuestionIndex: 5,
+            currentAnswerHasInk: false,
+            storedDrawingCount: 5
+        ) == true)
+        expect(target?.canRestore(
+            currentBatchIndex: 2,
+            currentQuestionIndex: 5,
+            currentAnswerHasInk: true,
+            storedDrawingCount: 5
+        ) == false)
+        expect(VocabularyAnswerAdvancePolicy.undoTarget(
+            batchIndex: 2,
+            answeredQuestionIndex: 4,
+            drawingIndex: 4,
+            isLastInBatch: true
+        ) == nil)
     }
 
     private static func makeCard(deckID: UUID, term: String) -> VocabularyCard {

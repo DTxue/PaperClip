@@ -29,6 +29,9 @@ struct VocabularyTestView: View {
     @State var draftSaveAction = DebouncedAction()
     @State var draftDrawingDataCache = VocabularyDraftDrawingDataCache()
     @State var gradingTaskStore = VocabularyTestGradingTaskStore()
+    @State var answerAdvanceUndoTarget: VocabularyAnswerAdvanceUndoTarget?
+    @State var answerAdvanceUndoDismissAction = DebouncedAction()
+    @State var isConfirmingEmptyAnswer = false
     @State var alert: AppAlert?
 
     init(

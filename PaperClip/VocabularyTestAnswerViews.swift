@@ -112,16 +112,74 @@ extension VocabularyTestView {
         }
         .navigationTitle(handwritingTestKind.navigationTitle)
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if showsAnswerAdvanceAction {
+                    if isLastQuestionInActiveBatch {
+                        Button(answerAdvanceActionTitle, systemImage: "checkmark.circle.fill") {
+                            requestAdvanceQuestion()
+                        }
+                    } else {
+                        VocabularyPencilOnlyActionButton(
+                            title: answerAdvanceActionTitle,
+                            systemImage: "arrow.right",
+                            action: requestAdvanceQuestion
+                        )
+                    }
+                }
+            }
         }
+        .confirmationDialog(
+            "当前题尚未作答",
+            isPresented: $isConfirmingEmptyAnswer,
+            titleVisibility: .visible
+        ) {
+            Button(emptyAnswerConfirmationActionTitle) {
+                advanceQuestion()
+            }
+            Button("继续作答", role: .cancel) {}
+        } message: {
+            Text("没有检测到手写内容。确认后将以空白答案继续。")
+        }
+        .overlay(alignment: .bottom) {
+            if answerAdvanceUndoTarget != nil {
+                VocabularyAnswerAdvanceUndoBanner(undo: undoLastAnswerAdvance)
+                    .padding(.bottom, 24)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: answerAdvanceUndoTarget)
         .appAlert($alert)
         .task(id: deck.id) {
             fetchSessionData()
         }
         .onDisappear {
             draftSaveAction.cancel()
+            dismissAnswerAdvanceUndo()
             cancelGradingTasks()
             saveDraft()
         }
+    }
+
+    var showsAnswerAdvanceAction: Bool {
+        !didFinishAnswering
+            && currentCard != nil
+            && activeBatch?.status == .answering
+    }
+
+    var isLastQuestionInActiveBatch: Bool {
+        currentIndex + 1 == (activeBatch?.cards.count ?? 0)
+    }
+
+    var answerAdvanceActionTitle: String {
+        VocabularyAnsweringActionTitle.title(
+            isExam: sessionMode == .exam,
+            isLastInBatch: isLastQuestionInActiveBatch,
+            isLastBatch: currentBatchIndex + 1 == batches.count
+        )
+    }
+
+    var emptyAnswerConfirmationActionTitle: String {
+        isLastQuestionInActiveBatch ? answerAdvanceActionTitle : "跳过并进入下一题"
     }
 
     var showsExamExitButton: Bool {

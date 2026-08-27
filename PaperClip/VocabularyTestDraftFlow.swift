@@ -1,5 +1,7 @@
 extension VocabularyTestView {
     func restoreDraft(_ draft: VocabularyTestDraft) {
+        dismissAnswerAdvanceUndo()
+        isConfirmingEmptyAnswer = false
         fetchSessionData()
         restartGradingSession()
         guard let restoredDraft = VocabularyTestDraftRestorer.restore(draft: draft, cards: allCards) else {

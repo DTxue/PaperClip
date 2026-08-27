@@ -71,6 +71,10 @@ final class VocabularyDraftDrawingDataCache {
         return data
     }
 
+    func removeValue(for key: VocabularyDraftDrawingKey) {
+        dataByDrawingKey[key] = nil
+    }
+
     func removeAll() {
         dataByDrawingKey.removeAll(keepingCapacity: true)
     }
