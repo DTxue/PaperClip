@@ -73,15 +73,20 @@ final class VocabularyPencilOnlyButton: UIButton {
 }
 
 struct VocabularyAnswerAdvanceUndoBanner: View {
+    let canUndo: Bool
     let undo: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
-            Label("已进入下一题", systemImage: "arrow.right.circle")
+            Label(
+                canUndo ? "已进入下一题" : "新题已开始作答",
+                systemImage: canUndo ? "arrow.right.circle" : "pencil.line"
+            )
             Divider()
                 .frame(height: 20)
             Button("撤销", action: undo)
                 .fontWeight(.semibold)
+                .disabled(!canUndo)
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 12)

@@ -142,7 +142,10 @@ extension VocabularyTestView {
         }
         .overlay(alignment: .bottom) {
             if answerAdvanceUndoTarget != nil {
-                VocabularyAnswerAdvanceUndoBanner(undo: undoLastAnswerAdvance)
+                VocabularyAnswerAdvanceUndoBanner(
+                    canUndo: canUndoLastAnswerAdvance,
+                    undo: undoLastAnswerAdvance
+                )
                     .padding(.bottom, 24)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
@@ -180,6 +183,17 @@ extension VocabularyTestView {
 
     var emptyAnswerConfirmationActionTitle: String {
         isLastQuestionInActiveBatch ? answerAdvanceActionTitle : "跳过并进入下一题"
+    }
+
+    var canUndoLastAnswerAdvance: Bool {
+        guard let target = answerAdvanceUndoTarget,
+              batches.indices.contains(target.batchIndex) else { return false }
+        return target.canRestore(
+            currentBatchIndex: currentBatchIndex,
+            currentQuestionIndex: currentIndex,
+            currentAnswerHasInk: DrawingDataSupport.hasInk(currentDrawing),
+            storedDrawingCount: batches[target.batchIndex].drawings.count
+        )
     }
 
     var showsExamExitButton: Bool {
