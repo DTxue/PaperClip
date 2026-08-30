@@ -5,15 +5,10 @@ extension VocabularyFlashcardView {
         DragGesture(minimumDistance: 12)
             .updating($activeDrag) { value, state, _ in
                 guard !isAnimatingSwipe else { return }
-                if state.axis == .undecided {
-                    state.axis = abs(value.translation.width) >= abs(value.translation.height)
-                        ? .horizontal
-                        : .vertical
-                }
-                guard state.axis == .horizontal else { return }
-                state.translation = CGSize(
-                    width: value.translation.width,
-                    height: value.translation.height * 0.08
+                state = VocabularyFlashcardDragSupport.updatedState(
+                    from: state,
+                    translationWidth: value.translation.width,
+                    translationHeight: value.translation.height
                 )
             }
             .onEnded { value in

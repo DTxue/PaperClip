@@ -89,7 +89,7 @@ extension VocabularyFlashcardView {
         .scaleEffect(swipeCardScale)
         .opacity(cardEntryOpacity * swipeCardOpacity)
         .offset(x: cardOffset.width + cardEntryOffset, y: cardOffset.height)
-        .gesture(swipeGesture(cardID: card.id))
+        .simultaneousGesture(swipeGesture(cardID: card.id))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(isRevealed ? "\(prompt(for: card))，答案：\(answer(for: card))" : prompt(for: card))
         .accessibilityHint(isRevealed ? "选择忘记、困难、记得或简单" : "轻点显示答案")

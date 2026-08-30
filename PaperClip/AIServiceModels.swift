@@ -8,7 +8,7 @@ enum AIAnswerModel: String, CaseIterable, Identifiable, Sendable {
 
     var title: String {
         switch self {
-        case .doubao: "豆包 Seed 2.0 Pro"
+        case .doubao: "豆包 Seed 2.1 Pro"
         case .deepSeek: "DeepSeek V4 Pro"
         }
     }
@@ -29,8 +29,8 @@ enum AIAnswerModel: String, CaseIterable, Identifiable, Sendable {
 
     var summary: String {
         switch self {
-        case .doubao: "速度快，适合常规题目"
-        case .deepSeek: "深度推理，适合复杂数学与理科题"
+        case .doubao: "多模态理解"
+        case .deepSeek: "深度推理"
         }
     }
 }
@@ -43,15 +43,6 @@ struct AIRequestConfiguration: Equatable {
 
     var usesDeepThinking: Bool {
         thinking == "enabled"
-    }
-
-    static func answer(model: AIAnswerModel) -> AIRequestConfiguration {
-        AIRequestConfiguration(
-            model: model,
-            thinking: model == .deepSeek ? "enabled" : "disabled",
-            maxOutputTokens: model == .deepSeek ? 16_384 : 8_192,
-            modelName: model.title
-        )
     }
 
     static func diary(model: AIAnswerModel) -> AIRequestConfiguration {

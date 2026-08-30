@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class DiaryEntry {
     var id: UUID
@@ -87,3 +88,7 @@ final class KnowledgeItem {
         self.diaryEntry = entry
     }
 }
+}
+
+typealias DiaryEntry = PaperClipSchemaV1.DiaryEntry
+typealias KnowledgeItem = PaperClipSchemaV1.KnowledgeItem

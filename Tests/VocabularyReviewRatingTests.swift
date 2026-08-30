@@ -88,6 +88,23 @@ struct VocabularyReviewRatingTests {
             "short horizontal drag resets"
         )
 
+        let horizontalDrag = VocabularyFlashcardDragSupport.updatedState(
+            from: .inactive,
+            translationWidth: 90,
+            translationHeight: 20
+        )
+        assert(horizontalDrag.axis == .horizontal, "horizontal drag should lock the swipe axis")
+        assert(horizontalDrag.translation.width == 90, "horizontal drag should move the card")
+        assertAlmostEqual(horizontalDrag.translation.height, 1.6, "vertical movement should be damped")
+
+        let verticalDrag = VocabularyFlashcardDragSupport.updatedState(
+            from: .inactive,
+            translationWidth: 20,
+            translationHeight: 90
+        )
+        assert(verticalDrag.axis == .vertical, "vertical drag should lock the vertical axis")
+        assert(verticalDrag.translation == .zero, "vertical drag should not move the card")
+
         let neutral = VocabularyFlashcardSwipePresentation(width: 0)
         assertAlmostEqual(neutral.cardScale, 1, "neutral card keeps full scale")
         assertAlmostEqual(neutral.colorProgress, 0, "neutral card has no color progress")
@@ -104,7 +121,7 @@ struct VocabularyReviewRatingTests {
         assertAlmostEqual(far.colorProgress, 1, "color progress is capped")
         assertAlmostEqual(far.cardOpacity, 0, "far swiped card fades out")
 
-        print("VocabularyReviewRatingTests: 21 passed")
+        print("VocabularyReviewRatingTests: 27 passed")
     }
 
     private static func assertAlmostEqual(

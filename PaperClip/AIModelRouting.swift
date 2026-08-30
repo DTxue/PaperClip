@@ -8,12 +8,13 @@ enum AIModelProvider {
 enum AIModelRouting {
     static func migratedDoubaoInferenceID(
         _ value: String?,
-        defaultID: String
+        defaultID: String,
+        legacyIDs: Set<String> = []
     ) -> String {
         guard let value else { return defaultID }
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalized = trimmed.lowercased()
-        if normalized.isEmpty || normalized.hasPrefix("doubao-") {
+        if normalized.isEmpty || legacyIDs.contains(normalized) {
             return defaultID
         }
         return trimmed

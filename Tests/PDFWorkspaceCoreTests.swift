@@ -19,10 +19,11 @@ struct PDFWorkspaceCoreTests {
         testLatestLayersByPage()
         testAnswerLayerWritePlanKeepsOnlyChangedPages()
         testAnswerLayerWritePlanCompletesUnchangedPendingPages()
-        testPDFDocumentEditDraft()
         testExamActivationDefaultsEnableWriting()
+        testExamGradingActionState()
+        testToolbarAllowsSubmittedAttemptToRequestGrading()
 
-        print("PDFWorkspaceCoreTests: 16 passed")
+        print("PDFWorkspaceCoreTests: 26 passed")
     }
 
     private static func testLatestLayersByPage() {
@@ -78,48 +79,90 @@ struct PDFWorkspaceCoreTests {
         expect(plan.completedPageIndices == Set([0]), "unchanged pending pages can still be removed from pending state")
     }
 
-    private static func testPDFDocumentEditDraft() {
-        let document = PDFDocumentItem(
-            title: "期中试卷",
-            localFileName: "paper.pdf",
-            grade: Grade.grade8.rawValue,
-            semester: Semester.first.rawValue,
-            subject: Subject.math.rawValue
-        )
-
-        let renamed = PDFDocumentEditDraft(
-            title: "  期末试卷  ",
-            grade: document.grade,
-            semester: document.semester,
-            subject: document.subject
-        )
-        expect(renamed.normalizedTitle == "期末试卷", "trims title")
-        expect(renamed.resolvedTitle(fallback: document.title) == "期末试卷", "uses normalized title")
-        expect(renamed.hasChanges(comparedTo: document), "renamed draft changes document")
-        expect(renamed.isRenameCandidate(comparedTo: document.title), "renamed draft is rename candidate")
-
-        let blankTitle = PDFDocumentEditDraft(
-            title: "   ",
-            grade: document.grade,
-            semester: document.semester,
-            subject: document.subject
-        )
-        expect(blankTitle.resolvedTitle(fallback: document.title) == document.title, "blank title falls back")
-        expect(!blankTitle.hasChanges(comparedTo: document), "blank title alone is not a change")
-        expect(!blankTitle.isRenameCandidate(comparedTo: document.title), "blank title is not rename candidate")
-
-        let recategorized = PDFDocumentEditDraft(
-            title: document.title,
-            grade: document.grade,
-            semester: Semester.second.rawValue,
-            subject: document.subject
-        )
-        expect(recategorized.hasChanges(comparedTo: document), "category change is detected")
-    }
-
     private static func testExamActivationDefaultsEnableWriting() {
         expect(PDFExamActivationDefaults.isWritingEnabled, "exam attempts should enter writing mode by default")
         expect(PDFExamActivationDefaults.isDrawingVisible, "exam attempts should show drawings by default")
+    }
+
+    private static func testExamGradingActionState() {
+        let inProgress = PDFExamGradingActionState(status: .inProgress, isSubmitting: false)
+        expect(inProgress.isEnabled, "in-progress attempts can submit for grading")
+        expect(inProgress.title == "交卷", "in-progress attempts use submit copy")
+        expect(inProgress.systemImage == "checkmark.seal", "in-progress attempts use submit icon")
+
+        let attemptID = UUID()
+        let progress = PDFExamPageProgress(
+            pageIndices: [0, 1],
+            submissions: [
+                ExamPageSubmission(
+                    sourceDocumentId: UUID(),
+                    attemptId: attemptID,
+                    pageIndex: 0,
+                    status: ExamPageSubmissionStatus.submitted.rawValue
+                )
+            ]
+        )
+        let retryCurrentPage = PDFExamGradingActionState(
+            status: .inProgress,
+            isSubmitting: false,
+            pageProgress: progress,
+            currentPageIndex: 0
+        )
+        expect(retryCurrentPage.title == "重试第 1 页", "failed submitted pages can be retried before the full exam is submitted")
+        expect(retryCurrentPage.systemImage == "arrow.clockwise.circle", "page grading retries use the retry icon")
+
+        let retryLockedPage = PDFExamGradingActionState(
+            status: .inProgress,
+            isSubmitting: false,
+            pageProgress: progress,
+            currentPageIndex: 1,
+            resumeTarget: .retryGrading(pageIndex: 0)
+        )
+        expect(retryLockedPage.title == "重试第 1 页", "scrolling cannot bypass a pending page grading retry")
+
+        let submitted = PDFExamGradingActionState(status: .submitted, isSubmitting: false)
+        expect(submitted.isEnabled, "submitted attempts can retry grading")
+        expect(submitted.title == "重新批阅", "submitted attempts use retry copy")
+        expect(submitted.systemImage == "arrow.clockwise.circle", "submitted attempts use retry icon")
+
+        let submitting = PDFExamGradingActionState(status: .inProgress, isSubmitting: true)
+        expect(!submitting.isEnabled, "submitting attempts disable grading actions")
+
+        let graded = PDFExamGradingActionState(status: .graded, isSubmitting: false)
+        expect(!graded.isEnabled, "graded attempts cannot request grading")
+    }
+
+    private static func testToolbarAllowsSubmittedAttemptToRequestGrading() {
+        let submitted = makeAttempt(status: .submitted)
+        let submittedSnapshot = PDFWorkspaceToolbarSnapshot(
+            activeAttempt: submitted,
+            hasAttempts: true,
+            isSubmittingExam: false,
+            isWritingEnabled: false,
+            isDrawingVisible: true
+        )
+        expect(submittedSnapshot.canSubmitExam, "submitted attempts should allow retrying grading")
+        expect(submittedSnapshot.submitExamTitle == "重新批阅", "submitted attempts should use retry copy")
+
+        let graded = makeAttempt(status: .graded)
+        let gradedSnapshot = PDFWorkspaceToolbarSnapshot(
+            activeAttempt: graded,
+            hasAttempts: true,
+            isSubmittingExam: false,
+            isWritingEnabled: false,
+            isDrawingVisible: true
+        )
+        expect(!gradedSnapshot.canSubmitExam, "graded attempts should not allow grading retry")
+    }
+
+    private static func makeAttempt(status: ExamAttemptStatus) -> ExamAttempt {
+        ExamAttempt(
+            sourceDocumentId: UUID(),
+            sourceDocumentTitle: "期中试卷",
+            generatedPDFFileName: "\(UUID().uuidString).pdf",
+            selectedPageIndices: [0],
+            status: status.rawValue
+        )
     }
 
 }

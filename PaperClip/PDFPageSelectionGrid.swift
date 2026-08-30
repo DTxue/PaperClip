@@ -8,6 +8,7 @@ struct PDFPageSelectionGrid: View {
     var maxSelectionCount: Int?
     var thumbnail: (Int) -> UIImage? = { _ in nil }
     var supplement: (Int) -> PDFPageSelectionSupplement? = { _ in nil }
+    var isPageEnabled: (Int) -> Bool = { _ in true }
     var onPageAppear: (Int) async -> Void = { _ in }
 
     var body: some View {
@@ -48,7 +49,7 @@ struct PDFPageSelectionGrid: View {
     }
 
     private func canToggle(_ index: Int) -> Bool {
-        PDFPageExportSelectionSupport.canTogglePage(
+        isPageEnabled(index) && PDFPageExportSelectionSupport.canTogglePage(
             index: index,
             selectedIndices: selectedIndices,
             maxSelectionCount: maxSelectionCount

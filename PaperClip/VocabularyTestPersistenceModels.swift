@@ -22,6 +22,7 @@ struct VocabularyTestDraftSavePayload {
     let batches: [VocabularyTestDraftBatchSnapshot]
 }
 
+extension PaperClipSchemaV1 {
 @Model
 final class VocabularyTestDraft {
     static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyTestDraft>] {
@@ -93,3 +94,6 @@ final class VocabularyTestDraft {
     }
 
 }
+}
+
+typealias VocabularyTestDraft = PaperClipSchemaV1.VocabularyTestDraft

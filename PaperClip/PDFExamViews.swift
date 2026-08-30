@@ -4,6 +4,7 @@ import SwiftUI
 
 struct ExamStartOverlay: View {
     let latestAttempt: ExamAttemptHistoryRowData?
+    let currentAttempt: ExamAttemptHistoryRowData?
     let attemptCount: Int
     let onStart: () -> Void
     let onHistory: () -> Void
@@ -19,10 +20,10 @@ struct ExamStartOverlay: View {
                     .font(.system(size: 34))
                     .foregroundStyle(.secondary)
 
-                Text("请选择页面后开始答题")
+                Text(currentAttempt == nil ? "整份 PDF 考试" : "继续未完成的考试")
                     .font(.headline)
 
-                Text("源 PDF 仅作为选页来源。书写、框选、导出和交卷都只作用于本次考试记录。")
+                Text("每页独立提交和批阅；上一页批阅完成后继续下一页，全部页面批阅完成后才能开始下一轮。源 PDF 不会被修改。")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -30,13 +31,16 @@ struct ExamStartOverlay: View {
                 Button {
                     onStart()
                 } label: {
-                    Label("开始答题", systemImage: "play.circle")
+                    Label(
+                        currentAttempt == nil ? "开始整份 PDF" : "继续考试",
+                        systemImage: currentAttempt == nil ? "doc.badge.plus" : "arrow.uturn.forward.circle"
+                    )
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
 
-                if let latestAttempt {
+                if currentAttempt == nil, let latestAttempt {
                     Button {
                         onContinue(latestAttempt.id)
                     } label: {
@@ -93,5 +97,65 @@ struct PDFExamExitButton: View {
         .contentShape(Capsule())
         .disabled(isDisabled)
         .accessibilityLabel("退出考试")
+    }
+}
+
+struct PDFExamSubmitButton: View {
+    let actionState: PDFExamGradingActionState
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label(actionState.title, systemImage: actionState.systemImage)
+                .font(.headline)
+                .frame(minHeight: 44)
+                .padding(.horizontal, 4)
+        }
+        .buttonStyle(.borderedProminent)
+        .background(.regularMaterial, in: Capsule())
+        .contentShape(Capsule())
+        .disabled(!actionState.isEnabled)
+        .accessibilityLabel(actionState.title)
+    }
+}
+
+struct PDFExamTimerBadge: View {
+    let startedAt: Date
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            Label(
+                VocabularyStudySessionFormat.clockDuration(context.date.timeIntervalSince(startedAt)),
+                systemImage: "timer"
+            )
+            .font(.subheadline.weight(.semibold))
+            .monospacedDigit()
+            .foregroundStyle(.primary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(.regularMaterial, in: Capsule())
+            .accessibilityLabel("考试计时")
+            .accessibilityValue(VocabularyStudySessionFormat.clockDuration(context.date.timeIntervalSince(startedAt)))
+        }
+    }
+}
+
+struct PDFExamPageProgressBadge: View {
+    let progress: PDFExamPageProgress
+
+    var body: some View {
+        Label(
+            "已交 \(progress.submittedPageIndices.count)/\(progress.pageIndices.count) · 已批 \(progress.gradedPageIndices.count)",
+            systemImage: "doc.text.magnifyingglass"
+        )
+        .font(.subheadline.weight(.semibold))
+        .monospacedDigit()
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(.regularMaterial, in: Capsule())
+        .accessibilityLabel("考试进度")
+        .accessibilityValue(
+            "已提交 \(progress.submittedPageIndices.count) 页，共 \(progress.pageIndices.count) 页，已批阅 \(progress.gradedPageIndices.count) 页"
+        )
     }
 }

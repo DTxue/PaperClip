@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct NewWritingPromptFormSections: View {
-    @Binding var language: WritingLanguage
     @Binding var studentGrade: String
     @Binding var requirementInput: String
     let isGenerating: Bool
@@ -9,19 +8,14 @@ struct NewWritingPromptFormSections: View {
 
     private var draft: WritingPromptGenerationDraft {
         WritingPromptGenerationDraft(
-            language: language,
+            language: .chinese,
             studentGrade: studentGrade,
             requirementInput: requirementInput
         )
     }
 
     var body: some View {
-        Section("写作类型") {
-            Picker("类型", selection: $language) {
-                ForEach(WritingLanguage.allCases) { language in
-                    Text(language.title).tag(language)
-                }
-            }
+        Section("年级") {
             Picker("年级", selection: $studentGrade) {
                 ForEach(WritingGradeOptions.all, id: \.self) { grade in
                     Text(grade).tag(grade)
@@ -32,11 +26,11 @@ struct NewWritingPromptFormSections: View {
         Section {
             TextEditor(text: $requirementInput)
                 .frame(minHeight: 150)
-                .textInputAutocapitalization(language == .english ? .sentences : .never)
+                .textInputAutocapitalization(.never)
         } header: {
             Text("写作要求")
         } footer: {
-            Text(footerText)
+            Text("例如：初二，记叙文，主题是一次让我成长的经历，600字左右。")
         }
 
         Section {
@@ -55,11 +49,5 @@ struct NewWritingPromptFormSections: View {
             }
             .disabled(isGenerating || !draft.canGenerate)
         }
-    }
-
-    private var footerText: String {
-        language == .chinese
-            ? "例如：初二，记叙文，主题是一次让我成长的经历，600字左右。"
-            : "For example: Grade 8, write about a memorable challenge, 120 words, use richer vocabulary."
     }
 }

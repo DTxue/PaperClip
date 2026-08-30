@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class HandwritingLayer {
     static var deletionPropertiesToFetch: [PartialKeyPath<HandwritingLayer>] {
@@ -35,3 +36,6 @@ final class HandwritingLayer {
         self.updatedAt = updatedAt
     }
 }
+}
+
+typealias HandwritingLayer = PaperClipSchemaV1.HandwritingLayer

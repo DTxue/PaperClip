@@ -5,6 +5,7 @@ struct WritingPromptListSection: View {
     let language: WritingLanguage
     let searchText: String
     let refreshToken: Int
+    let onCreate: () -> Void
     @Binding var alert: AppAlert?
 
     @Environment(\.modelContext) private var modelContext
@@ -12,10 +13,17 @@ struct WritingPromptListSection: View {
     @State private var recentDrafts: [WritingDraftRowData] = []
     @State private var recentReviews: [WritingReviewRowData] = []
 
-    init(language: WritingLanguage, searchText: String, refreshToken: Int, alert: Binding<AppAlert?>) {
+    init(
+        language: WritingLanguage,
+        searchText: String,
+        refreshToken: Int,
+        alert: Binding<AppAlert?>,
+        onCreate: @escaping () -> Void
+    ) {
         self.language = language
         self.searchText = searchText
         self.refreshToken = refreshToken
+        self.onCreate = onCreate
         _alert = alert
     }
 
@@ -30,7 +38,8 @@ struct WritingPromptListSection: View {
         WritingPromptListContentView(
             language: language,
             snapshot: snapshot,
-            onDelete: deletePrompts
+            onDelete: deletePrompts,
+            onCreate: onCreate
         )
         .task(id: refreshToken) {
             refreshPrompts()

@@ -54,19 +54,6 @@ extension VocabularyReviewRating {
     }
 }
 
-enum VocabularyFlashcardDragAxis {
-    case undecided
-    case horizontal
-    case vertical
-}
-
-struct VocabularyFlashcardDragState {
-    var axis = VocabularyFlashcardDragAxis.undecided
-    var translation = CGSize.zero
-
-    static let inactive = VocabularyFlashcardDragState()
-}
-
 struct VocabularySessionCompleteView: View {
     let title: String
     let message: String

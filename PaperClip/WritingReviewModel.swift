@@ -21,6 +21,7 @@ enum WritingReviewStatus: String, Codable {
     }
 }
 
+extension PaperClipSchemaV1 {
 @Model
 final class WritingReview {
     static var deletionPropertiesToFetch: [PartialKeyPath<WritingReview>] {
@@ -66,3 +67,6 @@ final class WritingReview {
         WritingLanguage(rawValue: languageRaw) ?? .chinese
     }
 }
+}
+
+typealias WritingReview = PaperClipSchemaV1.WritingReview

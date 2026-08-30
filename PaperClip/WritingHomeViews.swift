@@ -2,7 +2,6 @@ import SwiftUI
 import SwiftData
 
 struct WritingHomeView: View {
-    @State private var selectedLanguage = WritingLanguage.chinese
     @State private var searchText = ""
     @State private var isPresentingNewPrompt = false
     @State private var promptRefreshToken = 0
@@ -10,24 +9,15 @@ struct WritingHomeView: View {
 
     var body: some View {
         List {
-            Section {
-                Picker("写作类型", selection: $selectedLanguage) {
-                    ForEach(WritingLanguage.allCases) { language in
-                        Label(language.title, systemImage: language.systemImage)
-                            .tag(language)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .listRowBackground(Color.clear)
-            }
-
             WritingPromptListSection(
-                language: selectedLanguage,
+                language: .chinese,
                 searchText: searchText,
                 refreshToken: promptRefreshToken,
-                alert: $alert
+                alert: $alert,
+                onCreate: {
+                    isPresentingNewPrompt = true
+                }
             )
-            .id(selectedLanguage)
         }
         .navigationTitle("写作")
         .searchable(text: $searchText, prompt: "搜索写作题")
@@ -36,15 +26,14 @@ struct WritingHomeView: View {
                 Button {
                     isPresentingNewPrompt = true
                 } label: {
-                    Image(systemName: "plus")
+                    Label("生成写作题", systemImage: "plus")
                 }
-                .accessibilityLabel("生成写作题")
             }
         }
         .sheet(isPresented: $isPresentingNewPrompt, onDismiss: {
             promptRefreshToken &+= 1
         }) {
-            NewWritingPromptView(initialLanguage: selectedLanguage)
+            NewWritingPromptView()
         }
         .appAlert($alert)
     }

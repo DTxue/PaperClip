@@ -25,7 +25,7 @@ struct ReviewPageSelectionView: View {
                 }
             )
 
-            Text("仅合成原 PDF 页面和当前练习的正式手写答案，不包含草稿板、错题框或其他界面元素。")
+            Text("仅合成原 PDF 页面和当前练习的正式手写答案，不包含草稿板或其他界面元素。")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 16)

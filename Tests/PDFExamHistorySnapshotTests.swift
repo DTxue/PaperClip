@@ -5,12 +5,13 @@ struct PDFExamHistorySnapshotTests {
     static func main() {
         testSnapshotSortsAttemptsByUpdatedAtDescending()
         testDisplayRowsSummarizePagesAndStatus()
+        testDisplayRowsExposeDurationAndAverageQuestionDuration()
         testHistoryStateNormalizesFetchedAttempts()
         testHistoryStateUsesSummaryCountAsAuthoritative()
         testHistoryStatePreservesKnownCountWhenHistoryIsPartial()
         testHistoryStateDoesNotDoubleCountLatestInsert()
         testHistoryStateUpdatesExistingAttemptWithoutChangingCount()
-        print("PDFExamHistorySnapshotTests: 14 passed")
+        print("PDFExamHistorySnapshotTests: 18 passed")
     }
 
     private static func testSnapshotSortsAttemptsByUpdatedAtDescending() {
@@ -39,6 +40,7 @@ struct PDFExamHistorySnapshotTests {
         )
         expect(graded.statusTitle == "已批阅", "graded attempts should use graded title")
         expect(graded.iconName == "checkmark.seal.fill", "graded attempts should use system graded icon")
+        expect(!graded.allowsManualDeletion, "graded attempts should not be manually deletable from history")
 
         let submitted = ExamAttemptHistoryDisplayRow(attempt: makeAttempt(
             selectedPageIndicesText: "2",
@@ -47,6 +49,7 @@ struct PDFExamHistorySnapshotTests {
         expect(submitted.pageSummary == "3", "page summaries should convert zero-based indices to user-facing pages")
         expect(submitted.statusTitle == "已交卷", "submitted attempts should use submitted title")
         expect(submitted.iconName == "tray.full.fill", "submitted attempts should use system submitted icon")
+        expect(!submitted.allowsManualDeletion, "submitted attempts should not be manually deletable from history")
 
         let inProgress = ExamAttemptHistoryDisplayRow(attempt: makeAttempt(
             selectedPageIndicesText: "",
@@ -55,6 +58,53 @@ struct PDFExamHistorySnapshotTests {
         expect(inProgress.pageSummary == "无页面", "empty page selections should be explicit")
         expect(inProgress.statusTitle == "进行中", "unknown statuses should fall back to in-progress")
         expect(inProgress.iconName == "pencil.and.scribble", "in-progress attempts should use system writing icon")
+        expect(inProgress.allowsManualDeletion, "in-progress attempts should be manually deletable from history")
+
+        let attemptID = UUID()
+        let progress = PDFExamPageProgress(
+            pageIndices: [0, 1, 2],
+            submissions: [
+                ExamPageSubmission(
+                    sourceDocumentId: UUID(),
+                    attemptId: attemptID,
+                    pageIndex: 0,
+                    status: ExamPageSubmissionStatus.graded.rawValue
+                ),
+                ExamPageSubmission(
+                    sourceDocumentId: UUID(),
+                    attemptId: attemptID,
+                    pageIndex: 1,
+                    status: ExamPageSubmissionStatus.submitted.rawValue
+                )
+            ]
+        )
+        let partial = ExamAttemptHistoryDisplayRow(attempt: makeAttempt(
+            id: attemptID,
+            selectedPageIndicesText: "0,1,2",
+            pageProgress: progress
+        ))
+        expect(partial.attempt.pageProgress?.submittedPageIndices.count == 2, "history keeps partial submission progress")
+        expect(partial.attempt.pageProgress?.gradedPageIndices.count == 1, "history keeps completed page grading")
+        expect(!partial.allowsManualDeletion, "attempts with submitted pages cannot be deleted and restarted")
+    }
+
+    private static func testDisplayRowsExposeDurationAndAverageQuestionDuration() {
+        let row = ExamAttemptHistoryDisplayRow(attempt: makeAttempt(
+            createdAt: Date(timeIntervalSince1970: 10),
+            submittedAt: Date(timeIntervalSince1970: 130),
+            questionMetrics: ExamAttemptQuestionMetrics(correctCount: 3, incorrectCount: 1)
+        ))
+
+        expect(row.durationText == "00:02:00", "history rows should format total duration with seconds")
+        expect(row.averageQuestionDurationText == "30秒", "history rows should divide duration by graded question count")
+
+        let draft = ExamAttemptHistoryDisplayRow(attempt: makeAttempt(
+            createdAt: Date(timeIntervalSince1970: 10),
+            submittedAt: nil,
+            questionMetrics: ExamAttemptQuestionMetrics(correctCount: 3, incorrectCount: 1)
+        ))
+        expect(draft.durationText == nil, "draft rows should not expose a completed duration")
+        expect(draft.averageQuestionDurationText == nil, "draft rows should not expose average duration")
     }
 
     private static func testHistoryStateNormalizesFetchedAttempts() {
@@ -143,16 +193,22 @@ struct PDFExamHistorySnapshotTests {
     private static func makeAttempt(
         id: UUID = UUID(),
         createdAt: Date = Date(timeIntervalSince1970: 1),
+        submittedAt: Date? = nil,
         updatedAt: Date = Date(timeIntervalSince1970: 1),
         selectedPageIndicesText: String = "0",
-        status: String = ExamAttemptStatus.inProgress.rawValue
+        status: String = ExamAttemptStatus.inProgress.rawValue,
+        questionMetrics: ExamAttemptQuestionMetrics = ExamAttemptQuestionMetrics(),
+        pageProgress: PDFExamPageProgress? = nil
     ) -> ExamAttemptHistoryRowData {
         ExamAttemptHistoryRowData(
             id: id,
             createdAt: createdAt,
+            submittedAt: submittedAt,
             updatedAt: updatedAt,
             selectedPageIndicesText: selectedPageIndicesText,
-            status: status
+            status: status,
+            questionMetrics: questionMetrics,
+            pageProgress: pageProgress
         )
     }
 

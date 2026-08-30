@@ -13,7 +13,7 @@ struct FSRSExplanationView: View {
             } header: {
                 Text("当前配置")
             } footer: {
-                Text("错题、知识点和公式目前尚未接入 FSRS-6。每个词集可以单独调整每日新词数量和目标保持率。")
+                Text("FSRS-6 目前用于 ENG 词集复习。每个词集可以单独调整每日新词数量和目标保持率。")
             }
 
             Section {

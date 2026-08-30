@@ -5,22 +5,16 @@ struct NewWritingPromptView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
-    @State private var language: WritingLanguage
     @State private var studentGrade = "初一"
     @State private var requirementInput = ""
     @State private var isGenerating = false
     @State private var generationTaskSlot = ViewTaskSlot()
     @State private var alert: AppAlert?
 
-    init(initialLanguage: WritingLanguage) {
-        _language = State(initialValue: initialLanguage)
-    }
-
     var body: some View {
         NavigationStack {
             Form {
                 NewWritingPromptFormSections(
-                    language: $language,
                     studentGrade: $studentGrade,
                     requirementInput: $requirementInput,
                     isGenerating: isGenerating,
@@ -51,7 +45,7 @@ struct NewWritingPromptView: View {
 
         do {
             let draft = WritingPromptGenerationDraft(
-                language: language,
+                language: .chinese,
                 studentGrade: studentGrade,
                 requirementInput: requirementInput
             )

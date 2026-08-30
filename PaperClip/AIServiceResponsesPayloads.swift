@@ -1,5 +1,10 @@
 import Foundation
 
+struct AIServiceResponse<Value: Sendable>: Sendable {
+    let value: Value
+    let providerModelID: String?
+}
+
 struct ResponsesResponse: Decodable {
     struct OutputItem: Decodable {
         struct Content: Decodable {
@@ -11,11 +16,12 @@ struct ResponsesResponse: Decodable {
         let content: [Content]?
     }
 
+    let model: String?
     let output: [OutputItem]
     let outputTextValue: String?
 
     enum CodingKeys: String, CodingKey {
-        case output
+        case model, output
         case outputTextValue = "output_text"
     }
 

@@ -11,6 +11,33 @@ struct VocabularyArticleModePolicyTests {
         testGenerationCommitPolicyRejectsStaleState()
 
         expect(
+            VocabularyArticleModePolicy.canSelect(
+                .recitation,
+                currentMode: .reading,
+                isRecitationComplete: false
+            ),
+            "reading should be able to enter recitation"
+        )
+
+        expect(
+            !VocabularyArticleModePolicy.canSelect(
+                .reading,
+                currentMode: .recitation,
+                isRecitationComplete: false
+            ),
+            "unfinished recitation must not switch back to reading"
+        )
+
+        expect(
+            VocabularyArticleModePolicy.canSelect(
+                .reading,
+                currentMode: .recitation,
+                isRecitationComplete: true
+            ),
+            "completed recitation may return to reading"
+        )
+
+        expect(
             VocabularyArticleReplacementPolicy.nextStep(hasExistingArticle: false) == .generate,
             "first generation should start directly"
         )
@@ -55,7 +82,7 @@ struct VocabularyArticleModePolicyTests {
             "a stale generation must never be committed"
         )
 
-        print("VocabularyArticleModePolicyTests: generation policies passed")
+        print("VocabularyArticleModePolicyTests: generation and mode policies passed")
     }
 
     private static func testGenerationPlanCoversEveryCardWithoutOverloadingStories() {

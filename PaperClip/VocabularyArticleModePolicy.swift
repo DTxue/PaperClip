@@ -21,6 +21,20 @@ enum VocabularyArticleViewMode: String, CaseIterable, Identifiable {
     }
 }
 
+enum VocabularyArticleModePolicy {
+    static func canSelect(
+        _ targetMode: VocabularyArticleViewMode,
+        currentMode: VocabularyArticleViewMode,
+        isRecitationComplete: Bool
+    ) -> Bool {
+        if currentMode == .recitation, targetMode == .reading {
+            return isRecitationComplete
+        }
+
+        return true
+    }
+}
+
 enum VocabularyArticleGenerationStep: Equatable {
     case generate
     case confirmReplacement

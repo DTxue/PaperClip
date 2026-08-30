@@ -40,4 +40,5 @@ extension View {
     func paperClipSplitView() -> some View {
         self.navigationSplitViewStyle(.balanced)
     }
+
 }

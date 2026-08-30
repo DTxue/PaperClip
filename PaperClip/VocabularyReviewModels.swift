@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class VocabularyReviewLog {
     static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyReviewLog>] {
@@ -71,3 +72,6 @@ final class VocabularyReviewLog {
         self.algorithmVersion = algorithmVersion
     }
 }
+}
+
+typealias VocabularyReviewLog = PaperClipSchemaV1.VocabularyReviewLog

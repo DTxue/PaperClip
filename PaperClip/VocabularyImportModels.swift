@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class VocabularyImportBatch {
     static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyImportBatch>] {
@@ -36,3 +37,6 @@ final class VocabularyImportBatch {
         self.createdAt = createdAt
     }
 }
+}
+
+typealias VocabularyImportBatch = PaperClipSchemaV1.VocabularyImportBatch

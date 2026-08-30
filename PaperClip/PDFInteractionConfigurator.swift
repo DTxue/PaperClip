@@ -18,20 +18,17 @@ final class PDFInteractionConfigurator {
 
     func configure(
         pdfView: PDFView,
-        selectionGesture: UIGestureRecognizer?,
-        isSelectionMode: Bool,
         configureGestureTouchTypes: Bool
     ) {
         if configureGestureTouchTypes {
             configurePDFGestures(
                 in: pdfView,
-                selectionGesture: selectionGesture,
                 allowedTouchTypes: Self.nonPencilTouchTypes
             )
         }
 
         if let scrollView = currentPDFScrollView(in: pdfView) {
-            scrollView.isScrollEnabled = !isSelectionMode
+            scrollView.isScrollEnabled = true
             scrollView.delaysContentTouches = false
             scrollView.canCancelContentTouches = true
             scrollView.panGestureRecognizer.minimumNumberOfTouches = 1
@@ -40,23 +37,19 @@ final class PDFInteractionConfigurator {
 
     private func configurePDFGestures(
         in view: UIView,
-        selectionGesture: UIGestureRecognizer?,
         allowedTouchTypes: [NSNumber]
     ) {
         guard !(view is PKCanvasView) else { return }
 
         view.gestureRecognizers?.forEach { gesture in
-            if gesture !== selectionGesture {
-                let currentTouchTypes = gesture.allowedTouchTypes
-                if currentTouchTypes != allowedTouchTypes {
-                    gesture.allowedTouchTypes = allowedTouchTypes
-                }
+            let currentTouchTypes = gesture.allowedTouchTypes
+            if currentTouchTypes != allowedTouchTypes {
+                gesture.allowedTouchTypes = allowedTouchTypes
             }
         }
         view.subviews.forEach {
             configurePDFGestures(
                 in: $0,
-                selectionGesture: selectionGesture,
                 allowedTouchTypes: allowedTouchTypes
             )
         }

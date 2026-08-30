@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class PDFDocumentItem {
     static var deletionPropertiesToFetch: [PartialKeyPath<PDFDocumentItem>] {
@@ -45,3 +46,6 @@ final class PDFDocumentItem {
         StoredFile.importedPDF(fileName: localFileName).url
     }
 }
+}
+
+typealias PDFDocumentItem = PaperClipSchemaV1.PDFDocumentItem

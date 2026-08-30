@@ -4,7 +4,6 @@ import UIKit
 struct PDFCanvasConfiguration: Equatable {
     let isWritingEnabled: Bool
     let isDrawingVisible: Bool
-    let isSelectionMode: Bool
 }
 
 @MainActor
@@ -50,9 +49,7 @@ enum PDFCanvasFactory {
         if canvas.alpha != alpha {
             canvas.alpha = alpha
         }
-        let canDraw = configuration.isWritingEnabled
-            && !configuration.isSelectionMode
-            && configuration.isDrawingVisible
+        let canDraw = configuration.isWritingEnabled && configuration.isDrawingVisible
         if canvas.isUserInteractionEnabled != canDraw {
             canvas.isUserInteractionEnabled = canDraw
         }

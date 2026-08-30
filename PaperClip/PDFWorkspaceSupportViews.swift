@@ -16,6 +16,7 @@ struct ShareImageRequest: Identifiable, Transferable, Sendable {
 
 struct PDFWorkspaceSnapshot {
     let latestAttempt: ExamAttemptHistoryRowData?
+    let currentAttempt: ExamAttemptHistoryRowData?
     let attemptCount: Int
     let gradeStamps: [PDFGradeStamp]
 
@@ -23,11 +24,13 @@ struct PDFWorkspaceSnapshot {
 
     init(
         latestAttempt: ExamAttemptHistoryRowData?,
+        currentAttempt: ExamAttemptHistoryRowData?,
         attemptCount: Int,
         activeGradeMarks: [ExamGradeMark],
         activeAttempt: ExamAttempt?
     ) {
         self.latestAttempt = latestAttempt
+        self.currentAttempt = currentAttempt
         self.attemptCount = attemptCount
 
         guard let activeAttempt else {
@@ -65,11 +68,14 @@ struct PDFWorkspaceCanvasSnapshot {
     let drawings: [Int: Data]
     let gradeStamps: [PDFGradeStamp]
     let hasActiveAttempt: Bool
+    let activeAttemptStartedAt: Date?
+    let gradingActionState: PDFExamGradingActionState
+    let pageProgress: PDFExamPageProgress?
     let isWritingEnabled: Bool
     let isDrawingVisible: Bool
-    let isSelectionMode: Bool
     let showsStartOverlay: Bool
     let latestAttempt: ExamAttemptHistoryRowData?
+    let currentAttempt: ExamAttemptHistoryRowData?
     let attemptCount: Int
     let isSubmittingExam: Bool
 
@@ -78,51 +84,33 @@ struct PDFWorkspaceCanvasSnapshot {
         drawings: [Int: Data],
         workspaceSnapshot: PDFWorkspaceSnapshot,
         hasActiveAttempt: Bool,
+        activeAttempt: ExamAttempt?,
+        pageProgress: PDFExamPageProgress?,
+        currentPageIndex: Int?,
+        resumeTarget: PDFExamResumeTarget?,
         isWritingEnabled: Bool,
         isDrawingVisible: Bool,
-        isSelectionMode: Bool,
         isSubmittingExam: Bool
     ) {
         self.url = activePDFURL
         self.drawings = drawings
         self.gradeStamps = workspaceSnapshot.gradeStamps
         self.hasActiveAttempt = hasActiveAttempt
+        self.activeAttemptStartedAt = activeAttempt?.createdAt
+        self.pageProgress = pageProgress
+        self.gradingActionState = PDFExamGradingActionState(
+            status: activeAttempt.flatMap { ExamAttemptStatus(rawValue: $0.status) },
+            isSubmitting: isSubmittingExam,
+            pageProgress: pageProgress,
+            currentPageIndex: currentPageIndex,
+            resumeTarget: resumeTarget
+        )
         self.isWritingEnabled = hasActiveAttempt && isWritingEnabled
         self.isDrawingVisible = isDrawingVisible
-        self.isSelectionMode = hasActiveAttempt && isSelectionMode
         self.showsStartOverlay = !hasActiveAttempt
         self.latestAttempt = workspaceSnapshot.latestAttempt
+        self.currentAttempt = workspaceSnapshot.currentAttempt
         self.attemptCount = workspaceSnapshot.attemptCount
         self.isSubmittingExam = isSubmittingExam
-    }
-}
-
-// MARK: - 框选菜单栏
-
-struct SelectionMenuBar: View {
-    let onSave: () -> Void
-    let onShare: () -> Void
-    let onReselect: () -> Void
-
-    var body: some View {
-        HStack(spacing: 0) {
-            menuButton("收藏错题", icon: "rectangle.stack.badge.plus", action: onSave)
-            Divider().frame(height: 20)
-            menuButton("分享截图", icon: "square.and.arrow.up", action: onShare)
-            Divider().frame(height: 20)
-            menuButton("重新选取", icon: "arrow.clockwise", action: onReselect)
-        }
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
-    }
-
-    private func menuButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Label(title, systemImage: icon)
-                .font(.subheadline.weight(.medium))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-        }
-        .buttonStyle(.borderless)
     }
 }

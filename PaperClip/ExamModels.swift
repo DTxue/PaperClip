@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class ExamAttempt {
     static var cascadeDeletionPropertiesToFetch: [PartialKeyPath<ExamAttempt>] {
@@ -56,5 +57,28 @@ final class ExamAttempt {
 
     var generatedPDFURL: URL {
         StoredFile.examPDF(fileName: generatedPDFFileName).url
+    }
+}
+}
+
+typealias ExamAttempt = PaperClipSchemaV1.ExamAttempt
+
+struct ExamAttemptQuestionMetrics: Equatable, Hashable {
+    var correctCount: Int = 0
+    var incorrectCount: Int = 0
+
+    var totalCount: Int { correctCount + incorrectCount }
+
+    mutating func add(isCorrect: Bool) {
+        if isCorrect {
+            correctCount += 1
+        } else {
+            incorrectCount += 1
+        }
+    }
+
+    mutating func add(_ other: ExamAttemptQuestionMetrics) {
+        correctCount += other.correctCount
+        incorrectCount += other.incorrectCount
     }
 }

@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class VocabularyMemoryState {
     @Attribute(.unique) var id: UUID
@@ -53,6 +54,9 @@ final class VocabularyMemoryState {
         self.lapseCount = lapseCount
     }
 }
+}
+
+typealias VocabularyMemoryState = PaperClipSchemaV1.VocabularyMemoryState
 
 extension VocabularyMemoryState {
     static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyMemoryState>] {

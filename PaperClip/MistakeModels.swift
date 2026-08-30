@@ -1,12 +1,11 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
+/// Legacy persisted model retained only so existing stores and backups remain readable.
+/// The retired mistake-library feature must not add new records through this type.
 @Model
 final class MistakeCard {
-    static var unfinishedRecognitionPropertiesToFetch: [PartialKeyPath<MistakeCard>] {
-        [\.id, \.imageFileName, \.recognitionStatus]
-    }
-
     @Attribute(.unique) var id: UUID
     var imageFileName: String
     var originalWidth: Double
@@ -23,14 +22,14 @@ final class MistakeCard {
     var note: String
     var createdAt: Date
     var updatedAt: Date
-    // AI 后台识别字段：默认 completed 保证旧数据不被重新识别
-    var recognitionStatus: String = RecognitionStatus.completed.rawValue
+    // Legacy recognition field. The retired feature no longer schedules work for it.
+    var recognitionStatus: String = "completed"
     var recognizedText: String = ""
-    /// AI 识别的题型，例如“选择题”；旧数据默认为空并由题目文本回退判断
+    /// Legacy AI recognition metadata.
     var questionType: String = ""
     /// AI 生成或用户修订的标准答案；旧数据保持为空并在交卷时转为人工自评
     var correctAnswer: String = ""
-    /// 错题卡所在试卷的标题（创建时写入，之后只读）
+    /// Legacy source-document title.
     var sourceDocumentTitle: String = ""
     /// 题目图片在原始截图中的归一化裁剪区域，格式 "x,y,w,h"（0–1），nil 表示未框选
     var questionCrop: String? = nil
@@ -41,14 +40,14 @@ final class MistakeCard {
         originalWidth: Double,
         originalHeight: Double,
         printWidthMM: Double = 170,
-        grade: String = Grade.grade7.rawValue,
-        semester: String = Semester.first.rawValue,
-        subject: String = Subject.math.rawValue,
+        grade: String = "七年级",
+        semester: String = "上学期",
+        subject: String = "数学",
         tagsText: String = "",
-        errorReason: String = ErrorReason.careless.rawValue,
-        status: String = MasteryStatus.unmastered.rawValue,
+        errorReason: String = "粗心",
+        status: String = "未掌握",
         note: String = "",
-        recognitionStatus: String = RecognitionStatus.completed.rawValue,
+        recognitionStatus: String = "completed",
         recognizedText: String = "",
         questionType: String = "",
         correctAnswer: String = "",
@@ -80,19 +79,7 @@ final class MistakeCard {
         self.updatedAt = updatedAt
     }
 
-    var imageURL: URL {
-        StoredFile.cardImage(fileName: imageFileName).url
-    }
-
-    var tags: [String] {
-        MistakeTagParser.parse(tagsText)
-    }
-
-    var tagPreviewText: String {
-        MistakeTagDisplay.preview(tags, limit: 2)
-    }
-
-    var resolvedQuestionType: QuestionType {
-        QuestionType.resolve(questionType, questionText: recognizedText)
-    }
 }
+}
+
+typealias MistakeCard = PaperClipSchemaV1.MistakeCard

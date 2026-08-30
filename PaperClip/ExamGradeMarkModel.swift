@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class ExamGradeMark {
     @Attribute(.unique) var id: UUID
@@ -39,6 +40,9 @@ final class ExamGradeMark {
         self.updatedAt = updatedAt
     }
 }
+}
+
+typealias ExamGradeMark = PaperClipSchemaV1.ExamGradeMark
 
 extension ExamGradeMark {
     static var deletionPropertiesToFetch: [PartialKeyPath<ExamGradeMark>] {

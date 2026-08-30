@@ -99,6 +99,21 @@ struct PDFAnswerLayerStore {
         try modelContext.saveOrRollbackIfNeeded()
         return true
     }
+
+    @discardableResult
+    func clearAnswer(for attempt: ExamAttempt, pageIndex: Int) throws -> Bool {
+        let attemptID = attempt.id
+        var descriptor = FetchDescriptor<ExamHandwritingLayer>(
+            predicate: #Predicate<ExamHandwritingLayer> { layer in
+                layer.attemptId == attemptID && layer.pageIndex == pageIndex
+            }
+        )
+        descriptor.propertiesToFetch = ExamHandwritingLayer.deletionPropertiesToFetch
+        try modelContext.deleteFetched(descriptor)
+        attempt.updatedAt = .now
+        try modelContext.saveOrRollbackIfNeeded()
+        return true
+    }
 }
 
 struct PDFAnswerLayerStoreFlushResult {

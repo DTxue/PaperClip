@@ -12,7 +12,7 @@ run_swift_test() {
     shift
 
     echo "==> $name"
-    swiftc "$@" -o "$BUILD_DIR/$name"
+    swiftc PaperClip/PaperClipSchemaVersion.swift "$@" -o "$BUILD_DIR/$name"
     "$BUILD_DIR/$name"
 }
 
@@ -21,7 +21,6 @@ run_swift_test AIServiceModelsTests \
     PaperClip/AIResponseJSONSanitizer.swift \
     PaperClip/AIDecodingSupport.swift \
     PaperClip/AIServiceModels.swift \
-    PaperClip/AIQuestionModels.swift \
     PaperClip/AIExamGradingModels.swift \
     PaperClip/AIVocabularyModels.swift \
     PaperClip/AIWritingPromptModels.swift \
@@ -83,6 +82,7 @@ run_swift_test AIServiceResponseDecodingTests \
     PaperClip/AIResponseJSONSanitizer.swift \
     PaperClip/AIDecodingSupport.swift \
     PaperClip/AIVocabularyModels.swift \
+    PaperClip/AIServiceResponsesPayloads.swift \
     Tests/AIServiceResponseDecodingTests.swift
 
 run_swift_test ImageJPEGProfileTests \
@@ -94,15 +94,88 @@ run_swift_test ImageEncodingPlanTests \
     PaperClip/ImageEncodingPlan.swift \
     Tests/ImageEncodingPlanTests.swift
 
-run_swift_test LocalImageCacheKeyTests \
-    PaperClip/NormalizedCropString.swift \
-    PaperClip/LocalImageCacheKey.swift \
-    Tests/LocalImageCacheKeyTests.swift
-
 run_swift_test StoredFileTests \
     PaperClip/AppStorageDirectory.swift \
     PaperClip/StoredFile.swift \
     Tests/StoredFileTests.swift
+
+run_swift_test PaperClipDataBackupServiceTests \
+    PaperClip/AppStorageDirectory.swift \
+    Tests/PaperClipDataBackupServiceTests.swift \
+    -lsqlite3
+
+run_swift_test LegacyMistakeDataCleanupTests \
+    PaperClip/AppStorageDirectory.swift \
+    PaperClip/LegacyMistakeDataCleanup.swift \
+    Tests/LegacyMistakeDataCleanupTests.swift \
+    -lsqlite3
+
+run_swift_test MistakeAttachmentStoreTests \
+    PaperClip/AppStorageDirectory.swift \
+    PaperClip/MistakeAttachmentStore.swift \
+    Tests/MistakeAttachmentStoreTests.swift \
+    -lsqlite3
+
+LEGACY_STORE_FIXTURE_DIR="$BUILD_DIR/paperclip-legacy-store"
+LEGACY_STORE_FIXTURE_ARCHIVE="$BUILD_DIR/PaperClipLegacyUnversionedStore.tar.gz"
+rm -rf "$LEGACY_STORE_FIXTURE_DIR"
+mkdir -p "$LEGACY_STORE_FIXTURE_DIR"
+base64 -D < Tests/Fixtures/PaperClipLegacyUnversionedStore.tar.gz.base64 \
+    > "$LEGACY_STORE_FIXTURE_ARCHIVE"
+EXPECTED_LEGACY_FIXTURE_SHA256="$(< Tests/Fixtures/PaperClipLegacyUnversionedStore.sha256)"
+ACTUAL_LEGACY_FIXTURE_SHA256="$(shasum -a 256 "$LEGACY_STORE_FIXTURE_ARCHIVE" | awk '{print $1}')"
+if [[ "$ACTUAL_LEGACY_FIXTURE_SHA256" != "$EXPECTED_LEGACY_FIXTURE_SHA256" ]]; then
+    echo "Legacy SwiftData fixture checksum mismatch" >&2
+    exit 1
+fi
+tar -xzf "$LEGACY_STORE_FIXTURE_ARCHIVE" -C "$LEGACY_STORE_FIXTURE_DIR"
+export PAPERCLIP_LEGACY_STORE_DIR="$LEGACY_STORE_FIXTURE_DIR"
+
+run_swift_test PaperClipSchemaMigrationTests \
+    PaperClip/AppStorageDirectory.swift \
+    PaperClip/StoredFile.swift \
+    PaperClip/AcademicTaxonomy.swift \
+    PaperClip/ExamAttemptStatus.swift \
+    PaperClip/PDFPageIndexDisplay.swift \
+    PaperClip/PDFDocumentModels.swift \
+    PaperClip/HandwritingLayerModel.swift \
+    PaperClip/ExamModels.swift \
+    PaperClip/ExamPageSubmissionModel.swift \
+    PaperClip/ExamHandwritingLayerModel.swift \
+    PaperClip/ExamGradeMarkModel.swift \
+    PaperClip/ModelContextHelpers.swift \
+    PaperClip/PDFExamPageProgress.swift \
+    PaperClip/MistakeModels.swift \
+    PaperClip/ExportRecordModel.swift \
+    PaperClip/MistakePracticeModels.swift \
+    PaperClip/MistakeLibraryModels.swift \
+    PaperClip/VocabularyCoreEnums.swift \
+    PaperClip/VocabularyReviewRating.swift \
+    PaperClip/VocabularyJSONStorage.swift \
+    PaperClip/VocabularyStudySessionItem.swift \
+    PaperClip/VocabularyStudySessionMetrics.swift \
+    PaperClip/AIResponseJSONValueExtractor.swift \
+    PaperClip/AIResponseJSONSanitizer.swift \
+    PaperClip/AIDecodingSupport.swift \
+    PaperClip/AIVocabularyModels.swift \
+    PaperClip/VocabularyModels.swift \
+    PaperClip/VocabularyMemoryModels.swift \
+    PaperClip/VocabularyReviewModels.swift \
+    PaperClip/VocabularyStudyModels.swift \
+    PaperClip/VocabularyTestPersistenceModels.swift \
+    PaperClip/VocabularyHandwritingAttempt.swift \
+    PaperClip/VocabularyImportModels.swift \
+    PaperClip/VocabularyDistractorCache.swift \
+    PaperClip/DiaryEntryContentPresence.swift \
+    PaperClip/DiaryModels.swift \
+    PaperClip/WritingLanguageModels.swift \
+    PaperClip/WritingPaperModels.swift \
+    PaperClip/WritingPromptModel.swift \
+    PaperClip/WritingDraftModel.swift \
+    PaperClip/WritingReviewModel.swift \
+    PaperClip/PaperClipSchema.swift \
+    Tests/PaperClipSchemaMigrationTests.swift \
+    -lsqlite3
 
 run_swift_test CanvasSizeReportSupportTests \
     PaperClip/CanvasSizeReportSupport.swift \
@@ -155,32 +228,63 @@ run_swift_test DiaryHistoryRowDataTests \
     PaperClip/DiaryHistoryRowData.swift \
     Tests/DiaryHistoryRowDataTests.swift
 
-run_swift_test MasteryStatusSummaryTests \
+run_swift_test ExamAttemptStatusTests \
+    PaperClip/ExamAttemptStatus.swift \
+    Tests/ExamAttemptStatusTests.swift
+
+run_swift_test MistakeReviewEngineTests \
+    PaperClip/AcademicTaxonomy.swift \
+    PaperClip/MistakeLibraryModels.swift \
+    PaperClip/MistakeReviewEngine.swift \
+    Tests/MistakeReviewEngineTests.swift
+
+run_swift_test MistakeLibrarySupportTests \
+    PaperClip/AcademicTaxonomy.swift \
+    PaperClip/MistakeLibraryModels.swift \
+    PaperClip/MistakeLibrarySupport.swift \
+    Tests/MistakeLibrarySupportTests.swift
+
+run_swift_test MistakeCropGeometryTests \
+    PaperClip/MistakeCropGeometry.swift \
+    Tests/MistakeCropGeometryTests.swift
+
+run_swift_test AIMistakeRecognitionModelsTests \
+    PaperClip/AIMistakeRecognitionModels.swift \
+    Tests/AIMistakeRecognitionModelsTests.swift
+
+run_swift_test MistakePresentationSupportTests \
+    PaperClip/MistakeScannerAccessPolicy.swift \
+    PaperClip/MistakeQuestionRendering.swift \
+    Tests/MistakePresentationSupportTests.swift
+
+run_swift_test MistakeLibraryPersistenceTests \
     PaperClip/AppStorageDirectory.swift \
     PaperClip/StoredFile.swift \
     PaperClip/AcademicTaxonomy.swift \
-    PaperClip/MistakeClassification.swift \
-    PaperClip/QuestionType.swift \
-    PaperClip/MistakeTagModels.swift \
-    PaperClip/MistakeModels.swift \
-    PaperClip/MasteryStatusSegment.swift \
-    PaperClip/MasteryStatusSummary.swift \
-    Tests/MasteryStatusSummaryTests.swift
-
-run_swift_test ExamAttemptStatusTests \
-    PaperClip/MistakeClassification.swift \
-    Tests/ExamAttemptStatusTests.swift
+    PaperClip/MistakeLibraryModels.swift \
+    PaperClip/MistakeReviewEngine.swift \
+    PaperClip/MistakeAttachmentStore.swift \
+    PaperClip/MistakeLibraryPersistence.swift \
+    Tests/MistakeLibraryPersistenceTests.swift \
+    -lsqlite3
 
 run_swift_test PDFExamGradingSupportTests \
     PaperClip/PDFExamGradingSupport.swift \
     Tests/PDFExamGradingSupportTests.swift
 
+run_swift_test AIExamGradingPromptTests \
+    PaperClip/AcademicTaxonomy.swift \
+    PaperClip/AIResponseJSONValueExtractor.swift \
+    PaperClip/AIResponseJSONSanitizer.swift \
+    PaperClip/AIDecodingSupport.swift \
+    PaperClip/AIExamGradingPrompt.swift \
+    Tests/AIExamGradingPromptTests.swift
+
 run_swift_test PDFExamGradingTransactionTests \
     PaperClip/AppStorageDirectory.swift \
     PaperClip/StoredFile.swift \
     PaperClip/AcademicTaxonomy.swift \
-    PaperClip/MistakeClassification.swift \
-    PaperClip/QuestionType.swift \
+    PaperClip/ExamAttemptStatus.swift \
     PaperClip/PDFPageIndexDisplay.swift \
     PaperClip/PDFPageSelectionSet.swift \
     PaperClip/PDFPageExportSelectionSupport.swift \
@@ -198,13 +302,37 @@ run_swift_test PDFExamGradingTransactionTests \
     PaperClip/PDFExamGradingTransaction.swift \
     Tests/PDFExamGradingTransactionTests.swift
 
-run_swift_test KnowledgePointVocabularyTests \
+run_swift_test PDFExamPageSubmissionTests \
+    PaperClip/AppStorageDirectory.swift \
+    PaperClip/StoredFile.swift \
     PaperClip/AcademicTaxonomy.swift \
-    PaperClip/KnowledgePointVocabulary.swift \
-    PaperClip/KnowledgePointVocabularySeed.swift \
-    PaperClip/KnowledgePointVocabularyMathSeed.swift \
-    PaperClip/KnowledgePointVocabularyScienceSeed.swift \
-    Tests/KnowledgePointVocabularyTests.swift
+    PaperClip/ExamAttemptStatus.swift \
+    PaperClip/PDFPageIndexDisplay.swift \
+    PaperClip/PDFDocumentModels.swift \
+    PaperClip/ExamModels.swift \
+    PaperClip/ExamPageSubmissionModel.swift \
+    PaperClip/ExamGradeMarkModel.swift \
+    PaperClip/ModelContextHelpers.swift \
+    PaperClip/AIResponseJSONValueExtractor.swift \
+    PaperClip/AIResponseJSONSanitizer.swift \
+    PaperClip/AIDecodingSupport.swift \
+    PaperClip/AIExamGradingModels.swift \
+    PaperClip/PDFExamGradingSupport.swift \
+    PaperClip/PDFExamPageProgress.swift \
+    PaperClip/PDFExamResumePolicy.swift \
+    PaperClip/PDFExamPageSubmission.swift \
+    Tests/PDFExamPageSubmissionTests.swift
+
+run_swift_test PDFExamResumePolicyTests \
+    PaperClip/AppStorageDirectory.swift \
+    PaperClip/StoredFile.swift \
+    PaperClip/ExamAttemptStatus.swift \
+    PaperClip/PDFPageIndexDisplay.swift \
+    PaperClip/ExamModels.swift \
+    PaperClip/ModelContextHelpers.swift \
+    PaperClip/ExamPageSubmissionModel.swift \
+    PaperClip/PDFExamResumePolicy.swift \
+    Tests/PDFExamResumePolicyTests.swift
 
 run_swift_test KnowledgeAIPromptsTests \
     PaperClip/AIKnowledgeModels.swift \
@@ -214,73 +342,20 @@ run_swift_test KnowledgeAIPromptsTests \
     PaperClip/KnowledgeAIPrompts.swift \
     Tests/KnowledgeAIPromptsTests.swift
 
-run_swift_test MathematicsReferenceTests \
-    PaperClip/MathematicsReferenceModels.swift \
-    PaperClip/MathematicsReferenceCatalogLoader.swift \
-    PaperClip/MathematicsReference.swift \
-    Tests/MathematicsReferenceTests.swift
-
-run_swift_test MistakeListSnapshotTests \
-    PaperClip/AppStorageDirectory.swift \
-    PaperClip/StoredFile.swift \
-    PaperClip/AcademicTaxonomy.swift \
-    PaperClip/MasteryStatusSegment.swift \
-    PaperClip/MasteryStatusSummary.swift \
-    PaperClip/MistakeClassification.swift \
-    PaperClip/QuestionType.swift \
-    PaperClip/MistakeTagModels.swift \
-    PaperClip/MistakeModels.swift \
-    PaperClip/MistakePracticeModels.swift \
-    PaperClip/MistakeCardViewModels.swift \
-    PaperClip/MistakeCardRowProjection.swift \
-    PaperClip/MistakeCardFilterQuery.swift \
-    PaperClip/MistakeCardRowDisplay.swift \
-    PaperClip/MistakeListSnapshot.swift \
-    PaperClip/MistakePaperSelectionModels.swift \
-    PaperClip/RelatedMistakeModels.swift \
-    Tests/MistakeListSnapshotTests.swift
-
-run_swift_test MistakePersistenceTests \
-    PaperClip/AppStorageDirectory.swift \
-    PaperClip/StoredFile.swift \
-    PaperClip/AcademicTaxonomy.swift \
-    PaperClip/MasteryStatusSegment.swift \
-    PaperClip/MasteryStatusSummary.swift \
-    PaperClip/MistakeClassification.swift \
-    PaperClip/QuestionType.swift \
-    PaperClip/MistakeTagModels.swift \
-    PaperClip/MistakeModels.swift \
-    PaperClip/MistakePracticeModels.swift \
-    PaperClip/ModelContextHelpers.swift \
-    PaperClip/MistakePersistence.swift \
-    PaperClip/MistakePracticePersistence.swift \
-    PaperClip/PaperResultMasterySync.swift \
-    Tests/MistakePersistenceTests.swift
-
-run_swift_test MistakeRecognitionQueueTests \
-    PaperClip/MistakeRecognitionQueue.swift \
-    Tests/MistakeRecognitionQueueTests.swift
-
-run_swift_test MistakeRecognitionStatusSupportTests \
-    PaperClip/MistakeClassification.swift \
-    PaperClip/MistakeRecognitionStatusSupport.swift \
-    Tests/MistakeRecognitionStatusSupportTests.swift
-
-run_swift_test MistakeSelectionCaptureSupportTests \
-    PaperClip/MistakeSelectionCaptureSupport.swift \
-    Tests/MistakeSelectionCaptureSupportTests.swift
-
 run_swift_test PDFExamHistorySnapshotTests \
     PaperClip/AppStorageDirectory.swift \
     PaperClip/StoredFile.swift \
-    PaperClip/MistakeClassification.swift \
-    PaperClip/QuestionType.swift \
+    PaperClip/ExamAttemptStatus.swift \
     PaperClip/PDFPageIndexDisplay.swift \
     PaperClip/PDFPageSelectionSet.swift \
     PaperClip/PDFPageExportSelectionSupport.swift \
     PaperClip/ExamModels.swift \
+    PaperClip/ExamPageSubmissionModel.swift \
     PaperClip/ExamHandwritingLayerModel.swift \
     PaperClip/ExamGradeMarkModel.swift \
+    PaperClip/ModelContextHelpers.swift \
+    PaperClip/PDFExamPageProgress.swift \
+    PaperClip/VocabularyStudySessionFormat.swift \
     PaperClip/PDFExamHistoryStatusStyle.swift \
     PaperClip/PDFExamHistoryViews.swift \
     Tests/PDFExamHistorySnapshotTests.swift
@@ -311,82 +386,74 @@ run_swift_test PDFLongImageLayoutSupportTests \
     PaperClip/PDFLongImageStackLayoutSupport.swift \
     Tests/PDFLongImageLayoutSupportTests.swift
 
-run_swift_test PDFCropGeometryTests \
-    PaperClip/PDFPageRenderGeometry.swift \
-    PaperClip/PDFCropGeometry.swift \
-    Tests/PDFCropGeometryTests.swift
-
 run_swift_test HandwritingRenderGeometryTests \
     PaperClip/HandwritingRenderGeometry.swift \
     Tests/HandwritingRenderGeometryTests.swift
-
-run_swift_test PDFSelectionGeometryTests \
-    PaperClip/PDFSelectionModels.swift \
-    PaperClip/RectGeometry.swift \
-    PaperClip/PDFSelectionHandleGeometry.swift \
-    PaperClip/PDFSelectionGeometry.swift \
-    Tests/PDFSelectionGeometryTests.swift
 
 run_swift_test PDFToolPickerVisibilitySupportTests \
     PaperClip/PDFToolPickerVisibilitySupport.swift \
     Tests/PDFToolPickerVisibilitySupportTests.swift
 
-run_swift_test QuestionCropGeometryTests \
-    PaperClip/NormalizedCropString.swift \
-    PaperClip/QuestionCropGeometry.swift \
-    PaperClip/QuestionCropRectOperations.swift \
-    Tests/QuestionCropGeometryTests.swift
-
-run_swift_test PaperObjectiveAnswerSelectionTests \
-    PaperClip/PaperObjectiveAnswerSelection.swift \
-    Tests/PaperObjectiveAnswerSelectionTests.swift
-
-run_swift_test PaperChoiceParserTests \
-    PaperClip/QuestionType.swift \
-    PaperClip/PaperChoiceParser.swift \
-    Tests/PaperChoiceParserTests.swift
-
 run_swift_test PDFWorkspaceCoreTests \
     PaperClip/AppStorageDirectory.swift \
     PaperClip/StoredFile.swift \
     PaperClip/AcademicTaxonomy.swift \
+    PaperClip/ExamAttemptStatus.swift \
+    PaperClip/PDFPageIndexDisplay.swift \
     PaperClip/PDFDocumentModels.swift \
-    PaperClip/PDFDocumentEditDraft.swift \
+    PaperClip/ExamModels.swift \
+    PaperClip/ExamPageSubmissionModel.swift \
+    PaperClip/ModelContextHelpers.swift \
+    PaperClip/PDFExamPageProgress.swift \
+    PaperClip/PDFExamResumePolicy.swift \
     PaperClip/PDFWorkspaceCore.swift \
+    PaperClip/PDFWorkspaceToolbarSnapshot.swift \
     Tests/PDFWorkspaceCoreTests.swift
 
 run_swift_test PDFPersistenceTests \
     PaperClip/AppStorageDirectory.swift \
     PaperClip/StoredFile.swift \
     PaperClip/AcademicTaxonomy.swift \
-    PaperClip/MistakeClassification.swift \
-    PaperClip/QuestionType.swift \
+    PaperClip/ExamAttemptStatus.swift \
     PaperClip/PDFPageIndexDisplay.swift \
     PaperClip/PDFPageSelectionSet.swift \
     PaperClip/PDFPageExportSelectionSupport.swift \
     PaperClip/PDFDocumentModels.swift \
     PaperClip/HandwritingLayerModel.swift \
     PaperClip/ExamModels.swift \
+    PaperClip/ExamPageSubmissionModel.swift \
     PaperClip/ExamHandwritingLayerModel.swift \
     PaperClip/ExamGradeMarkModel.swift \
     PaperClip/ModelContextHelpers.swift \
+    PaperClip/PDFExamPageProgress.swift \
+    PaperClip/PDFExamResumePolicy.swift \
     PaperClip/PDFPersistence.swift \
+    PaperClip/PDFExamPersistence.swift \
     PaperClip/PDFWorkspaceCore.swift \
     PaperClip/PDFAnswerLayerStore.swift \
     PaperClip/PDFDocumentCascadeDeletion.swift \
     Tests/PDFPersistenceTests.swift
 
-run_swift_test PreferredSubjectsTests \
+run_swift_test PDFExamArchiveStoreTests \
+    PaperClip/AppStorageDirectory.swift \
+    PaperClip/StoredFile.swift \
     PaperClip/AcademicTaxonomy.swift \
-    PaperClip/PreferredSubjects.swift \
-    Tests/PreferredSubjectsTests.swift
-
-run_swift_test MistakeCardEditorDraftLogicTests \
-    PaperClip/AcademicTaxonomy.swift \
-    PaperClip/PreferredSubjects.swift \
-    PaperClip/MistakeTagModels.swift \
-    PaperClip/MistakeCardEditorDraftLogic.swift \
-    Tests/MistakeCardEditorDraftLogicTests.swift
+    PaperClip/ExamAttemptStatus.swift \
+    PaperClip/PDFPageIndexDisplay.swift \
+    PaperClip/PDFPageSelectionSet.swift \
+    PaperClip/PDFPageExportSelectionSupport.swift \
+    PaperClip/PDFDocumentModels.swift \
+    PaperClip/HandwritingLayerModel.swift \
+    PaperClip/ExamModels.swift \
+    PaperClip/ExamPageSubmissionModel.swift \
+    PaperClip/ExamHandwritingLayerModel.swift \
+    PaperClip/ExamGradeMarkModel.swift \
+    PaperClip/ModelContextHelpers.swift \
+    PaperClip/PDFPersistence.swift \
+    PaperClip/PDFExamPersistence.swift \
+    PaperClip/PDFDocumentCascadeDeletion.swift \
+    PaperClip/PDFExamAttemptStore.swift \
+    Tests/PDFExamArchiveStoreTests.swift
 
 run_swift_test VocabularyHomeSnapshotTests \
     PaperClip/VocabularyModels.swift \
@@ -631,6 +698,8 @@ run_swift_test VocabularyTextImporterTests \
 
 run_swift_test WritingHomeSnapshotTests \
     PaperClip/WritingLanguageModels.swift \
+    PaperClip/WritingPromptConfiguration.swift \
+    PaperClip/WritingPromptDefaults.swift \
     PaperClip/WritingPaperModels.swift \
     PaperClip/WritingPromptGenerationDraft.swift \
     PaperClip/WritingPromptModel.swift \
@@ -668,17 +737,10 @@ run_swift_test StatisticsSnapshotTests \
     PaperClip/StoredFile.swift \
     PaperClip/AcademicTaxonomy.swift \
     PaperClip/Models.swift \
-    PaperClip/MasteryStatusSegment.swift \
-    PaperClip/MistakeTagModels.swift \
     PaperClip/MistakeModels.swift \
     PaperClip/MistakePracticeModels.swift \
-    PaperClip/MistakePersistence.swift \
-    PaperClip/MistakePracticePersistence.swift \
-    PaperClip/MasteryStatusSummary.swift \
-    PaperClip/MistakeClassification.swift \
-    PaperClip/QuestionType.swift \
+    PaperClip/ExamAttemptStatus.swift \
     PaperClip/ModelContextHelpers.swift \
-    PaperClip/PreferredSubjects.swift \
     PaperClip/PDFPageIndexDisplay.swift \
     PaperClip/ExamModels.swift \
     PaperClip/ExamGradeMarkModel.swift \
@@ -690,42 +752,10 @@ run_swift_test StatisticsSnapshotTests \
     PaperClip/VocabularyStudySessionItem.swift \
     PaperClip/VocabularyStudySessionMetrics.swift \
     PaperClip/VocabularyStudyModels.swift \
-    PaperClip/StatisticsDataSeries.swift \
+    PaperClip/VocabularyStudySessionDraft.swift \
+    PaperClip/VocabularyStudySessionTransaction.swift \
     PaperClip/StatisticsModels.swift \
-    PaperClip/StatisticsCardAggregate.swift \
-    PaperClip/StatisticsPracticeWeekData.swift \
     Tests/StatisticsSnapshotTests.swift
-
-run_swift_test SubjectLibrarySnapshotTests \
-    PaperClip/AppStorageDirectory.swift \
-    PaperClip/StoredFile.swift \
-    PaperClip/AcademicTaxonomy.swift \
-    PaperClip/MasteryStatusSegment.swift \
-    PaperClip/MasteryStatusSummary.swift \
-    PaperClip/MistakeClassification.swift \
-    PaperClip/QuestionType.swift \
-    PaperClip/MistakeTagModels.swift \
-    PaperClip/MistakeModels.swift \
-    PaperClip/MistakePracticeModels.swift \
-    PaperClip/MistakePersistence.swift \
-    PaperClip/MistakePracticePersistence.swift \
-    PaperClip/PDFPageIndexDisplay.swift \
-    PaperClip/PDFPageSelectionSet.swift \
-    PaperClip/PDFPageExportSelectionSupport.swift \
-    PaperClip/PDFDocumentModels.swift \
-    PaperClip/HandwritingLayerModel.swift \
-    PaperClip/ExamModels.swift \
-    PaperClip/ExamHandwritingLayerModel.swift \
-    PaperClip/ExamGradeMarkModel.swift \
-    PaperClip/ModelContextHelpers.swift \
-    PaperClip/PDFPersistence.swift \
-    PaperClip/PDFDocumentCascadeDeletion.swift \
-    PaperClip/PreferredSubjects.swift \
-    PaperClip/SubjectLibrarySnapshotSupport.swift \
-    PaperClip/SubjectLibrarySnapshot.swift \
-    PaperClip/SubjectDocumentSnapshot.swift \
-    PaperClip/SubjectLibraryViewModels.swift \
-    Tests/SubjectLibrarySnapshotTests.swift
 
 run_swift_test VisibleElementDiffTests \
     PaperClip/VisibleElementDiff.swift \

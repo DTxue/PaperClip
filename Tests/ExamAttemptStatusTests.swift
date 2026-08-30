@@ -4,10 +4,11 @@ import Foundation
 struct ExamAttemptStatusTests {
     static func main() {
         testSubmitEligibility()
+        testGradingRequestEligibility()
         testUnknownStatusIsNotSubmittable()
         testTerminalStatus()
 
-        print("ExamAttemptStatusTests: 5 passed")
+        print("ExamAttemptStatusTests: 8 passed")
     }
 
     private static func testSubmitEligibility() {
@@ -15,6 +16,12 @@ struct ExamAttemptStatusTests {
         expect(ExamAttemptStatus.canSubmit(ExamAttemptStatus.inProgress.rawValue))
         expect(!ExamAttemptStatus.submitted.canSubmit)
         expect(!ExamAttemptStatus.graded.canSubmit)
+    }
+
+    private static func testGradingRequestEligibility() {
+        expect(ExamAttemptStatus.inProgress.canRequestGrading)
+        expect(ExamAttemptStatus.submitted.canRequestGrading)
+        expect(!ExamAttemptStatus.graded.canRequestGrading)
     }
 
     private static func testUnknownStatusIsNotSubmittable() {

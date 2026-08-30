@@ -58,6 +58,13 @@ struct PDFPageSelectionCell: View {
             PDFPageSelectionTitle(index: index, isSelected: isSelected)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
+
+            if let supplement {
+                Label(supplement.title, systemImage: supplement.systemImage)
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
         }
         .padding(10)
         .frame(maxWidth: .infinity)

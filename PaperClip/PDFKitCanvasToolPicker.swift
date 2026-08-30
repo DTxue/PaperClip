@@ -67,24 +67,30 @@ extension PDFKitCanvasView.Coordinator {
 
     var shouldShowToolPicker: Bool {
         parent.isWritingEnabled
-            && !parent.isSelectionMode
             && parent.isDrawingVisible
+            && preferredCanvas().map(canvasAllowsWriting) == true
     }
 
     func preferredCanvas() -> PKCanvasView? {
         if let currentPage = pdfView?.currentPage,
-           let canvas = canvases[currentPage] {
+           let canvas = canvases[currentPage],
+           canvasAllowsWriting(canvas) {
             return canvas
         }
         for page in pdfView?.visiblePages ?? [] {
-            if let canvas = canvases[page] {
+            if let canvas = canvases[page], canvasAllowsWriting(canvas) {
                 return canvas
             }
         }
-        if let activeCanvas {
+        if let activeCanvas, canvasAllowsWriting(activeCanvas) {
             return activeCanvas
         }
-        return canvases.values.first
+        return canvases.values.first(where: canvasAllowsWriting)
+    }
+
+    func canvasAllowsWriting(_ canvas: PKCanvasView) -> Bool {
+        guard let pageIndex = pageIndexByCanvas[ObjectIdentifier(canvas)] else { return false }
+        return parent.writablePageIndices?.contains(pageIndex) ?? true
     }
 
     private func scheduleToolPickerActivation(

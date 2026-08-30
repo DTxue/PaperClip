@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class VocabularyHandwritingAttempt {
     static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyHandwritingAttempt>] {
@@ -30,3 +31,6 @@ final class VocabularyHandwritingAttempt {
         self.createdAt = createdAt
     }
 }
+}
+
+typealias VocabularyHandwritingAttempt = PaperClipSchemaV1.VocabularyHandwritingAttempt

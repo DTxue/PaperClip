@@ -3,34 +3,55 @@ import SwiftUI
 struct ExamAttemptHistoryRowData: Identifiable, Hashable {
     let id: UUID
     let createdAt: Date
+    let submittedAt: Date?
     let updatedAt: Date
     let selectedPageIndicesText: String
     let status: String
+    let questionMetrics: ExamAttemptQuestionMetrics
+    let pageProgress: PDFExamPageProgress?
 
     init(
         id: UUID,
         createdAt: Date,
+        submittedAt: Date? = nil,
         updatedAt: Date,
         selectedPageIndicesText: String,
-        status: String
+        status: String,
+        questionMetrics: ExamAttemptQuestionMetrics = ExamAttemptQuestionMetrics(),
+        pageProgress: PDFExamPageProgress? = nil
     ) {
         self.id = id
         self.createdAt = createdAt
+        self.submittedAt = submittedAt
         self.updatedAt = updatedAt
         self.selectedPageIndicesText = selectedPageIndicesText
         self.status = status
+        self.questionMetrics = questionMetrics
+        self.pageProgress = pageProgress
     }
 
-    init(attempt: ExamAttempt) {
+    init(
+        attempt: ExamAttempt,
+        questionMetrics: ExamAttemptQuestionMetrics = ExamAttemptQuestionMetrics(),
+        pageProgress: PDFExamPageProgress? = nil
+    ) {
         id = attempt.id
         createdAt = attempt.createdAt
+        submittedAt = attempt.submittedAt
         updatedAt = attempt.updatedAt
         selectedPageIndicesText = attempt.selectedPageIndicesText
         status = attempt.status
+        self.questionMetrics = questionMetrics
+        self.pageProgress = pageProgress
     }
 
     var selectedPageIndices: [Int] {
         PDFPageIndexDisplay.parseStoredIndices(selectedPageIndicesText)
+    }
+
+    var duration: Double? {
+        guard let submittedAt else { return nil }
+        return max(submittedAt.timeIntervalSince(createdAt), 0)
     }
 
     static var propertiesToFetch: [PartialKeyPath<ExamAttempt>] {
@@ -40,6 +61,7 @@ struct ExamAttemptHistoryRowData: Identifiable, Hashable {
             \.selectedPageIndicesText,
             \.status,
             \.createdAt,
+            \.submittedAt,
             \.updatedAt
         ]
     }
@@ -167,6 +189,21 @@ struct ExamAttemptHistoryDisplayRow: Identifiable, Hashable {
     var createdAt: Date { attempt.createdAt }
     var statusTitle: String { statusStyle.title }
     var iconName: String { statusStyle.iconName }
+    var allowsManualDeletion: Bool {
+        guard statusStyle.allowsManualDeletion else { return false }
+        return attempt.pageProgress?.submittedPageIndices.isEmpty ?? true
+    }
+    var durationText: String? {
+        attempt.duration.map(VocabularyStudySessionFormat.clockDuration)
+    }
+    var averageQuestionDurationText: String? {
+        guard let duration = attempt.duration, attempt.questionMetrics.totalCount > 0 else {
+            return nil
+        }
+        return VocabularyStudySessionFormat.duration(
+            duration / Double(attempt.questionMetrics.totalCount)
+        )
+    }
 
     init(attempt: ExamAttemptHistoryRowData) {
         self.attempt = attempt

@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class ExamHandwritingLayer {
     @Attribute(.unique) var id: UUID
@@ -29,6 +30,9 @@ final class ExamHandwritingLayer {
         self.updatedAt = updatedAt
     }
 }
+}
+
+typealias ExamHandwritingLayer = PaperClipSchemaV1.ExamHandwritingLayer
 
 extension ExamHandwritingLayer {
     static var deletionPropertiesToFetch: [PartialKeyPath<ExamHandwritingLayer>] {

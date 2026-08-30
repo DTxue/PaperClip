@@ -38,7 +38,7 @@ extension PDFExamPageSelectionView {
         pageCount = nil
         pageThumbnails = [:]
         renderingThumbnailIndices = []
-        selectedIndices = []
+        selectedIndices = decision.target.pageIndex.map { Set([$0]) } ?? []
 
         let documentURL = documentURL
         let loadedPageCount = await PDFPageDocumentReader.pageCount(at: documentURL)

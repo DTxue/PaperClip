@@ -45,28 +45,4 @@ enum StorageService {
         try makePDFReadOnly(at: destination)
         return fileName
     }
-
-    static func saveCardImage(_ image: UIImage) throws -> String {
-        guard let data = ImageJPEGEncoder.standardData(from: image) else {
-            throw CocoaError(.fileWriteUnknown)
-        }
-        return try saveCardImageData(data)
-    }
-
-    static func saveCardImage(
-        _ image: UIImage,
-        priority: TaskPriority = .userInitiated
-    ) async throws -> String {
-        try await Task.detached(priority: priority) {
-            try saveCardImage(image)
-        }.value
-    }
-
-    static func saveCardImageData(_ data: Data) throws -> String {
-        let fileName = "\(UUID().uuidString).jpg"
-        let destination = StoredFile.cardImage(fileName: fileName).url
-        try ensureParentDirectoryExists(for: destination)
-        try data.write(to: destination, options: .atomic)
-        return fileName
-    }
 }

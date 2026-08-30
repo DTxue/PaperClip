@@ -8,8 +8,6 @@ struct StatisticsSnapshotTests {
         let schema = Schema([
             ExamAttempt.self,
             ExamGradeMark.self,
-            MistakeCard.self,
-            MistakePracticeLayer.self,
             VocabularyDeck.self,
             VocabularyStudySession.self
         ])
@@ -17,100 +15,16 @@ struct StatisticsSnapshotTests {
         let container = try ModelContainer(for: schema, configurations: [configuration])
         let context = container.mainContext
 
-        expect(StatisticsSnapshot.cardAggregatePropertiesToFetch.count == 4)
-        expect(StatisticsSnapshot.practiceWeekPropertiesToFetch.count == 2)
         expect(StatisticsSnapshot.vocabularySessionPropertiesToFetch.count == 6)
         expect(StatisticsSnapshot.vocabularyDeckPropertiesToFetch.count == 2)
-        expect(StatisticsSnapshot.pdfExamAttemptPropertiesToFetch.count == 6)
+        expect(StatisticsSnapshot.pdfExamAttemptPropertiesToFetch.count == 7)
         expect(StatisticsSnapshot.pdfExamGradeMarkPropertiesToFetch.count == 2)
+
+        try testVocabularyStudyCompletionAppearsInTodayStatistics()
 
         let calendar = Calendar(identifier: .gregorian)
         let now = Date(timeIntervalSince1970: 1_735_689_600) // 2025-01-01 00:00:00 UTC
-        let lastMonth = try require(calendar.date(byAdding: .month, value: -1, to: now))
-        let oldMonth = try require(calendar.date(byAdding: .month, value: -18, to: now))
-        let monthBuckets = StatisticsDateBuckets.recentBuckets(
-            endingAt: now,
-            component: .month,
-            count: 3,
-            calendar: calendar
-        )
-        expect(monthBuckets.count == 3)
-        expect(monthBuckets.last == StatisticsDateBuckets.bucketStart(
-            for: now,
-            component: .month,
-            calendar: calendar
-        ))
-        expect(StatisticsDateBuckets.recentBuckets(
-            endingAt: now,
-            component: .month,
-            count: 0,
-            calendar: calendar
-        ).isEmpty)
-        expect(StatisticsDateBuckets.bucketStart(
-            for: now,
-            component: .weekOfYear,
-            calendar: calendar
-        ) == calendar.dateInterval(of: .weekOfYear, for: now)?.start)
-
-        let masteredCard = MistakeCard(
-            imageFileName: "math-mastered.jpg",
-            originalWidth: 100,
-            originalHeight: 50,
-            subject: Subject.math.rawValue,
-            tagsText: "函数, 一次函数",
-            status: MasteryStatus.mastered.rawValue,
-            createdAt: now
-        )
-        let reviewCard = MistakeCard(
-            imageFileName: "physics-review.jpg",
-            originalWidth: 100,
-            originalHeight: 50,
-            subject: Subject.physics.rawValue,
-            tagsText: "力学",
-            status: MasteryStatus.review.rawValue,
-            createdAt: lastMonth
-        )
-        let oldCard = MistakeCard(
-            imageFileName: "old.jpg",
-            originalWidth: 100,
-            originalHeight: 50,
-            subject: Subject.english.rawValue,
-            tagsText: "阅读",
-            status: MasteryStatus.unmastered.rawValue,
-            createdAt: oldMonth
-        )
-        let unknownSubjectCard = MistakeCard(
-            imageFileName: "unknown.jpg",
-            originalWidth: 100,
-            originalHeight: 50,
-            subject: "未知学科",
-            tagsText: "",
-            status: MasteryStatus.mastered.rawValue,
-            createdAt: now
-        )
-        context.insert(masteredCard)
-        context.insert(reviewCard)
-        context.insert(oldCard)
-        context.insert(unknownSubjectCard)
-
-        context.insert(MistakePracticeLayer(
-            cardID: masteredCard.id,
-            practiceGroupID: UUID(),
-            mark: PracticeMark.gotIt.rawValue,
-            createdAt: now
-        ))
-        context.insert(MistakePracticeLayer(
-            cardID: reviewCard.id,
-            practiceGroupID: UUID(),
-            mark: PracticeMark.notYet.rawValue,
-            createdAt: now
-        ))
-        context.insert(MistakePracticeLayer(
-            cardID: oldCard.id,
-            practiceGroupID: UUID(),
-            mark: PracticeMark.gotIt.rawValue,
-            createdAt: oldMonth
-        ))
+        let oldDate = try require(calendar.date(byAdding: .day, value: -1, to: now))
         let coreDeckID = UUID()
         let testDeckID = UUID()
         context.insert(VocabularyDeck(id: coreDeckID, title: "核心词集"))
@@ -168,19 +82,22 @@ struct StatisticsSnapshotTests {
         context.insert(VocabularyStudySession(
             deckID: coreDeckID,
             kind: "测验",
-            startedAt: oldMonth,
-            endedAt: oldMonth,
+            startedAt: oldDate,
+            endedAt: oldDate,
             duration: 600,
             totalCount: 10,
             correctCount: 0,
             items: []
         ))
         let todayAttemptID = UUID()
+        let earlierTodayAttemptID = UUID()
         let yesterdayAttemptID = UUID()
         let draftAttemptID = UUID()
+        let todayDocumentID = UUID()
+        let earlierTodayDocumentID = UUID()
         context.insert(ExamAttempt(
             id: todayAttemptID,
-            sourceDocumentId: UUID(),
+            sourceDocumentId: todayDocumentID,
             sourceDocumentTitle: "期中 PDF",
             generatedPDFFileName: "today-exam.pdf",
             selectedPageIndices: [0, 1],
@@ -190,15 +107,26 @@ struct StatisticsSnapshotTests {
             updatedAt: now
         ))
         context.insert(ExamAttempt(
+            id: earlierTodayAttemptID,
+            sourceDocumentId: earlierTodayDocumentID,
+            sourceDocumentTitle: "期中 PDF",
+            generatedPDFFileName: "earlier-today-exam.pdf",
+            selectedPageIndices: [2],
+            status: ExamAttemptStatus.graded.rawValue,
+            createdAt: try require(calendar.date(byAdding: .minute, value: -80, to: now)),
+            submittedAt: try require(calendar.date(byAdding: .minute, value: -70, to: now)),
+            updatedAt: try require(calendar.date(byAdding: .minute, value: -69, to: now))
+        ))
+        context.insert(ExamAttempt(
             id: yesterdayAttemptID,
             sourceDocumentId: UUID(),
             sourceDocumentTitle: "昨日 PDF",
             generatedPDFFileName: "yesterday-exam.pdf",
             selectedPageIndices: [0],
             status: ExamAttemptStatus.graded.rawValue,
-            createdAt: oldMonth,
-            submittedAt: oldMonth,
-            updatedAt: oldMonth
+            createdAt: oldDate,
+            submittedAt: oldDate,
+            updatedAt: oldDate
         ))
         context.insert(ExamAttempt(
             id: draftAttemptID,
@@ -234,6 +162,20 @@ struct StatisticsSnapshotTests {
         ))
         context.insert(ExamGradeMark(
             sourceDocumentId: UUID(),
+            attemptId: earlierTodayAttemptID,
+            pageIndex: 2,
+            isCorrect: false,
+            normalizedAnchor: "0.5,0.5"
+        ))
+        context.insert(ExamGradeMark(
+            sourceDocumentId: UUID(),
+            attemptId: earlierTodayAttemptID,
+            pageIndex: 2,
+            isCorrect: true,
+            normalizedAnchor: "0.6,0.5"
+        ))
+        context.insert(ExamGradeMark(
+            sourceDocumentId: UUID(),
             attemptId: yesterdayAttemptID,
             pageIndex: 0,
             isCorrect: false,
@@ -247,24 +189,6 @@ struct StatisticsSnapshotTests {
             now: now
         )
 
-        expect(snapshot.masterySummary.total == 4)
-        expect(snapshot.masterySummary.mastered == 2)
-        expect(snapshot.masterySummary.review == 1)
-        expect(snapshot.masterySummary.unmastered == 1)
-        expect(snapshot.subjectData.map(\.subject) == [
-            Subject.math.rawValue,
-            Subject.english.rawValue,
-            Subject.physics.rawValue
-        ])
-        expect(snapshot.monthlyData.count == 12)
-        expect(snapshot.monthlyData.reduce(0) { $0 + $1.count } == 3)
-        expect(snapshot.monthlyData.contains(where: \.hasEntries))
-        expect(snapshot.topTags.count == 4)
-        expect(Set(snapshot.topTags.map(\.tag)) == ["函数", "一次函数", "力学", "阅读"])
-        expect(snapshot.practiceWeekData.count == 1)
-        expect(snapshot.practiceWeekData[0].gotIt == 1)
-        expect(snapshot.practiceWeekData[0].notYet == 1)
-        expect(snapshot.practiceWeekData[0].hasEntries)
         expect(snapshot.vocabularySummary.hasSessions)
         expect(snapshot.vocabularySummary.rows.count == 2)
         expect(Set(snapshot.vocabularySummary.rows.map(\.deckTitle)) == ["测验词集", "核心词集"])
@@ -287,16 +211,79 @@ struct StatisticsSnapshotTests {
         expect(coreRow.testIncorrectCount == 2)
         expect(abs(coreRow.testAccuracy - 0.6) < 0.0001)
         expect(snapshot.pdfExamSummary.hasAttempts)
-        expect(snapshot.pdfExamSummary.rows.count == 1)
+        expect(snapshot.pdfExamSummary.rows.count == 2)
         let pdfRow = try require(snapshot.pdfExamSummary.rows.first)
+        let earlierPDFRow = try require(snapshot.pdfExamSummary.rows.dropFirst().first)
+        expect(snapshot.pdfExamSummary.rows.map(\.id) == [todayAttemptID, earlierTodayAttemptID])
+        expect(pdfRow.sourceDocumentID == todayDocumentID)
         expect(pdfRow.title == "期中 PDF")
+        expect(pdfRow.completedAt == now)
         expect(pdfRow.duration == 1_800)
         expect(pdfRow.correctCount == 2)
         expect(pdfRow.incorrectCount == 1)
+        expect(pdfRow.averageQuestionDuration == 600)
         expect(abs(pdfRow.accuracy - (2.0 / 3.0)) < 0.0001)
+        expect(earlierPDFRow.sourceDocumentID == earlierTodayDocumentID)
+        expect(earlierPDFRow.title == "期中 PDF")
+        expect(earlierPDFRow.duration == 600)
+        expect(earlierPDFRow.correctCount == 1)
+        expect(earlierPDFRow.incorrectCount == 1)
+        expect(earlierPDFRow.averageQuestionDuration == 300)
+        expect(abs(earlierPDFRow.accuracy - 0.5) < 0.0001)
         expect(snapshot.hasAnyData)
 
-        print("StatisticsSnapshotTests: 47 passed")
+        print("StatisticsSnapshotTests: passed")
+    }
+
+    @MainActor
+    private static func testVocabularyStudyCompletionAppearsInTodayStatistics() throws {
+        let schema = Schema([
+            ExamAttempt.self,
+            ExamGradeMark.self,
+            VocabularyDeck.self,
+            VocabularyStudySession.self
+        ])
+        let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: schema, configurations: [configuration])
+        let context = container.mainContext
+
+        let deck = VocabularyDeck(title: "今日学习词集")
+        context.insert(deck)
+        try context.save()
+
+        let didRecord = try VocabularyStudySessionTransaction.recordSession(
+            deckID: deck.id,
+            kind: "学习",
+            startedAt: Date.now.addingTimeInterval(-75),
+            items: [
+                VocabularyStudySessionItem(
+                    cardID: UUID(),
+                    prompt: "first prompt",
+                    expectedAnswer: "first answer",
+                    isCorrect: true
+                ),
+                VocabularyStudySessionItem(
+                    cardID: UUID(),
+                    prompt: "second prompt",
+                    expectedAnswer: "second answer",
+                    isCorrect: false
+                )
+            ],
+            in: context
+        )
+        expect(didRecord)
+
+        let snapshot = try StatisticsSnapshot.load(modelContext: context)
+        expect(snapshot.vocabularySummary.hasSessions)
+        expect(snapshot.vocabularySummary.rows.count == 1)
+
+        let row = try require(snapshot.vocabularySummary.rows.first)
+        expect(row.deckTitle == "今日学习词集")
+        expect(row.hasLearning)
+        expect(row.learningMetrics.totalCount == 2)
+        expect(row.learningCorrectCount == 1)
+        expect(row.learningIncorrectCount == 1)
+        expect(!row.hasTest)
     }
 
     private static func require<T>(_ value: T?) throws -> T {

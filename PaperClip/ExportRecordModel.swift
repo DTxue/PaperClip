@@ -1,6 +1,8 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
+/// Legacy persisted model retained only so existing stores and backups remain readable.
 @Model
 final class ExportRecord {
     @Attribute(.unique) var id: UUID
@@ -28,8 +30,7 @@ final class ExportRecord {
         self.pdfFileName = pdfFileName
         self.createdAt = createdAt
     }
-
-    var pdfURL: URL {
-        StoredFile.exportPDF(fileName: pdfFileName).url
-    }
 }
+}
+
+typealias ExportRecord = PaperClipSchemaV1.ExportRecord

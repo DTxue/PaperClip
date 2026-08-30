@@ -2,29 +2,11 @@ import SwiftUI
 
 extension VocabularyFlashcardView {
     func orderedCards(for direction: VocabularyDirection) -> [VocabularyCard] {
-        var stateByCardID: [UUID: VocabularyMemoryState] = [:]
-        for state in states where state.direction == direction.rawValue {
-            if stateByCardID[state.cardID] == nil {
-                stateByCardID[state.cardID] = state
-            }
-        }
-
-        let now = Date.now
-        var due: [(card: VocabularyCard, dueDate: Date)] = []
-        var fresh: [VocabularyCard] = []
-        fresh.reserveCapacity(min(deck.dailyNewLimit, allCards.count))
-        for card in allCards {
-            if let state = stateByCardID[card.id] {
-                if state.dueDate <= now {
-                    due.append((card: card, dueDate: state.dueDate))
-                }
-            } else if fresh.count < deck.dailyNewLimit {
-                fresh.append(card)
-            }
-        }
-
-        due.sort { $0.dueDate < $1.dueDate }
-        return due.map(\.card) + fresh
+        VocabularyFlashcardQueue.orderedCards(
+            cards: allCards,
+            states: states,
+            direction: direction
+        )
     }
 
     func resetSession() {
@@ -44,10 +26,6 @@ extension VocabularyFlashcardView {
         isAnimatingSwipe = false
         roundFinished = false
         sessionFinished = false
-        startedAt = .now
-        sessionStartedAt = .now
-        sessionItems = []
-        didRecordSession = false
     }
 
     func fetchSessionData() {

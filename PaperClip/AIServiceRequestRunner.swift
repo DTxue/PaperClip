@@ -3,11 +3,11 @@ import Foundation
 enum AIServiceRequestRunner {
     private static let requestTimeout: Duration = .seconds(240)
 
-    static func run(
+    static func run<Result: Sendable>(
         modelName: String,
-        operation: @escaping @Sendable () async throws -> String
-    ) async throws -> String {
-        try await withThrowingTaskGroup(of: String.self) { group in
+        operation: @escaping @Sendable () async throws -> Result
+    ) async throws -> Result {
+        try await withThrowingTaskGroup(of: Result.self) { group in
             group.addTask {
                 do {
                     return try await operation()

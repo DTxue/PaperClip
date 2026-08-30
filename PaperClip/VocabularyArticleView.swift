@@ -42,6 +42,21 @@ struct VocabularyArticleView: View {
         readingTheme.palette(for: colorScheme, appTheme: appTheme)
     }
 
+    private var modeSelection: Binding<VocabularyArticleViewMode> {
+        Binding(
+            get: { viewMode },
+            set: { targetMode in
+                guard VocabularyArticleModePolicy.canSelect(
+                    targetMode,
+                    currentMode: viewMode,
+                    isRecitationComplete: recitation.isComplete
+                ) else { return }
+
+                viewMode = targetMode
+            }
+        )
+    }
+
     var body: some View {
         Group {
             if cards.isEmpty {
@@ -156,10 +171,15 @@ struct VocabularyArticleView: View {
                 )
 
                 HStack {
-                    Picker("词生文模式", selection: $viewMode) {
+                    Picker("词生文模式", selection: modeSelection) {
                         ForEach(VocabularyArticleViewMode.allCases) { mode in
                             Label(mode.title, systemImage: mode.systemImage)
                                 .tag(mode)
+                                .disabled(!VocabularyArticleModePolicy.canSelect(
+                                    mode,
+                                    currentMode: viewMode,
+                                    isRecitationComplete: recitation.isComplete
+                                ))
                         }
                     }
                     .pickerStyle(.segmented)

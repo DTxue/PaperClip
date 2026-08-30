@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class WritingPrompt {
     static var deletionPropertiesToFetch: [PartialKeyPath<WritingPrompt>] {
@@ -61,3 +62,6 @@ final class WritingPrompt {
             .filter { !$0.isEmpty }
     }
 }
+}
+
+typealias WritingPrompt = PaperClipSchemaV1.WritingPrompt

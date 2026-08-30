@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class VocabularyDistractorCache {
     static var freshnessPropertiesToFetch: [PartialKeyPath<VocabularyDistractorCache>] {
@@ -45,3 +46,6 @@ final class VocabularyDistractorCache {
         VocabularyJSONStorage.decode([String].self, from: distractorTilesJSON, fallback: [])
     }
 }
+}
+
+typealias VocabularyDistractorCache = PaperClipSchemaV1.VocabularyDistractorCache

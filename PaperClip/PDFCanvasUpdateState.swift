@@ -1,8 +1,6 @@
 import Foundation
 
 struct PDFCanvasCommandTokens: Equatable {
-    let selectionAction: Int
-    let cancelSelection: Int
     let undo: Int
     let redo: Int
     let clearAnswers: Int
@@ -27,8 +25,6 @@ struct PDFCanvasUpdateState {
             self.lastSnapshot = snapshot
             return PDFCanvasUpdateChanges(
                 needsLayout: true,
-                selectionActionChanged: false,
-                cancelSelectionChanged: false,
                 undoChanged: false,
                 redoChanged: false,
                 clearAnswersChanged: false,
@@ -38,8 +34,6 @@ struct PDFCanvasUpdateState {
 
         let changes = PDFCanvasUpdateChanges(
             needsLayout: snapshot.layoutInputs != lastSnapshot.layoutInputs,
-            selectionActionChanged: snapshot.commandTokens.selectionAction != lastSnapshot.commandTokens.selectionAction,
-            cancelSelectionChanged: snapshot.commandTokens.cancelSelection != lastSnapshot.commandTokens.cancelSelection,
             undoChanged: snapshot.commandTokens.undo != lastSnapshot.commandTokens.undo,
             redoChanged: snapshot.commandTokens.redo != lastSnapshot.commandTokens.redo,
             clearAnswersChanged: snapshot.commandTokens.clearAnswers != lastSnapshot.commandTokens.clearAnswers,
@@ -52,8 +46,6 @@ struct PDFCanvasUpdateState {
 
 struct PDFCanvasUpdateChanges: Equatable {
     let needsLayout: Bool
-    let selectionActionChanged: Bool
-    let cancelSelectionChanged: Bool
     let undoChanged: Bool
     let redoChanged: Bool
     let clearAnswersChanged: Bool

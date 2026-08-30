@@ -2,37 +2,33 @@ import SwiftData
 
 struct PaperClipLaunchStore {
     let container: ModelContainer
+    let isPersistent: Bool
     let startupError: AppAlert?
 }
 
 enum PaperClipModelContainerFactory {
     static func makeLaunchStore() -> PaperClipLaunchStore {
-        let schema = makeSchema()
-        let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
         do {
+            let cleanupBackupURL = try LegacyMistakeDataCleanup.prepareSafetyBackupIfNeeded()
             return PaperClipLaunchStore(
-                container: try ModelContainer(
-                    for: schema,
-                    configurations: [configuration]
-                ),
-                startupError: nil
+                container: try PaperClipStore.makeContainer(),
+                isPersistent: true,
+                startupError: cleanupBackupURL.map { _ in
+                    AppAlert(
+                        title: "旧错题清理备份已生成",
+                        message: "旧版错题数据清理前已完成整库备份。可在“设置 → 数据备份”中分享并长期保存。"
+                    )
+                }
             )
         } catch let persistentError {
             do {
-                let fallback = ModelConfiguration(
-                    schema: schema,
-                    isStoredInMemoryOnly: true
-                )
                 return PaperClipLaunchStore(
-                    container: try ModelContainer(
-                        for: schema,
-                        configurations: [fallback]
-                    ),
+                    container: try PaperClipStore.makeContainer(isStoredInMemoryOnly: true),
+                    isPersistent: false,
                     startupError: AppAlert(
                         title: "本地数据库不可用",
                         message: """
-                        应用已进入临时模式，本次运行的数据不会持久保存。\
+                        应用已进入临时模式，本次运行的数据不会持久保存，后台修复和识别已暂停。\
                         请重新启动应用；如问题持续，请先备份应用数据。\
                         原因：\(persistentError.localizedDescription)
                         """
@@ -44,33 +40,16 @@ enum PaperClipModelContainerFactory {
         }
     }
 
-    private static func makeSchema() -> Schema {
-        Schema([
-            PDFDocumentItem.self,
-            HandwritingLayer.self,
-            ExamAttempt.self,
-            ExamHandwritingLayer.self,
-            ExamGradeMark.self,
-            MistakeCard.self,
-            ExportRecord.self,
-            MistakePracticeLayer.self,
-            VocabularyFolder.self,
-            VocabularyDeck.self,
-            VocabularyCard.self,
-            VocabularyGeneratedArticle.self,
-            VocabularyArticleRecitationHistory.self,
-            VocabularyMemoryState.self,
-            VocabularyReviewLog.self,
-            VocabularyStudySession.self,
-            VocabularyTestDraft.self,
-            VocabularyHandwritingAttempt.self,
-            VocabularyImportBatch.self,
-            VocabularyDistractorCache.self,
-            DiaryEntry.self,
-            KnowledgeItem.self,
-            WritingPrompt.self,
-            WritingDraft.self,
-            WritingReview.self
-        ])
+    static func makeTemporaryLaunchStore(startupError: AppAlert) -> PaperClipLaunchStore {
+        do {
+            return PaperClipLaunchStore(
+                container: try PaperClipStore.makeContainer(isStoredInMemoryOnly: true),
+                isPersistent: false,
+                startupError: startupError
+            )
+        } catch {
+            fatalError("无法创建安全临时数据库：\(error.localizedDescription)")
+        }
     }
+
 }

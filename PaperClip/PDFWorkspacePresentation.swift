@@ -14,14 +14,6 @@ extension PDFWorkspaceView {
         content
             .onAppear(perform: handleWorkspaceAppear)
             .onDisappear(perform: handleWorkspaceDisappear)
-            .sheet(item: $session.currentCard) { card in
-                NavigationStack {
-                    MistakeCardEditorView(card: card)
-                }
-            }
-            .sheet(item: $session.aiAnalysisRequest) { request in
-                AIAnalysisView(image: request.image)
-            }
             .sheet(isPresented: $session.isPDFPageExportPresented) {
                 PDFPageExportView(
                     documentURL: activePDFURL,
@@ -29,15 +21,21 @@ extension PDFWorkspaceView {
                     canvasSizes: session.canvasSizes
                 )
             }
-            .sheet(isPresented: $session.isPageSelectionPresented) {
-                PDFExamPageSelectionView(documentURL: document.localFileURL) { indices in
-                    startExam(with: indices)
+            .sheet(item: $session.examPageSelectionContext) { context in
+                PDFExamPageSelectionView(
+                    documentURL: context.documentURL,
+                    decision: context.decision
+                ) { pageIndex in
+                    session.examPageSelectionContext = nil
+                    activateAttempt(id: context.attemptID, requestedPageIndex: pageIndex)
                 }
             }
             .sheet(isPresented: $session.isExamHistoryPresented) {
                 ExamAttemptHistoryView(attempts: session.examHistoryAttempts) { attempt in
                     session.isExamHistoryPresented = false
-                    activateAttempt(id: attempt)
+                    continueExam(id: attempt)
+                } onDelete: { attempt in
+                    deleteInProgressExamAttempt(id: attempt)
                 }
             }
             .appAlert($session.alert)
@@ -51,12 +49,21 @@ extension PDFWorkspaceView {
             session.alert = AppAlert(title: "无法保护原 PDF", error: error)
         }
         refreshExamSummary()
+        activateInitialOrCurrentAttemptIfNeeded()
+    }
+
+    func activateInitialOrCurrentAttemptIfNeeded() {
+        guard !didActivateInitialAttempt else { return }
+        didActivateInitialAttempt = true
+        if let initialAttemptID {
+            activateAttempt(id: initialAttemptID)
+            return
+        }
     }
 
     func handleWorkspaceDisappear() {
         session.pendingSaveAction.cancel()
         session.submitTaskSlot.cancel()
-        cancelSelectionActionTask()
         session.resetActiveExamURL()
         persistModelContext()
     }

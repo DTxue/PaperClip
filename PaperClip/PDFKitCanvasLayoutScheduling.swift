@@ -4,9 +4,9 @@ extension PDFKitCanvasView.Coordinator {
     func updateFromSwiftUI(_ parent: PDFKitCanvasView) {
         self.parent = parent
         updateDocumentIfNeeded(url: parent.url)
-        selectionGesture?.isEnabled = parent.isSelectionMode
         configurePDFInteractionIfNeeded()
         updateCanvasesIfNeeded()
+        applyPageNavigationIfNeeded()
         let changes = consumeSwiftUIUpdate()
         if changes.needsLayout {
             scheduleCanvasLayoutForSwiftUIUpdateIfNeeded()
@@ -23,8 +23,6 @@ extension PDFKitCanvasView.Coordinator {
                     gradeStamps: parent.gradeStamps
                 ),
                 commandTokens: PDFCanvasCommandTokens(
-                    selectionAction: parent.selectionActionToken,
-                    cancelSelection: parent.cancelSelectionToken,
                     undo: parent.undoToken,
                     redo: parent.redoToken,
                     clearAnswers: parent.clearAnswersToken,
@@ -53,15 +51,6 @@ extension PDFKitCanvasView.Coordinator {
     }
 
     private func applySwiftUIChanges(_ changes: PDFCanvasUpdateChanges) {
-        if !parent.isSelectionMode {
-            clearSelection(notify: false)
-        }
-        if changes.selectionActionChanged, let selectionAction = parent.selectionAction {
-            confirmSelection(action: selectionAction)
-        }
-        if changes.cancelSelectionChanged {
-            clearSelection()
-        }
         if changes.undoChanged {
             activeCanvas?.undoManager?.undo()
         }

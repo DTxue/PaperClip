@@ -4,19 +4,14 @@ extension PDFKitCanvasView.Coordinator {
 
         pdfInteraction.configure(
             pdfView: pdfView,
-            selectionGesture: selectionGesture,
-            isSelectionMode: parent.isSelectionMode,
             configureGestureTouchTypes: needsPDFGestureTouchConfiguration
         )
         needsPDFGestureTouchConfiguration = false
         needsPDFInteractionConfiguration = false
-        lastConfiguredSelectionMode = parent.isSelectionMode
     }
 
     func configurePDFInteractionIfNeeded() {
-        guard needsPDFInteractionConfiguration
-            || lastConfiguredSelectionMode != parent.isSelectionMode
-        else { return }
+        guard needsPDFInteractionConfiguration else { return }
         configurePDFInteraction()
     }
 }

@@ -12,7 +12,7 @@ struct WritingSettingsView: View {
         Form {
             Section {
                 Picker("提示词", selection: $selectedPrompt) {
-                    ForEach(WritingPromptConfiguration.allCases) { item in
+                    ForEach(WritingPromptConfiguration.availableCases) { item in
                         Text(item.title).tag(item)
                     }
                 }
@@ -38,7 +38,7 @@ struct WritingSettingsView: View {
                     }
                     Spacer()
                     Button("恢复全部默认", role: .destructive) {
-                        for item in WritingPromptConfiguration.allCases {
+                        for item in WritingPromptConfiguration.availableCases {
                             UserDefaults.standard.removeObject(forKey: item.storageKey)
                         }
                         replacePromptText(selectedPrompt.defaultValue, autosave: false)
@@ -52,7 +52,6 @@ struct WritingSettingsView: View {
 
             Section("批阅目标") {
                 Label("中文批阅按远高于当前年级的标准，强制输出“好词好句”和局部示范修改。", systemImage: "character.book.closed")
-                Label("英文批阅检查字母、拼写、用词、语法、句式和更高级表达。", systemImage: "textformat.abc")
                 Label("批阅前会展示豆包识别文本，用户确认后再提交 DeepSeek。", systemImage: "text.viewfinder")
             }
         }

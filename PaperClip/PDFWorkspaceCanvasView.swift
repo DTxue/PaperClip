@@ -15,49 +15,33 @@ extension PDFWorkspaceView {
                 drawings: snapshot.drawings,
                 gradeStamps: snapshot.gradeStamps,
                 isWritingEnabled: snapshot.isWritingEnabled,
+                writablePageIndices: session.writablePageIndices(),
                 isDrawingVisible: snapshot.isDrawingVisible,
-                isSelectionMode: snapshot.isSelectionMode,
-                selectionAction: session.pendingSelectionAction,
-                selectionActionToken: session.selectionActionToken,
-                cancelSelectionToken: session.cancelSelectionToken,
                 undoToken: session.undoToken,
                 redoToken: session.redoToken,
                 clearAnswersToken: session.clearAnswersToken,
                 reloadDrawingsToken: session.reloadDrawingsToken,
+                requestedPageIndex: session.requestedPDFPageIndex,
+                pageNavigationToken: session.pageNavigationToken,
                 onDrawingChanged: saveDrawing,
-                onSelectionRectChanged: selectionRectDidChange,
-                onCrop: handleSelectionAction,
                 onError: { message in
                     session.alert = AppAlert(title: "无法打开 PDF", message: message)
                 },
+                onCurrentPageIndexChanged: { session.currentPDFPageIndex = $0 },
                 onCanvasSizesChanged: canvasSizesDidChange
             )
 
             if snapshot.showsStartOverlay {
                 ExamStartOverlay(
                     latestAttempt: snapshot.latestAttempt,
+                    currentAttempt: snapshot.currentAttempt,
                     attemptCount: snapshot.attemptCount,
-                    onStart: { session.isPageSelectionPresented = true },
+                    onStart: startOrResumeFullExam,
                     onHistory: openExamHistory,
-                    onContinue: { attemptID in activateAttempt(id: attemptID) },
+                    onContinue: continueExam(id:),
                     onDismiss: { dismiss() }
                 )
                 .zIndex(3)
-            }
-
-            if let rect = session.selectionRect {
-                SelectionMenuBar(
-                    onSave: { performSelectionAction(.saveMistake) },
-                    onShare: { performSelectionAction(.share) },
-                    onReselect: resetSelection
-                )
-                .position(x: rect.midX, y: rect.maxY + 44)
-                .transition(.scale(scale: 0.85, anchor: .top).combined(with: .opacity))
-                .zIndex(1)
-            }
-
-            if session.isSelectionMode {
-                SelectionInstructionOverlay(hasSelection: session.selectionRect != nil)
             }
 
             if session.isScratchPresented {
@@ -71,16 +55,34 @@ extension PDFWorkspaceView {
                 ExamSubmittingOverlay()
                     .zIndex(4)
             }
-        }
-        .safeAreaInset(edge: .top, alignment: .leading, spacing: 0) {
+
             if snapshot.hasActiveAttempt {
                 PDFExamExitButton(
                     isDisabled: snapshot.isSubmittingExam,
                     action: { session.isExitExamConfirmationPresented = true }
                 )
-                .padding(.top, 8)
                 .padding(.leading, 12)
-                .padding(.bottom, 6)
+                .safeAreaPadding(.top, 8)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .zIndex(5)
+
+                HStack(spacing: 10) {
+                    if let progress = snapshot.pageProgress {
+                        PDFExamPageProgressBadge(progress: progress)
+                    }
+                    if let startedAt = snapshot.activeAttemptStartedAt {
+                        PDFExamTimerBadge(startedAt: startedAt)
+                    }
+
+                    PDFExamSubmitButton(
+                        actionState: snapshot.gradingActionState,
+                        action: { session.isSubmitConfirmationPresented = true }
+                    )
+                }
+                .padding(.trailing, 12)
+                .safeAreaPadding(.top, 8)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .zIndex(5)
             }
         }
     }

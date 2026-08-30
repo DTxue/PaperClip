@@ -60,8 +60,11 @@ struct WritingHomeSnapshotTests {
         testLatestMetadataDoesNotDependOnInputOrder()
         testRecentMetadataFetchPlan()
         testGenerationDraftTrimsRequirement()
+        testOnlyChineseWritingIsAvailable()
+        testOnlyChineseWritingPromptSettingsAreAvailable()
+        testLegacyEnglishWritingLanguageRemainsDecodable()
         testDeletionSelectionIgnoresInvalidOffsets()
-        print("WritingHomeSnapshotTests: 10 passed")
+        print("WritingHomeSnapshotTests: 13 passed")
     }
 
     private static func testWhitespaceSearchDoesNotFilterPrompts() {
@@ -127,16 +130,33 @@ struct WritingHomeSnapshotTests {
 
     private static func testGenerationDraftTrimsRequirement() {
         var draft = WritingPromptGenerationDraft(
-            language: .english,
+            language: .chinese,
             studentGrade: "初二",
             requirementInput: "   "
         )
         expect(!draft.canGenerate, "blank requirement should not generate")
         expect(draft.trimmedRequirement.isEmpty, "blank requirement should trim to empty")
 
-        draft.requirementInput = "\nwrite about a challenge\t"
+        draft.requirementInput = "\n写一次难忘的挑战\t"
         expect(draft.canGenerate, "non-empty requirement should generate")
-        expect(draft.trimmedRequirement == "write about a challenge", "requirement should trim surrounding whitespace")
+        expect(draft.trimmedRequirement == "写一次难忘的挑战", "requirement should trim surrounding whitespace")
+    }
+
+    private static func testOnlyChineseWritingIsAvailable() {
+        expect(WritingLanguage.availableCases == [.chinese], "only Chinese writing should be available")
+    }
+
+    private static func testOnlyChineseWritingPromptSettingsAreAvailable() {
+        expect(
+            WritingPromptConfiguration.availableCases == [.chineseGeneration, .chineseReview],
+            "only Chinese writing prompt settings should be available"
+        )
+    }
+
+    private static func testLegacyEnglishWritingLanguageRemainsDecodable() {
+        let encodedLanguage = Data("\"english\"".utf8)
+        let decodedLanguage = try? JSONDecoder().decode(WritingLanguage.self, from: encodedLanguage)
+        expect(decodedLanguage == .english, "legacy English writing data should remain decodable")
     }
 
     private static func testDeletionSelectionIgnoresInvalidOffsets() {

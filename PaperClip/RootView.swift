@@ -2,7 +2,7 @@ import SwiftUI
 
 enum AppSection: Int {
     case home
-    case library
+    case mistakes
     case writing
     case vocabulary
     case statistics
@@ -18,10 +18,8 @@ struct RootView: View {
                 HomeView()
             }
 
-            Tab("题库", systemImage: "books.vertical", value: .library) {
-                NavigationStack {
-                    SubjectLibraryView()
-                }
+            Tab("错题库", systemImage: "rectangle.stack.badge.exclamationmark", value: .mistakes) {
+                MistakeLibraryView()
             }
 
             Tab("写作", systemImage: "pencil.and.outline", value: .writing) {
@@ -30,16 +28,14 @@ struct RootView: View {
                 }
             }
 
-            Tab("刷子", systemImage: "character.book.closed", value: .vocabulary) {
+            Tab("ENG", systemImage: "character.book.closed", value: .vocabulary) {
                 NavigationStack {
                     VocabularyHomeView()
                 }
             }
 
             Tab("统计", systemImage: "chart.bar", value: .statistics) {
-                NavigationStack {
-                    StatisticsView()
-                }
+                StatisticsView(isActive: section == .statistics)
             }
 
             Tab("设置", systemImage: "gearshape", value: .settings) {

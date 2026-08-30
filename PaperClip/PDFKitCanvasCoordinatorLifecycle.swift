@@ -3,14 +3,10 @@ import PencilKit
 import UIKit
 
 extension PDFKitCanvasView.Coordinator {
-        func attach(
-            host: PDFDrawingHostView,
-            selectionGesture: UIPanGestureRecognizer
-        ) {
+        func attach(host: PDFDrawingHostView) {
             self.host = host
             pdfView = host.pdfView
             loadedURL = parent.url
-            self.selectionGesture = selectionGesture
 
             let center = NotificationCenter.default
             let notifications: [Notification.Name] = [
@@ -47,8 +43,6 @@ extension PDFKitCanvasView.Coordinator {
             }
             activeCanvas = nil
             pdfInteraction.resetCache()
-            cropTasks.cancel()
-            selectionInteraction.clear(notify: false, notifySelection: parent.onSelectionRectChanged)
             loadedURL = url
             if let document = try? PDFRenderSupport.document(at: url) {
                 pdfView.document = document
@@ -66,6 +60,32 @@ extension PDFKitCanvasView.Coordinator {
 
         @objc func handlePDFViewChange() {
             scheduleCanvasLayout()
+            reportCurrentPageIndexIfNeeded()
+        }
+
+        func applyPageNavigationIfNeeded() {
+            guard lastPageNavigationToken != parent.pageNavigationToken else { return }
+            lastPageNavigationToken = parent.pageNavigationToken
+            guard let pageIndex = parent.requestedPageIndex,
+                  let pdfView,
+                  let page = pdfView.document?.page(at: pageIndex)
+            else { return }
+            pdfView.go(to: page)
+            reportCurrentPageIndexIfNeeded()
+            scheduleCanvasLayout()
+        }
+
+        func reportCurrentPageIndexIfNeeded() {
+            guard let pdfView,
+                  let document = pdfView.document,
+                  let currentPage = pdfView.currentPage
+            else { return }
+            let pageIndex = document.index(for: currentPage)
+            guard pageIndex >= 0, pageIndex != lastReportedPageIndex else { return }
+            lastReportedPageIndex = pageIndex
+            MainActorScheduler.async { [parent] in
+                parent.onCurrentPageIndexChanged(pageIndex)
+            }
         }
 
         @objc func handleAppDidBecomeActive() {
@@ -80,14 +100,12 @@ extension PDFKitCanvasView.Coordinator {
 
         func tearDown() {
             NotificationCenter.default.removeObserver(self)
-            cropTasks.cancel()
-            selectionInteraction.clear(notify: false, notifySelection: parent.onSelectionRectChanged)
             for page in Array(canvases.keys) {
                 removeCanvas(for: page)
             }
             gradeStampLayout.removeAll()
-            selectionGesture = nil
             pdfView = nil
             host = nil
+            lastReportedPageIndex = nil
         }
 }

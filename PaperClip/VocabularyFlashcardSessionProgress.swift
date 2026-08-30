@@ -44,6 +44,5 @@ extension VocabularyFlashcardView {
 
     func markNextCardStarted() {
         isAnimatingSwipe = false
-        startedAt = .now
     }
 }

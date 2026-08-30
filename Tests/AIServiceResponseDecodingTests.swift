@@ -9,7 +9,8 @@ struct AIServiceResponseDecodingTests {
         testDecodedJSONValueUsesSanitizedContentAndSnakeCaseKeys()
         testVocabularyEnglishDefinitionsDecodeTopLevelArray()
         testVocabularyEnglishDefinitionsDecodeItemsObject()
-        print("AIServiceResponseDecodingTests: 6 passed")
+        testResponsesPayloadDecodesProviderModelID()
+        print("AIServiceResponseDecodingTests: 7 passed")
     }
 
     private static func testSanitizedJSONValueRemovesFenceAndText() {
@@ -93,6 +94,24 @@ struct AIServiceResponseDecodingTests {
         expect(
             value.items.first?.englishDefinition == "to use something and give it back later",
             "English definition generation should still accept the prompted items object"
+        )
+    }
+
+    private static func testResponsesPayloadDecodesProviderModelID() {
+        let data = Data(
+            """
+            {
+              "model": "doubao-seed-2-1-pro-260628",
+              "output": [],
+              "output_text": "{}"
+            }
+            """.utf8
+        )
+
+        let value = try! JSONDecoder().decode(ResponsesResponse.self, from: data)
+        expect(
+            value.model == "doubao-seed-2-1-pro-260628",
+            "Responses API payload should expose the provider-returned model ID"
         )
     }
 

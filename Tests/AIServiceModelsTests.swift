@@ -10,52 +10,17 @@ private func expect(_ condition: @autoclosure () -> Bool, _ message: String) {
 @main
 struct AIServiceModelsTests {
     static func main() throws {
-        try testQuestionRecognitionDefaults()
-        try testSolutionStepFlexibleNumber()
         try testExamGradingFlexibleFields()
         try testVocabularyGradingDefaults()
         try testVocabularyGradingOutputTokenBudgetScalesWithQuestionCount()
         try testWritingReviewDisplayText()
         try testWritingReviewJSONStorage()
         try testGoodWordsAndSentencesDecoding()
-        try testAnswerRequestConfiguration()
         try testDiaryRequestConfiguration()
         try testKnowledgeRequestConfiguration()
         try testFixedProviderRequestConfiguration()
 
-        print("AIServiceModelsTests: 23 passed")
-    }
-
-    private static func testQuestionRecognitionDefaults() throws {
-        let data = """
-        {
-          "recognizedQuestion": "1 + 1 = ?",
-          "subject": "数学",
-          "questionType": "计算",
-          "knowledgePoints": "整数加法\\n等式"
-        }
-        """.data(using: .utf8)!
-
-        let value = try JSONDecoder().decode(AIQuestionRecognition.self, from: data)
-        expect(value.knowledgePoints == ["整数加法", "等式"], "splits string knowledge points")
-        expect(value.correctAnswer.isEmpty, "defaults missing correct answer")
-    }
-
-    private static func testSolutionStepFlexibleNumber() throws {
-        let data = """
-        {
-          "solutionOverview": "先计算",
-          "solutionSteps": [
-            { "number": "2", "title": "相加", "explanation": "1 + 1" }
-          ],
-          "finalAnswer": "2",
-          "commonMistakes": "忘记进位"
-        }
-        """.data(using: .utf8)!
-
-        let value = try JSONDecoder().decode(AIQuestionSolution.self, from: data)
-        expect(value.solutionSteps.first?.number == 2, "decodes string step number")
-        expect(value.commonMistakes == ["忘记进位"], "splits string common mistakes")
+        print("AIServiceModelsTests: passed")
     }
 
     private static func testExamGradingFlexibleFields() throws {
@@ -219,18 +184,6 @@ struct AIServiceModelsTests {
         expect(value.sentences.first?.whyUseful == "点题", "sentence should decode after model split")
         expect(value.sentencePatterns.first?.usage == "递进", "sentence pattern should decode after model split")
         expect(value.openingSentences == ["开头一句"], "single opening sentence should normalize to array")
-    }
-
-    private static func testAnswerRequestConfiguration() throws {
-        let doubao = AIRequestConfiguration.answer(model: .doubao)
-        expect(doubao.thinking == "disabled", "doubao answer requests should not enable thinking")
-        expect(doubao.maxOutputTokens == 8_192, "doubao answer token budget should preserve existing behavior")
-        expect(doubao.modelName == AIAnswerModel.doubao.title, "doubao answer model name should use model title")
-
-        let deepSeek = AIRequestConfiguration.answer(model: .deepSeek)
-        expect(deepSeek.thinking == "enabled", "deepSeek answer requests should enable thinking")
-        expect(deepSeek.maxOutputTokens == 16_384, "deepSeek answer token budget should preserve existing behavior")
-        expect(deepSeek.modelName == AIAnswerModel.deepSeek.title, "deepSeek answer model name should use model title")
     }
 
     private static func testDiaryRequestConfiguration() throws {

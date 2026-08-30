@@ -62,9 +62,12 @@ private struct VocabularyWeightedMasteryDetails: View {
                 .foregroundStyle(.secondary)
                 .padding(.top, 2)
 
-            accuracyRow("闪卡正确率 (15%)", weightedResult.flashcardAccuracy)
-            accuracyRow("拼句正确率 (25%)", weightedResult.studyAccuracy)
-            accuracyRow("测验正确率 (60%)", weightedResult.quizAccuracy)
+            accuracyRow("闪卡正确率 (训练 15%)", weightedResult.flashcardAccuracy)
+            accuracyRow("拼句正确率 (训练 25%)", weightedResult.studyAccuracy)
+            LabeledContent("训练熟练度（最高 40%）", value: VocabularyStudySessionFormat.percent(weightedResult.trainingMastery))
+            accuracyRow("测验正确率", weightedResult.quizAccuracy)
+            masteryRow("测验熟练度", weightedResult.quizMastery)
+            LabeledContent("练习熟练度", value: VocabularyStudySessionFormat.percent(weightedResult.weightedMastery))
             LabeledContent("FSRS 可提取率", value: VocabularyStudySessionFormat.percent(fsrs))
         }
         .font(.footnote)
@@ -74,6 +77,17 @@ private struct VocabularyWeightedMasteryDetails: View {
         LabeledContent(title) {
             if let accuracy {
                 Text(VocabularyStudySessionFormat.percent(accuracy))
+            } else {
+                Text("无历史记录")
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func masteryRow(_ title: String, _ mastery: Double?) -> some View {
+        LabeledContent(title) {
+            if let mastery {
+                Text(VocabularyStudySessionFormat.percent(mastery))
             } else {
                 Text("无历史记录")
                     .foregroundStyle(.secondary)

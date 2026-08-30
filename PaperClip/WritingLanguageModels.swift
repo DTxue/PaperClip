@@ -1,8 +1,11 @@
 import Foundation
 
-enum WritingLanguage: String, CaseIterable, Identifiable, Codable {
+enum WritingLanguage: String, Identifiable, Codable {
     case chinese
     case english
+
+    /// 当前产品只开放中文写作；保留 `.english` 以兼容既有持久化数据。
+    static let availableCases: [WritingLanguage] = [.chinese]
 
     var id: Self { self }
 

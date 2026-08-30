@@ -2,6 +2,7 @@ import CoreGraphics
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class WritingDraft {
     static var deletionPropertiesToFetch: [PartialKeyPath<WritingDraft>] {
@@ -95,3 +96,6 @@ final class WritingDraft {
         set { reviewStatusRaw = newValue.rawValue }
     }
 }
+}
+
+typealias WritingDraft = PaperClipSchemaV1.WritingDraft

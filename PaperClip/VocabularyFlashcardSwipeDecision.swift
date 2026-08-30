@@ -1,4 +1,41 @@
 import Foundation
+import CoreGraphics
+
+enum VocabularyFlashcardDragAxis: Equatable {
+    case undecided
+    case horizontal
+    case vertical
+}
+
+struct VocabularyFlashcardDragState: Equatable {
+    var axis = VocabularyFlashcardDragAxis.undecided
+    var translation = CGSize.zero
+
+    static let inactive = VocabularyFlashcardDragState()
+}
+
+enum VocabularyFlashcardDragSupport {
+    static func updatedState(
+        from state: VocabularyFlashcardDragState,
+        translationWidth: Double,
+        translationHeight: Double,
+        verticalDamping: Double = 0.08
+    ) -> VocabularyFlashcardDragState {
+        var nextState = state
+        if nextState.axis == .undecided {
+            nextState.axis = abs(translationWidth) >= abs(translationHeight)
+                ? .horizontal
+                : .vertical
+        }
+
+        guard nextState.axis == .horizontal else { return nextState }
+        nextState.translation = CGSize(
+            width: translationWidth,
+            height: translationHeight * verticalDamping
+        )
+        return nextState
+    }
+}
 
 enum VocabularyFlashcardSwipeDecision: Equatable {
     case ignore

@@ -13,7 +13,7 @@ struct AIModelRoutingTests {
         try testDoubaoModelMigration()
         try testInferenceIDResolution()
         try testProviderAndAPIKeySelection()
-        print("AIModelRoutingTests: 11 passed")
+        print("AIModelRoutingTests: 13 passed")
     }
 
     private static func testDoubaoModelMigration() throws {
@@ -26,8 +26,27 @@ struct AIModelRoutingTests {
             "blank doubao model should use default"
         )
         expect(
-            AIModelRouting.migratedDoubaoInferenceID("doubao-vision-pro", defaultID: "default") == "default",
+            AIModelRouting.migratedDoubaoInferenceID(
+                "doubao-vision-pro",
+                defaultID: "default",
+                legacyIDs: ["doubao-vision-pro", "ep-20260620182757-zwqg9"]
+            ) == "default",
             "legacy doubao model should migrate to default endpoint"
+        )
+        expect(
+            AIModelRouting.migratedDoubaoInferenceID(
+                "ep-20260620182757-zwqg9",
+                defaultID: "doubao-seed-2-1-pro-260628",
+                legacyIDs: ["doubao-vision-pro", "ep-20260620182757-zwqg9"]
+            ) == "doubao-seed-2-1-pro-260628",
+            "previous default endpoint should migrate to the Seed 2.1 Pro model"
+        )
+        expect(
+            AIModelRouting.migratedDoubaoInferenceID(
+                " doubao-seed-2-1-pro-260628 ",
+                defaultID: "default"
+            ) == "doubao-seed-2-1-pro-260628",
+            "current direct model id should be trimmed and preserved"
         )
         expect(
             AIModelRouting.migratedDoubaoInferenceID(" ep-custom ", defaultID: "default") == "ep-custom",

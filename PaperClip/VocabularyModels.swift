@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class VocabularyFolder {
     static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyFolder>] {
@@ -24,7 +25,6 @@ final class VocabularyFolder {
         self.updatedAt = updatedAt
     }
 }
-
 @Model
 final class VocabularyDeck {
     static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyDeck>] {
@@ -69,7 +69,6 @@ final class VocabularyDeck {
         self.updatedAt = updatedAt
     }
 }
-
 @Model
 final class VocabularyCard {
     static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyCard>] {
@@ -228,3 +227,10 @@ final class VocabularyArticleRecitationHistory {
         return json
     }
 }
+}
+
+typealias VocabularyFolder = PaperClipSchemaV1.VocabularyFolder
+typealias VocabularyDeck = PaperClipSchemaV1.VocabularyDeck
+typealias VocabularyCard = PaperClipSchemaV1.VocabularyCard
+typealias VocabularyGeneratedArticle = PaperClipSchemaV1.VocabularyGeneratedArticle
+typealias VocabularyArticleRecitationHistory = PaperClipSchemaV1.VocabularyArticleRecitationHistory

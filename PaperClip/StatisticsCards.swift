@@ -3,9 +3,9 @@ import SwiftUI
 extension StatisticsView {
     // MARK: - Vocabulary Summary Card
     func vocabularySummaryCard(_ summary: StatisticsVocabularySummary) -> some View {
-        StatCard(title: "今日刷子统计", icon: "character.book.closed") {
+        StatCard(title: "今日 ENG 统计", icon: "character.book.closed") {
             if summary.hasSessions {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 8) {
                     ForEach(summary.rows) { row in
                         vocabularyDeckStatRow(row)
                         if row.id != summary.rows.last?.id {
@@ -15,9 +15,9 @@ extension StatisticsView {
                 }
             } else {
                 StatisticsCardEmptyState(
-                    title: "暂无刷子数据",
+                    title: "暂无 ENG 数据",
                     systemImage: "character.book.closed",
-                    description: "今天完成刷子的学习或测试后，这里会按词集显示学习时间和测试表现。"
+                    description: "今天完成 ENG 英语单词学习或测试后，这里会按词集显示学习时间和测试表现。"
                 )
             }
         }
@@ -27,9 +27,15 @@ extension StatisticsView {
     func pdfExamSummaryCard(_ summary: StatisticsPDFExamSummary) -> some View {
         StatCard(title: "今日 PDF 考试统计", icon: "doc.richtext") {
             if summary.hasAttempts {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 8) {
                     ForEach(summary.rows) { row in
-                        pdfExamStatRow(row)
+                        Button {
+                            selectedPDFExamRow = row
+                        } label: {
+                            pdfExamStatRow(row)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("打开考试记录")
                         if row.id != summary.rows.last?.id {
                             Divider()
                         }
@@ -39,19 +45,19 @@ extension StatisticsView {
                 StatisticsCardEmptyState(
                     title: "暂无 PDF 考试数据",
                     systemImage: "doc.richtext",
-                    description: "今天完成题库内 PDF 考试批阅后，这里会显示做题时间和批阅结果。"
+                    description: "这里会显示已有 PDF 考试记录的做题时间和批阅结果。"
                 )
             }
         }
     }
 
     private func vocabularyDeckStatRow(_ row: StatisticsVocabularyDeckRow) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(row.deckTitle)
-                .font(.headline)
+                .font(.subheadline.weight(.semibold))
                 .lineLimit(2)
 
-            VStack(spacing: 10) {
+            VStack(spacing: 4) {
                 vocabularyModeStatRow(
                     title: "学习",
                     duration: row.learningDuration,
@@ -73,43 +79,40 @@ extension StatisticsView {
     }
 
     private func pdfExamStatRow(_ row: StatisticsPDFExamRow) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(row.title)
-                .font(.headline)
-                .lineLimit(2)
-
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("考试")
-                        .font(.subheadline.weight(.semibold))
-                    Spacer()
-                    Text(VocabularyStudySessionFormat.duration(row.duration))
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack(spacing: 0) {
-                    vocabularyMetric(
-                        value: VocabularyStudySessionFormat.percent(row.accuracy),
-                        label: "正确率",
-                        color: .accentColor
-                    )
-                    Spacer()
-                    vocabularyMetric(
-                        value: "\(row.correctCount)",
-                        label: "答对",
-                        color: .green
-                    )
-                    Spacer()
-                    vocabularyMetric(
-                        value: "\(row.incorrectCount)",
-                        label: "答错",
-                        color: .red
-                    )
-                }
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(row.title)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(2)
+                Spacer(minLength: 8)
+                Text(row.completedAt, format: .dateTime.hour().minute())
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
             }
-            .padding(10)
-            .background(.quinary, in: RoundedRectangle(cornerRadius: 8))
+
+            HStack(spacing: 10) {
+                compactMetric(
+                    value: VocabularyStudySessionFormat.clockDuration(row.duration),
+                    label: "用时",
+                    color: .secondary
+                )
+                Spacer(minLength: 4)
+                compactMetric(
+                    value: VocabularyStudySessionFormat.percent(row.accuracy),
+                    label: "正确率",
+                    color: .accentColor
+                )
+                compactMetric(value: "\(row.correctCount)", label: "对", color: .green)
+                compactMetric(value: "\(row.incorrectCount)", label: "错", color: .red)
+                compactMetric(
+                    value: row.averageQuestionDuration.map(VocabularyStudySessionFormat.duration) ?? "暂无",
+                    label: "平均/题",
+                    color: .orange
+                )
+            }
         }
     }
 
@@ -121,45 +124,32 @@ extension StatisticsView {
         incorrectCount: Int,
         isEmpty: Bool
     ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                Spacer()
-                Text(VocabularyStudySessionFormat.duration(duration))
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-            }
+        HStack(spacing: 10) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .frame(width: 30, alignment: .leading)
 
             if isEmpty {
-                Text("今日暂无\(title)记录")
+                Text("暂无")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else {
-                HStack(spacing: 0) {
-                    vocabularyMetric(
-                        value: VocabularyStudySessionFormat.percent(accuracy),
-                        label: "正确率",
-                        color: .accentColor
-                    )
-                    Spacer()
-                    vocabularyMetric(
-                        value: "\(correctCount)",
-                        label: "答对",
-                        color: .green
-                    )
-                    Spacer()
-                    vocabularyMetric(
-                        value: "\(incorrectCount)",
-                        label: "答错",
-                        color: .red
-                    )
-                }
+                compactMetric(
+                    value: VocabularyStudySessionFormat.duration(duration),
+                    label: "用时",
+                    color: .secondary
+                )
+                Spacer(minLength: 4)
+                compactMetric(
+                    value: VocabularyStudySessionFormat.percent(accuracy),
+                    label: "正确率",
+                    color: .accentColor
+                )
+                compactMetric(value: "\(correctCount)", label: "对", color: .green)
+                compactMetric(value: "\(incorrectCount)", label: "错", color: .red)
             }
         }
-        .padding(10)
-        .background(.quinary, in: RoundedRectangle(cornerRadius: 8))
     }
 
     private func vocabularyMetric(value: Int, label: String, color: Color) -> some View {
@@ -178,24 +168,18 @@ extension StatisticsView {
         .accessibilityElement(children: .combine)
     }
 
-    // MARK: - Monthly Trend Card
-    func monthlyTrendCard(_ monthlyData: [StatisticsMonthPoint]) -> some View {
-        StatCard(title: "每月收录趋势", icon: "calendar") {
-            MonthlyTrendChartContent(monthlyData: monthlyData)
+    private func compactMetric(value: String, label: String, color: Color) -> some View {
+        HStack(spacing: 3) {
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
+        .accessibilityElement(children: .combine)
     }
 
-    // MARK: - Weak Points Card
-    func weakPointsCard(_ topTags: [(tag: String, count: Int)]) -> some View {
-        StatCard(title: "薄弱知识点 Top 10", icon: "chart.bar.xaxis.ascending") {
-            WeakPointsChartContent(topTags: topTags)
-        }
-    }
-
-    // MARK: - Practice Activity Card
-    func practiceActivityCard(_ practiceWeekData: [StatisticsWeekPoint]) -> some View {
-        StatCard(title: "练习活跃度（近 8 周）", icon: "pencil.and.list.clipboard") {
-            PracticeActivityChartContent(practiceWeekData: practiceWeekData)
-        }
-    }
 }

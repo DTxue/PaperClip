@@ -7,7 +7,10 @@ extension PDFWorkspaceView {
     }
 
     func saveDrawing(pageIndex: Int, drawing: PKDrawing) {
-        guard session.activeAttempt != nil else { return }
+        guard let attempt = session.activeAttempt,
+              attempt.status == ExamAttemptStatus.inProgress.rawValue,
+              session.writablePageIndices()?.contains(pageIndex) ?? true
+        else { return }
         session.pendingDrawingStore.set(drawing, for: pageIndex)
         scheduleModelContextSave()
     }
@@ -46,7 +49,13 @@ extension PDFWorkspaceView {
 
     /// 清除当前会话的所有手写内容，不影响其他会话。
     func clearAllAnswers() {
-        guard let attempt = session.activeAttempt else { return }
+        guard let attempt = session.activeAttempt,
+              attempt.status == ExamAttemptStatus.inProgress.rawValue
+        else { return }
+        if let pageIndex = session.writablePageIndices()?.first {
+            clearCurrentPageAnswer(attempt: attempt, pageIndex: pageIndex)
+            return
+        }
         do {
             try answerLayerStore.clearAnswers(for: attempt)
         } catch {
@@ -57,6 +66,21 @@ extension PDFWorkspaceView {
         session.pendingDrawingStore.removeAll()
         session.examHandwritingByPage.removeAll()
         session.clearAnswersToken += 1
+        session.pendingSaveAction.cancel()
+        archiveActiveExamAttemptBestEffort()
+    }
+
+    private func clearCurrentPageAnswer(attempt: ExamAttempt, pageIndex: Int) {
+        do {
+            try answerLayerStore.clearAnswer(for: attempt, pageIndex: pageIndex)
+        } catch {
+            session.alert = AppAlert(title: "无法清除当前页答案", error: error)
+            return
+        }
+        session.drawings[pageIndex] = nil
+        session.pendingDrawingStore.removePages(Set([pageIndex]))
+        session.examHandwritingByPage[pageIndex] = nil
+        session.reloadDrawingsToken += 1
         session.pendingSaveAction.cancel()
         archiveActiveExamAttemptBestEffort()
     }

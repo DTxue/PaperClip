@@ -6,11 +6,13 @@ extension PDFKitCanvasView.Coordinator {
         func updateCanvasesIfNeeded() {
             let configuration = PDFCanvasConfiguration(
                 isWritingEnabled: parent.isWritingEnabled,
-                isDrawingVisible: parent.isDrawingVisible,
-                isSelectionMode: parent.isSelectionMode
+                isDrawingVisible: parent.isDrawingVisible
             )
-            guard configuration != lastCanvasConfiguration else { return }
+            guard configuration != lastCanvasConfiguration
+                || parent.writablePageIndices != lastWritablePageIndices
+            else { return }
             lastCanvasConfiguration = configuration
+            lastWritablePageIndices = parent.writablePageIndices
             canvases.values.forEach(configure)
         }
 
@@ -39,12 +41,15 @@ extension PDFKitCanvasView.Coordinator {
         }
 
         func configure(_ canvas: PKCanvasView) {
+            let pageIndex = pageIndexByCanvas[ObjectIdentifier(canvas)]
+            let canWritePage = pageIndex.map { pageIndex in
+                parent.writablePageIndices?.contains(pageIndex) ?? true
+            } ?? false
             PDFCanvasFactory.configure(
                 canvas,
                 configuration: PDFCanvasConfiguration(
-                    isWritingEnabled: parent.isWritingEnabled,
-                    isDrawingVisible: parent.isDrawingVisible,
-                    isSelectionMode: parent.isSelectionMode
+                    isWritingEnabled: parent.isWritingEnabled && canWritePage,
+                    isDrawingVisible: parent.isDrawingVisible
                 )
             )
         }

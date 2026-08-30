@@ -27,9 +27,12 @@ enum PDFExamGradingTransactionTests {
         try testBeginSubmissionRejectsAlreadySubmittedAttemptsBeforePersisting()
         try testFinishGradingRequiresSubmittedAttempt()
         try testFinishGradingReplacesOldMarksAndMarksAttemptGraded()
+        try testFinishGradingNormalizesPercentageAnchor()
+        try testFinishGradingNormalizesPixelAnchor()
+        try testFinishGradingNormalizesMixedModelCoordinateSpaces()
         try testRecordGradingFailureKeepsSubmittedAndDoesNotDowngradeGraded()
 
-        print("PDFExamGradingTransactionTests: 22 passed")
+        print("PDFExamGradingTransactionTests: 29 passed")
     }
 
     @MainActor
@@ -145,7 +148,102 @@ enum PDFExamGradingTransactionTests {
         expect(marks.count == 1, "finishGrading replaces old grade marks")
         expect(marks.first?.pageIndex == 1, "finishGrading writes new page index")
         expect(marks.first?.isCorrect == false, "finishGrading writes correctness")
-        expect(marks.first?.normalizedAnchor == "0.96,0.04", "finishGrading clamps and serializes stamp anchor")
+        expect(marks.first?.normalizedAnchor == "0.04,0.04", "finishGrading normalizes percentage-like coordinates and clamps the stamp anchor")
+    }
+
+    @MainActor
+    private static func testFinishGradingNormalizesPercentageAnchor() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let attempt = makeAttempt(status: .submitted)
+        context.insert(attempt)
+        try context.save()
+
+        try PDFExamGradingTransaction.finishGrading(
+            items: [
+                try makeGradingItem(
+                    pageIndex: 0,
+                    isCorrect: true,
+                    anchorX: 0.42,
+                    anchorY: 58
+                )
+            ],
+            attempt: attempt,
+            sourceDocumentID: attempt.sourceDocumentId,
+            in: context
+        )
+
+        let marks = try fetchGradeMarks(attemptID: attempt.id, in: context)
+        expect(marks.count == 1, "finishGrading writes one percentage-coordinate mark")
+        expect(marks.first?.normalizedAnchor == "0.42,0.58", "finishGrading preserves percentage y position instead of clamping it to the page bottom")
+    }
+
+    @MainActor
+    private static func testFinishGradingNormalizesPixelAnchor() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let attempt = makeAttempt(status: .submitted)
+        context.insert(attempt)
+        try context.save()
+
+        try PDFExamGradingTransaction.finishGrading(
+            items: [
+                try makeGradingItem(
+                    pageIndex: 0,
+                    isCorrect: true,
+                    anchorX: 1_260,
+                    anchorY: 1_000
+                )
+            ],
+            pagePixelSizes: [0: CGSize(width: 1_400, height: 2_000)],
+            attempt: attempt,
+            sourceDocumentID: attempt.sourceDocumentId,
+            in: context
+        )
+
+        let marks = try fetchGradeMarks(attemptID: attempt.id, in: context)
+        expect(marks.count == 1, "finishGrading writes one pixel-coordinate mark")
+        expect(marks.first?.normalizedAnchor == "0.9,0.5", "finishGrading converts pixel coordinates before persistence")
+    }
+
+    @MainActor
+    private static func testFinishGradingNormalizesMixedModelCoordinateSpaces() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let attempt = makeAttempt(status: .submitted)
+        context.insert(attempt)
+        try context.save()
+
+        try PDFExamGradingTransaction.finishGrading(
+            items: [
+                try makeGradingItem(
+                    pageIndex: 0,
+                    questionNumber: "27",
+                    isCorrect: false,
+                    anchorX: 0.404,
+                    anchorY: 83
+                ),
+                try makeGradingItem(
+                    pageIndex: 0,
+                    questionNumber: "41",
+                    isCorrect: false,
+                    anchorX: 0.391,
+                    anchorY: 888
+                )
+            ],
+            pagePixelSizes: [0: CGSize(width: 1_400, height: 1_982)],
+            attempt: attempt,
+            sourceDocumentID: attempt.sourceDocumentId,
+            in: context
+        )
+
+        let marks = try fetchGradeMarks(attemptID: attempt.id, in: context)
+        let anchorsByQuestion = Dictionary(
+            uniqueKeysWithValues: marks.map { ($0.questionNumber, $0.normalizedAnchor) }
+        )
+        expect(marks.count == 2, "finishGrading writes both mixed-coordinate marks")
+        expect(anchorsByQuestion["27"] == "0.404,0.083", "finishGrading treats y=83 as 0...1000 when the page y axis reaches 888")
+        expect(anchorsByQuestion["41"] == "0.391,0.888", "finishGrading does not divide 0...1000 y by JPEG pixel height")
     }
 
     @MainActor
@@ -188,13 +286,19 @@ enum PDFExamGradingTransactionTests {
         )
     }
 
-    private static func makeGradingItem(pageIndex: Int, isCorrect: Bool) throws -> AIExamGradingItem {
+    private static func makeGradingItem(
+        pageIndex: Int,
+        questionNumber: String = "1",
+        isCorrect: Bool,
+        anchorX: Double = 2,
+        anchorY: Double = -1
+    ) throws -> AIExamGradingItem {
         let json = """
         {
           "pageIndex": \(pageIndex),
-          "questionNumber": "1",
+          "questionNumber": "\(questionNumber)",
           "isCorrect": \(isCorrect),
-          "stampAnchor": { "x": 2, "y": -1 },
+          "stampAnchor": { "x": \(anchorX), "y": \(anchorY) },
           "confidence": 0.8
         }
         """

@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+extension PaperClipSchemaV1 {
 @Model
 final class VocabularyStudySession {
     static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyStudySession>] {
@@ -75,3 +76,6 @@ final class VocabularyStudySession {
         VocabularyStudySessionMetrics(totalCount: totalCount, correctCount: correctCount)
     }
 }
+}
+
+typealias VocabularyStudySession = PaperClipSchemaV1.VocabularyStudySession

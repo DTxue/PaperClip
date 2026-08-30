@@ -5,7 +5,10 @@ struct VocabularyWeightedMasteryTests {
     static func main() {
         testSortedNewestFirstCalculatorMatchesSortingCalculator()
         testSortedNewestFirstCalculatorUsesRecentMatchingLogs()
-        print("VocabularyWeightedMasteryTests: 2 passed")
+        testTrainingModesAreCappedAtFortyPercent()
+        testQuizCanReachFullMasteryWithoutTrainingModes()
+        testQuizNeedsEnoughRecentEvidenceForFullCredit()
+        print("VocabularyWeightedMasteryTests: 5 passed")
     }
 
     private static func testSortedNewestFirstCalculatorMatchesSortingCalculator() {
@@ -28,6 +31,8 @@ struct VocabularyWeightedMasteryTests {
         expect(sortedResult.flashcardAccuracy == sortingResult.flashcardAccuracy)
         expect(sortedResult.studyAccuracy == sortingResult.studyAccuracy)
         expect(sortedResult.quizAccuracy == sortingResult.quizAccuracy)
+        expect(sortedResult.trainingMastery == sortingResult.trainingMastery)
+        expect(sortedResult.quizMastery == sortingResult.quizMastery)
         expect(sortedResult.weightedMastery == sortingResult.weightedMastery)
     }
 
@@ -48,6 +53,54 @@ struct VocabularyWeightedMasteryTests {
 
         expect(result.flashcardAccuracy == 0.5)
         expect(result.studyAccuracy == 1)
+        expect(result.weightedMastery == 0.325)
+    }
+
+    private static func testTrainingModesAreCappedAtFortyPercent() {
+        let deckID = UUID()
+        let cardID = UUID()
+        let logs = [
+            log(cardID: cardID, deckID: deckID, responseKind: "闪卡", rating: .easy, secondsAgo: 10),
+            log(cardID: cardID, deckID: deckID, responseKind: "闪卡", rating: .good, secondsAgo: 20),
+            log(cardID: cardID, deckID: deckID, responseKind: "拼句", rating: .easy, secondsAgo: 30),
+            log(cardID: cardID, deckID: deckID, responseKind: "拼句", rating: .good, secondsAgo: 40)
+        ]
+
+        let result = VocabularyWeightedMasteryCalculator.calculate(sortedNewestFirstLogs: logs)
+
+        expect(result.trainingMastery == 0.4)
+        expect(result.quizMastery == nil)
+        expect(result.weightedMastery == 0.4)
+    }
+
+    private static func testQuizCanReachFullMasteryWithoutTrainingModes() {
+        let deckID = UUID()
+        let cardID = UUID()
+        let logs = (1...5).map {
+            log(cardID: cardID, deckID: deckID, responseKind: "测验-手写", rating: .good, secondsAgo: TimeInterval($0))
+        }
+
+        let result = VocabularyWeightedMasteryCalculator.calculate(sortedNewestFirstLogs: logs)
+
+        expect(result.trainingMastery == 0)
+        expect(result.quizAccuracy == 1)
+        expect(result.quizMastery == 1)
+        expect(result.weightedMastery == 1)
+    }
+
+    private static func testQuizNeedsEnoughRecentEvidenceForFullCredit() {
+        let deckID = UUID()
+        let cardID = UUID()
+        let logs = [
+            log(cardID: cardID, deckID: deckID, responseKind: "测验-手写", rating: .easy, secondsAgo: 10),
+            log(cardID: cardID, deckID: deckID, responseKind: "测验-手写", rating: .good, secondsAgo: 20)
+        ]
+
+        let result = VocabularyWeightedMasteryCalculator.calculate(sortedNewestFirstLogs: logs)
+
+        expect(result.quizAccuracy == 1)
+        expect(result.quizMastery == 0.4)
+        expect(result.weightedMastery == 0.4)
     }
 
     private static func log(

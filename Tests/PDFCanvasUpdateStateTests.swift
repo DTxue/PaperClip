@@ -17,8 +17,6 @@ struct PDFCanvasUpdateStateTests {
         let changes = state.consume(makeSnapshot())
 
         expect(changes.needsLayout)
-        expect(!changes.selectionActionChanged)
-        expect(!changes.cancelSelectionChanged)
         expect(!changes.undoChanged)
         expect(!changes.redoChanged)
         expect(!changes.clearAnswersChanged)
@@ -54,8 +52,6 @@ struct PDFCanvasUpdateStateTests {
         let changes = state.consume(
             makeSnapshot(
                 commandTokens: PDFCanvasCommandTokens(
-                    selectionAction: 1,
-                    cancelSelection: 0,
                     undo: 0,
                     redo: 2,
                     clearAnswers: 0,
@@ -65,8 +61,6 @@ struct PDFCanvasUpdateStateTests {
         )
 
         expect(!changes.needsLayout)
-        expect(changes.selectionActionChanged)
-        expect(!changes.cancelSelectionChanged)
         expect(!changes.undoChanged)
         expect(changes.redoChanged)
         expect(!changes.clearAnswersChanged)
@@ -76,8 +70,6 @@ struct PDFCanvasUpdateStateTests {
     private static func makeSnapshot(
         url: URL = URL(fileURLWithPath: "/tmp/source.pdf"),
         commandTokens: PDFCanvasCommandTokens = PDFCanvasCommandTokens(
-            selectionAction: 0,
-            cancelSelection: 0,
             undo: 0,
             redo: 0,
             clearAnswers: 0,
@@ -115,8 +107,6 @@ struct PDFCanvasUpdateStateTests {
 private extension PDFCanvasUpdateChanges {
     static let noChanges = PDFCanvasUpdateChanges(
         needsLayout: false,
-        selectionActionChanged: false,
-        cancelSelectionChanged: false,
         undoChanged: false,
         redoChanged: false,
         clearAnswersChanged: false,
@@ -124,9 +114,7 @@ private extension PDFCanvasUpdateChanges {
     )
 
     var hasCommandChanges: Bool {
-        selectionActionChanged
-            || cancelSelectionChanged
-            || undoChanged
+        undoChanged
             || redoChanged
             || clearAnswersChanged
             || reloadDrawingsChanged

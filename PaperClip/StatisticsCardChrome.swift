@@ -8,37 +8,17 @@ struct StatCard<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 10) {
             Label(title, systemImage: icon)
-                .font(.subheadline.weight(.semibold))
+                .font(.caption.weight(.semibold))
                 .foregroundStyle(palette.secondaryTextColor)
             content
         }
-        .padding(18)
-        .background(palette.panelBackgroundColor, in: RoundedRectangle(cornerRadius: 18))
+        .padding(12)
+        .background(palette.panelBackgroundColor, in: RoundedRectangle(cornerRadius: 8))
         .overlay {
-            RoundedRectangle(cornerRadius: 18).stroke(palette.borderColor.opacity(0.7))
+            RoundedRectangle(cornerRadius: 8).stroke(palette.borderColor.opacity(0.7))
         }
-    }
-}
-
-struct MasteryDistributionBar: View {
-    let summary: MasteryStatusSummary
-
-    var body: some View {
-        GeometryReader { proxy in
-            let width = proxy.size.width
-            HStack(spacing: 2) {
-                ForEach(summary.segments, id: \.status) { segment in
-                    if segment.count > 0 {
-                        segment.status.statisticsBarColor
-                            .frame(width: width * CGFloat(segment.ratio))
-                    }
-                }
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 5))
-        }
-        .frame(height: 12)
     }
 }
 
@@ -53,24 +33,6 @@ struct StatisticsCardEmptyState: View {
             systemImage: systemImage,
             description: Text(description)
         )
-        .frame(maxWidth: .infinity, minHeight: 120)
-    }
-}
-
-extension MasteryStatus {
-    var statisticsTextColor: Color {
-        switch self {
-        case .unmastered: .red
-        case .review: .orange
-        case .mastered: .green
-        }
-    }
-
-    var statisticsBarColor: Color {
-        switch self {
-        case .unmastered: .red.opacity(0.7)
-        case .review: .orange
-        case .mastered: .green
-        }
+        .frame(maxWidth: .infinity, minHeight: 72)
     }
 }

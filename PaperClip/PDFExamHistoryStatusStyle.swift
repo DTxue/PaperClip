@@ -48,4 +48,8 @@ enum ExamAttemptHistoryStatusStyle: Hashable {
             return .accentColor
         }
     }
+
+    var allowsManualDeletion: Bool {
+        self == .inProgress
+    }
 }

@@ -2,14 +2,6 @@ import Foundation
 import SwiftData
 
 struct StatisticsSnapshot {
-    static var cardAggregatePropertiesToFetch: [PartialKeyPath<MistakeCard>] {
-        [\.status, \.subject, \.createdAt, \.tagsText]
-    }
-
-    static var practiceWeekPropertiesToFetch: [PartialKeyPath<MistakePracticeLayer>] {
-        [\.createdAt, \.mark]
-    }
-
     static var vocabularySessionPropertiesToFetch: [PartialKeyPath<VocabularyStudySession>] {
         [\.deckID, \.kind, \.endedAt, \.duration, \.totalCount, \.correctCount]
     }
@@ -19,27 +11,17 @@ struct StatisticsSnapshot {
     }
 
     static var pdfExamAttemptPropertiesToFetch: [PartialKeyPath<ExamAttempt>] {
-        [\.id, \.sourceDocumentTitle, \.status, \.createdAt, \.submittedAt, \.updatedAt]
+        [\.id, \.sourceDocumentId, \.sourceDocumentTitle, \.status, \.createdAt, \.submittedAt, \.updatedAt]
     }
 
     static var pdfExamGradeMarkPropertiesToFetch: [PartialKeyPath<ExamGradeMark>] {
         [\.attemptId, \.isCorrect]
     }
 
-    let masterySummary: MasteryStatusSummary
-    let subjectData: [(subject: String, count: Int)]
-    let monthlyData: [StatisticsMonthPoint]
-    let topTags: [(tag: String, count: Int)]
-    let practiceWeekData: [StatisticsWeekPoint]
     let vocabularySummary: StatisticsVocabularySummary
     let pdfExamSummary: StatisticsPDFExamSummary
 
     static let empty = StatisticsSnapshot(
-        masterySummary: .empty,
-        subjectData: [],
-        monthlyData: [],
-        topTags: [],
-        practiceWeekData: [],
         vocabularySummary: .empty,
         pdfExamSummary: .empty
     )
@@ -49,23 +31,7 @@ struct StatisticsSnapshot {
         calendar: Calendar = .current,
         now: Date = .now
     ) throws -> StatisticsSnapshot {
-        let cardAggregate = try StatisticsCardAggregate.make(
-            modelContext: modelContext,
-            calendar: calendar,
-            now: now,
-            propertiesToFetch: cardAggregatePropertiesToFetch
-        )
         return StatisticsSnapshot(
-            masterySummary: cardAggregate.masterySummary,
-            subjectData: cardAggregate.subjectData,
-            monthlyData: cardAggregate.monthlyData,
-            topTags: cardAggregate.topTags,
-            practiceWeekData: try StatisticsPracticeWeekData.make(
-                modelContext: modelContext,
-                calendar: calendar,
-                now: now,
-                propertiesToFetch: practiceWeekPropertiesToFetch
-            ),
             vocabularySummary: try StatisticsVocabularySummary.make(
                 modelContext: modelContext,
                 calendar: calendar,
@@ -84,25 +50,15 @@ struct StatisticsSnapshot {
     }
 
     private init(
-        masterySummary: MasteryStatusSummary,
-        subjectData: [(subject: String, count: Int)],
-        monthlyData: [StatisticsMonthPoint],
-        topTags: [(tag: String, count: Int)],
-        practiceWeekData: [StatisticsWeekPoint],
         vocabularySummary: StatisticsVocabularySummary,
         pdfExamSummary: StatisticsPDFExamSummary
     ) {
-        self.masterySummary = masterySummary
-        self.subjectData = subjectData
-        self.monthlyData = monthlyData
-        self.topTags = topTags
-        self.practiceWeekData = practiceWeekData
         self.vocabularySummary = vocabularySummary
         self.pdfExamSummary = pdfExamSummary
     }
 
     var hasAnyData: Bool {
-        masterySummary.total > 0 || vocabularySummary.hasSessions || pdfExamSummary.hasAttempts
+        vocabularySummary.hasSessions || pdfExamSummary.hasAttempts
     }
 }
 
@@ -268,30 +224,25 @@ struct StatisticsPDFExamSummary: Equatable {
 
     init(attempts: [ExamAttempt], marks: [ExamGradeMark]) {
         let attemptIDSet = Set(attempts.map(\.id))
-        var metricByAttemptID: [UUID: PDFExamMetric] = [:]
+        var metricByAttemptID: [UUID: ExamAttemptQuestionMetrics] = [:]
         for mark in marks where attemptIDSet.contains(mark.attemptId) {
-            metricByAttemptID[mark.attemptId, default: PDFExamMetric()].add(isCorrect: mark.isCorrect)
+            metricByAttemptID[mark.attemptId, default: ExamAttemptQuestionMetrics()].add(isCorrect: mark.isCorrect)
         }
 
-        var accumulatorByTitle: [String: StatisticsPDFExamAccumulator] = [:]
-        for attempt in attempts {
-            var accumulator = accumulatorByTitle[attempt.sourceDocumentTitle, default: StatisticsPDFExamAccumulator()]
-            accumulator.duration += Self.duration(for: attempt)
-            accumulator.metric.add(metricByAttemptID[attempt.id, default: PDFExamMetric()])
-            accumulatorByTitle[attempt.sourceDocumentTitle] = accumulator
-        }
-
-        rows = accumulatorByTitle.map { title, accumulator in
-            StatisticsPDFExamRow(
-                id: title,
-                title: title,
-                duration: accumulator.duration,
-                correctCount: accumulator.metric.correctCount,
-                incorrectCount: accumulator.metric.incorrectCount
+        rows = attempts.map { attempt in
+            let metric = metricByAttemptID[attempt.id, default: ExamAttemptQuestionMetrics()]
+            return StatisticsPDFExamRow(
+                id: attempt.id,
+                sourceDocumentID: attempt.sourceDocumentId,
+                title: attempt.sourceDocumentTitle,
+                completedAt: attempt.updatedAt,
+                duration: Self.duration(for: attempt),
+                correctCount: metric.correctCount,
+                incorrectCount: metric.incorrectCount
             )
         }
         .sorted { lhs, rhs in
-            if lhs.duration != rhs.duration { return lhs.duration > rhs.duration }
+            if lhs.completedAt != rhs.completedAt { return lhs.completedAt > rhs.completedAt }
             return lhs.title.localizedStandardCompare(rhs.title) == .orderedAscending
         }
     }
@@ -307,39 +258,23 @@ struct StatisticsPDFExamSummary: Equatable {
 }
 
 struct StatisticsPDFExamRow: Identifiable, Equatable {
-    let id: String
+    let id: UUID
+    let sourceDocumentID: UUID
     let title: String
+    let completedAt: Date
     let duration: Double
     let correctCount: Int
     let incorrectCount: Int
 
     var totalCount: Int { correctCount + incorrectCount }
 
+    var averageQuestionDuration: Double? {
+        guard totalCount > 0 else { return nil }
+        return duration / Double(totalCount)
+    }
+
     var accuracy: Double {
         guard totalCount > 0 else { return 0 }
         return Double(correctCount) / Double(totalCount)
-    }
-}
-
-private struct StatisticsPDFExamAccumulator {
-    var duration: Double = 0
-    var metric = PDFExamMetric()
-}
-
-private struct PDFExamMetric {
-    var correctCount: Int = 0
-    var incorrectCount: Int = 0
-
-    mutating func add(isCorrect: Bool) {
-        if isCorrect {
-            correctCount += 1
-        } else {
-            incorrectCount += 1
-        }
-    }
-
-    mutating func add(_ other: PDFExamMetric) {
-        correctCount += other.correctCount
-        incorrectCount += other.incorrectCount
     }
 }

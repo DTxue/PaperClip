@@ -1,10 +1,16 @@
 import Foundation
 
-enum WritingPromptConfiguration: String, CaseIterable, Identifiable {
+enum WritingPromptConfiguration: String, Identifiable {
     case chineseGeneration
     case englishGeneration
     case chineseReview
     case englishReview
+
+    /// 设置界面只展示当前开放的中文写作提示词。
+    static let availableCases: [WritingPromptConfiguration] = [
+        .chineseGeneration,
+        .chineseReview
+    ]
 
     var id: Self { self }
 

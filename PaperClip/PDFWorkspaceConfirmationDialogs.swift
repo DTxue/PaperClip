@@ -2,30 +2,39 @@ import SwiftUI
 
 extension View {
     func pdfWorkspaceConfirmationDialogs(owner: PDFWorkspaceView) -> some View {
-        self
+        let isRetryingPage = owner.session.activeAttempt?.status == ExamAttemptStatus.submitted.rawValue
+            || owner.session.isCurrentPageAwaitingGrading()
+        return self
             .confirmationDialog(
-                "清除全部答题？",
+                "清除当前页答题？",
                 isPresented: owner.$session.isClearAnswersConfirmationPresented,
                 titleVisibility: .visible
             ) {
-                Button("清除本次答题", role: .destructive) {
+                Button("清除当前页答题", role: .destructive) {
                     owner.clearAllAnswers()
                 }
                 Button("取消", role: .cancel) {}
             } message: {
-                Text("将清除当前考试的所有手写内容，源 PDF 和其他考试记录不受影响。此操作不可撤销。")
+                Text("只清除当前尚未提交页面的手写内容；已经提交页面的答案和批阅结果不会受影响。")
             }
             .confirmationDialog(
-                "确认交卷？",
+                isRetryingPage ? "确认重试单页批阅？" : "确认提交当前页？",
                 isPresented: owner.$session.isSubmitConfirmationPresented,
                 titleVisibility: .visible
             ) {
-                Button("交卷", role: .destructive) {
+                Button(
+                    isRetryingPage ? "重试批阅" : "提交本页",
+                    role: .destructive
+                ) {
                     owner.submitExam()
                 }
                 Button("取消", role: .cancel) {}
             } message: {
-                Text("交卷后会按本次选择的页面和手写内容生成批阅图片，源 PDF 不会被修改。")
+                if isRetryingPage {
+                    Text("只重新提交一张待批阅页面，已经完成的页面和源 PDF 不会被修改。")
+                } else {
+                    Text("只保存并批阅当前页面；提交成功后该页答案会锁定，历史页面的批阅结果仍可查看。")
+                }
             }
             .confirmationDialog(
                 "退出考试？",
@@ -38,22 +47,6 @@ extension View {
                 Button("取消", role: .cancel) {}
             } message: {
                 Text("当前答题内容会保存到本次考试记录，可稍后从最近考试继续。")
-            }
-            .confirmationDialog(
-                "分享题目截图",
-                isPresented: Binding(isPresenting: owner.$session.shareImageRequest),
-                titleVisibility: .visible
-            ) {
-                if let shareImageRequest = owner.session.shareImageRequest {
-                    ShareImageLink(request: shareImageRequest, previewTitle: "PaperClip 题目截图") {
-                        Label("分享", systemImage: "square.and.arrow.up")
-                    }
-                }
-                Button("取消", role: .cancel) {
-                    owner.session.shareImageRequest = nil
-                }
-            } message: {
-                Text("使用系统分享菜单发送当前框选截图。")
             }
     }
 }

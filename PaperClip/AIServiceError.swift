@@ -26,11 +26,11 @@ enum AIServiceError: LocalizedError {
         case .invalidModelID:
             return "推理接入点 ID 为空，请前往 AI 解析设置检查配置。"
         case .invalidQuestion:
-            return "确认后的题目内容为空，请先检查题目文本。"
+            return "输入内容为空，请先检查文本。"
         case .invalidImage:
-            return "题目图片无法编码，请重新框选后再试。"
+            return "图片无法编码，请重新选择后再试。"
         case .imageTooLarge:
-            return "题目图片数据过大，请缩小框选范围后再试。"
+            return "图片数据过大，请压缩图片后再试。"
         case .invalidServerResponse:
             return "火山方舟返回了无法识别的响应。"
         case .server(let model, let statusCode, let message):

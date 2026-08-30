@@ -93,3 +93,41 @@ struct VocabularyStudyQueuePlan {
         return stateByCardID
     }
 }
+
+enum VocabularyFlashcardQueue {
+    static func orderedCards(
+        cards: [VocabularyCard],
+        states: [VocabularyMemoryState],
+        direction: VocabularyDirection,
+        now: Date = .now
+    ) -> [VocabularyCard] {
+        var stateByCardID: [UUID: VocabularyMemoryState] = [:]
+        for state in states where state.direction == direction.rawValue {
+            if stateByCardID[state.cardID] == nil {
+                stateByCardID[state.cardID] = state
+            }
+        }
+
+        var due: [(card: VocabularyCard, dueDate: Date, originalIndex: Int)] = []
+        var remaining: [(card: VocabularyCard, originalIndex: Int)] = []
+        due.reserveCapacity(cards.count)
+        remaining.reserveCapacity(cards.count)
+
+        for (index, card) in cards.enumerated() {
+            if let state = stateByCardID[card.id], state.dueDate <= now {
+                due.append((card, state.dueDate, index))
+            } else {
+                remaining.append((card, index))
+            }
+        }
+
+        due.sort {
+            if $0.dueDate != $1.dueDate {
+                return $0.dueDate < $1.dueDate
+            }
+            return $0.originalIndex < $1.originalIndex
+        }
+
+        return due.map(\.card) + remaining.map(\.card)
+    }
+}

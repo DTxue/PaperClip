@@ -21,19 +21,54 @@ extension ModelContext {
         let localFileName = document.localFileName
         let fingerprint = document.fileFingerprint
         let title = document.title
-        let descriptor = FetchDescriptor<ExamAttempt>(
+        let directDescriptor = FetchDescriptor<ExamAttempt>(
             predicate: #Predicate<ExamAttempt> { attempt in
                 attempt.sourceDocumentId == documentID
                     || (!localFileName.isEmpty && attempt.sourceDocumentLocalFileName == localFileName)
-                    || (!fingerprint.isEmpty && attempt.sourceDocumentFingerprint == fingerprint)
-                    || (
-                        attempt.sourceDocumentLocalFileName.isEmpty
-                            && attempt.sourceDocumentFingerprint.isEmpty
-                            && attempt.sourceDocumentTitle == title
-                    )
             }
         )
-        for attempt in try fetch(descriptor) {
+        var attemptsByID = Dictionary(
+            uniqueKeysWithValues: try fetch(directDescriptor).map { ($0.id, $0) }
+        )
+
+        if !fingerprint.isEmpty {
+            let matchingDocumentCount = try fetchCount(FetchDescriptor<PDFDocumentItem>(
+                predicate: #Predicate<PDFDocumentItem> { candidate in
+                    candidate.fileFingerprint == fingerprint
+                }
+            ))
+            if matchingDocumentCount == 1 {
+                let legacyFingerprintDescriptor = FetchDescriptor<ExamAttempt>(
+                    predicate: #Predicate<ExamAttempt> { attempt in
+                        attempt.sourceDocumentLocalFileName.isEmpty
+                            && attempt.sourceDocumentFingerprint == fingerprint
+                    }
+                )
+                for attempt in try fetch(legacyFingerprintDescriptor) {
+                    attemptsByID[attempt.id] = attempt
+                }
+            }
+        }
+
+        let matchingTitleCount = try fetchCount(FetchDescriptor<PDFDocumentItem>(
+            predicate: #Predicate<PDFDocumentItem> { candidate in
+                candidate.title == title
+            }
+        ))
+        if matchingTitleCount == 1 {
+            let legacyTitleDescriptor = FetchDescriptor<ExamAttempt>(
+                predicate: #Predicate<ExamAttempt> { attempt in
+                    attempt.sourceDocumentLocalFileName.isEmpty
+                        && attempt.sourceDocumentFingerprint.isEmpty
+                        && attempt.sourceDocumentTitle == title
+                }
+            )
+            for attempt in try fetch(legacyTitleDescriptor) {
+                attemptsByID[attempt.id] = attempt
+            }
+        }
+
+        for attempt in attemptsByID.values {
             if attempt.sourceDocumentId != documentID {
                 attempt.sourceDocumentId = documentID
                 didChange = true
@@ -72,17 +107,70 @@ extension ModelContext {
     ) throws -> ExamAttempt? {
         let documentID = document.id
         let localFileName = document.localFileName
-        let fingerprint = document.fileFingerprint
         var descriptor = FetchDescriptor<ExamAttempt>(
             predicate: #Predicate<ExamAttempt> { attempt in
                 attempt.sourceDocumentId == documentID
                     || (!localFileName.isEmpty && attempt.sourceDocumentLocalFileName == localFileName)
-                    || (!fingerprint.isEmpty && attempt.sourceDocumentFingerprint == fingerprint)
             },
             sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
         )
         descriptor.propertiesToFetch = propertiesToFetch
         return try fetchFirst(descriptor)
+    }
+
+    func fetchCurrentExamAttempt(
+        document: PDFDocumentItem,
+        propertiesToFetch: [PartialKeyPath<ExamAttempt>] = []
+    ) throws -> ExamAttempt? {
+        let documentID = document.id
+        let localFileName = document.localFileName
+        let inProgressStatus = ExamAttemptStatus.inProgress.rawValue
+        var descriptor = FetchDescriptor<ExamAttempt>(
+            predicate: #Predicate<ExamAttempt> { attempt in
+                (attempt.sourceDocumentId == documentID
+                    || (!localFileName.isEmpty && attempt.sourceDocumentLocalFileName == localFileName))
+                    && attempt.status == inProgressStatus
+            },
+            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+        )
+        descriptor.propertiesToFetch = propertiesToFetch
+        return try fetchFirst(descriptor)
+    }
+
+    func fetchResumableFullDocumentExamAttempt(
+        document: PDFDocumentItem,
+        sourcePageCount: Int,
+        propertiesToFetch: [PartialKeyPath<ExamAttempt>] = []
+    ) throws -> ExamAttempt? {
+        guard sourcePageCount > 0 else { return nil }
+        let documentID = document.id
+        let localFileName = document.localFileName
+        let requiredPageIndices = Array(0..<sourcePageCount)
+        let inProgressStatus = ExamAttemptStatus.inProgress.rawValue
+        let submittedStatus = ExamAttemptStatus.submitted.rawValue
+        var descriptor = FetchDescriptor<ExamAttempt>(
+            predicate: #Predicate<ExamAttempt> { attempt in
+                (attempt.sourceDocumentId == documentID
+                    || (!localFileName.isEmpty && attempt.sourceDocumentLocalFileName == localFileName))
+                    && (attempt.status == inProgressStatus || attempt.status == submittedStatus)
+            },
+            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+        )
+        descriptor.propertiesToFetch = propertiesToFetch
+
+        for attempt in try fetch(descriptor) {
+            guard attempt.selectedPageIndices == requiredPageIndices else { continue }
+            if ExamAttemptStatus(rawValue: attempt.status) == .inProgress {
+                return attempt
+            }
+            let submissions = try fetchExamPageSubmissions(attemptID: attempt.id)
+            if submissions.contains(where: {
+                $0.status == ExamPageSubmissionStatus.submitted.rawValue
+            }) {
+                return attempt
+            }
+        }
+        return nil
     }
 
     func fetchExamAttempts(
@@ -91,12 +179,10 @@ extension ModelContext {
     ) throws -> [ExamAttempt] {
         let documentID = document.id
         let localFileName = document.localFileName
-        let fingerprint = document.fileFingerprint
         var descriptor = FetchDescriptor<ExamAttempt>(
             predicate: #Predicate<ExamAttempt> { attempt in
                 attempt.sourceDocumentId == documentID
                     || (!localFileName.isEmpty && attempt.sourceDocumentLocalFileName == localFileName)
-                    || (!fingerprint.isEmpty && attempt.sourceDocumentFingerprint == fingerprint)
             },
             sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
         )
@@ -107,12 +193,10 @@ extension ModelContext {
     func fetchExamAttemptCount(document: PDFDocumentItem) throws -> Int {
         let documentID = document.id
         let localFileName = document.localFileName
-        let fingerprint = document.fileFingerprint
         return try fetchCount(FetchDescriptor<ExamAttempt>(
             predicate: #Predicate<ExamAttempt> { attempt in
                 attempt.sourceDocumentId == documentID
                     || (!localFileName.isEmpty && attempt.sourceDocumentLocalFileName == localFileName)
-                    || (!fingerprint.isEmpty && attempt.sourceDocumentFingerprint == fingerprint)
             }
         ))
     }

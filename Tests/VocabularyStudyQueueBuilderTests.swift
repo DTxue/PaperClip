@@ -14,7 +14,8 @@ struct VocabularyStudyQueueBuilderTests {
         testNegativeDailyNewLimitSkipsFreshSampling()
         testPlanIndexesFirstStateAndClassifiesDueAndFreshCards()
         testPlanNormalizesNegativeMaximum()
-        print("VocabularyStudyQueueBuilderTests: 15 passed")
+        testFlashcardQueueIncludesFutureAndFreshCards()
+        print("VocabularyStudyQueueBuilderTests: 16 passed")
     }
 
     private static func testDueInsertionKeepsEarliestLimitedCards() {
@@ -250,6 +251,29 @@ struct VocabularyStudyQueueBuilderTests {
 
         expect(plan.queueLimit == 0)
         expect(queue.isEmpty)
+    }
+
+    private static func testFlashcardQueueIncludesFutureAndFreshCards() {
+        let deck = VocabularyDeck(title: "Test", dailyNewLimit: 1)
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        let future = makeCard(deckID: deck.id, term: "future")
+        let dueLate = makeCard(deckID: deck.id, term: "due-late")
+        let freshA = makeCard(deckID: deck.id, term: "fresh-a")
+        let dueEarly = makeCard(deckID: deck.id, term: "due-early")
+        let freshB = makeCard(deckID: deck.id, term: "fresh-b")
+
+        let queue = VocabularyFlashcardQueue.orderedCards(
+            cards: [future, dueLate, freshA, dueEarly, freshB],
+            states: [
+                makeState(deckID: deck.id, cardID: future.id, dueDate: now.addingTimeInterval(3_600), lapseCount: 0),
+                makeState(deckID: deck.id, cardID: dueLate.id, dueDate: now.addingTimeInterval(-10), lapseCount: 0),
+                makeState(deckID: deck.id, cardID: dueEarly.id, dueDate: now.addingTimeInterval(-30), lapseCount: 0)
+            ],
+            direction: .definitionToTerm,
+            now: now
+        )
+
+        expect(queue.map(\.term) == ["due-early", "due-late", "future", "fresh-a", "fresh-b"])
     }
 
     private static func makeCard(deckID: UUID, term: String) -> VocabularyCard {

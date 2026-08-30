@@ -36,6 +36,7 @@ enum PDFExamGradingTransaction {
 
     static func finishGrading(
         items: [AIExamGradingItem],
+        pagePixelSizes: [Int: CGSize] = [:],
         attempt: ExamAttempt,
         sourceDocumentID: UUID,
         in modelContext: ModelContext
@@ -48,16 +49,24 @@ enum PDFExamGradingTransaction {
 
         try modelContext.deleteExamGradeMarks(attemptID: attempt.id)
 
-        for item in items {
+        let normalizedAnchors = PDFExamGradingSupport.normalizedStampAnchorStrings(
+            items.map {
+                PDFExamGradingSupport.RawStampAnchor(
+                    pageIndex: $0.pageIndex,
+                    x: $0.stampAnchor.x,
+                    y: $0.stampAnchor.y
+                )
+            },
+            pagePixelSizes: pagePixelSizes
+        )
+
+        for (item, normalizedAnchor) in zip(items, normalizedAnchors) {
             let mark = ExamGradeMark(
                 sourceDocumentId: sourceDocumentID,
                 attemptId: attempt.id,
                 pageIndex: item.pageIndex,
                 isCorrect: item.isCorrect,
-                normalizedAnchor: PDFExamGradingSupport.normalizedStampAnchorString(
-                    x: item.stampAnchor.x,
-                    y: item.stampAnchor.y
-                ),
+                normalizedAnchor: normalizedAnchor,
                 confidence: item.confidence,
                 questionNumber: item.questionNumber
             )

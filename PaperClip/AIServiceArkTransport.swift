@@ -5,7 +5,7 @@ extension AIService {
         _ body: ResponsesRequest,
         apiKey: String,
         modelName: String
-    ) async throws -> String {
+    ) async throws -> AIServiceResponse<String> {
         var request = URLRequest(url: arkEndpoint, timeoutInterval: 230)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -25,7 +25,11 @@ extension AIService {
               !content.isEmpty else {
             throw AIServiceError.emptyResponse(modelName)
         }
-        return content
+        return AIServiceResponse(
+            value: content,
+            providerModelID: responseBody.model?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        )
     }
 
     private static let arkEndpoint = URL(
