@@ -24,7 +24,7 @@ struct AIKeySettingsSection: View {
                 isVisible: $isDeepSeekAPIKeyVisible
             )
         } header: { Text("API 密钥") } footer: {
-            Text("密钥仅保存在本机 Keychain，供日记、写作和 ENG 功能使用。")
+            Text("密钥仅保存在本机 Keychain，供日记、知识库和 ENG 功能使用。")
         }
     }
 }
@@ -50,7 +50,7 @@ struct DeepSeekModelSettingsSection: View {
             Text("已锁定使用官方默认配置")
                 .foregroundStyle(.secondary)
         } header: { Text("DeepSeek V4 Pro") } footer: {
-            Text("系统批阅作文将默认使用 DeepSeek 官方 \(AIService.defaultDeepSeekInferenceID) 模型。")
+            Text("DeepSeek 请求默认使用官方 \(AIService.defaultDeepSeekInferenceID) 模型。")
         }
     }
 }

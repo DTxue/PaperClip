@@ -1,14 +1,10 @@
-import CoreGraphics
 import Foundation
 import SwiftData
 
+/// Historical V1–V4 migration model. Writing is not part of the current schema.
 extension PaperClipSchemaV1 {
 @Model
 final class WritingDraft {
-    static var deletionPropertiesToFetch: [PartialKeyPath<WritingDraft>] {
-        [\.id]
-    }
-
     @Attribute(.unique) var id: UUID
     var promptID: UUID
     var languageRaw: String
@@ -26,76 +22,31 @@ final class WritingDraft {
     init(
         id: UUID = UUID(),
         promptID: UUID,
-        language: WritingLanguage,
-        paperStyle: WritingPaperStyle = .lined,
+        languageRaw: String,
+        paperStyleRaw: String = "lined",
         blackPaperMode: Bool = false,
-        paperWidth: Double = WritingPaperMetrics.defaultWidth,
-        paperHeight: Double = WritingPaperMetrics.defaultHeight,
+        paperWidth: Double = 820,
+        paperHeight: Double = 1500,
         rulingSpacing: Double? = nil,
         drawingData: Data = Data(),
         recognizedText: String = "",
-        reviewStatus: WritingReviewStatus = .draft,
+        reviewStatusRaw: String = "draft",
         createdAt: Date = .now,
         updatedAt: Date = .now
     ) {
         self.id = id
         self.promptID = promptID
-        self.languageRaw = language.rawValue
-        self.paperStyleRaw = paperStyle.rawValue
+        self.languageRaw = languageRaw
+        self.paperStyleRaw = paperStyleRaw
         self.blackPaperMode = blackPaperMode
         self.paperWidth = paperWidth
         self.paperHeight = paperHeight
-        self.rulingSpacing = rulingSpacing ?? WritingPaperMetrics.defaultRulingSpacing(for: paperStyle)
+        self.rulingSpacing = rulingSpacing
         self.drawingData = drawingData
         self.recognizedText = recognizedText
-        self.reviewStatusRaw = reviewStatus.rawValue
+        self.reviewStatusRaw = reviewStatusRaw
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
-
-    var language: WritingLanguage {
-        get { WritingLanguage(rawValue: languageRaw) ?? .chinese }
-        set { languageRaw = newValue.rawValue }
-    }
-
-    var paperStyle: WritingPaperStyle {
-        get { WritingPaperStyle(rawValue: paperStyleRaw) ?? .lined }
-        set { paperStyleRaw = newValue.rawValue }
-    }
-
-    var paperSize: CGSize {
-        get {
-            WritingPaperMetrics.clampedSize(
-                width: paperWidth ?? WritingPaperMetrics.defaultWidth,
-                height: paperHeight ?? WritingPaperMetrics.defaultHeight
-            )
-        }
-        set {
-            let clampedSize = WritingPaperMetrics.clampedSize(
-                width: newValue.width,
-                height: newValue.height
-            )
-            paperWidth = clampedSize.width
-            paperHeight = clampedSize.height
-        }
-    }
-
-    var paperRulingSpacing: Double {
-        get {
-            WritingPaperMetrics.clampedRulingSpacing(
-                rulingSpacing ?? WritingPaperMetrics.defaultRulingSpacing(for: paperStyle)
-            )
-        }
-        set {
-            rulingSpacing = WritingPaperMetrics.clampedRulingSpacing(newValue)
-        }
-    }
-
-    var reviewStatus: WritingReviewStatus {
-        get { WritingReviewStatus(rawValue: reviewStatusRaw) ?? .draft }
-        set { reviewStatusRaw = newValue.rawValue }
-    }
 }
 }
-
-typealias WritingDraft = PaperClipSchemaV1.WritingDraft

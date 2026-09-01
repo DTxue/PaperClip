@@ -47,13 +47,11 @@
 		A10000000000000000001204 /* DrawingDataSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001204 /* DrawingDataSupport.swift */; };
 		A1000000000000000000120D /* VocabularyStudySessionTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000120D /* VocabularyStudySessionTransaction.swift */; };
 		A1000000000000000000120E /* VocabularyTestSessionCommitTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000120E /* VocabularyTestSessionCommitTransaction.swift */; };
-		A1000000000000000000120F /* WritingReviewTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000120F /* WritingReviewTransaction.swift */; };
 		A10000000000000000001014 /* ImageJPEGEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001014 /* ImageJPEGEncoder.swift */; };
 		A1000000000000000000103D /* ImageEncodingPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000103D /* ImageEncodingPlan.swift */; };
 		A1000000000000000000103E /* ImageJPEGProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000103E /* ImageJPEGProfile.swift */; };
 		A10000000000000000001033 /* CanvasSizeReportSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001033 /* CanvasSizeReportSupport.swift */; };
 		A10000000000000000001034 /* AIServiceErrorMessageSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001034 /* AIServiceErrorMessageSupport.swift */; };
-		A10000000000000000001035 /* WritingDraftPersistenceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001035 /* WritingDraftPersistenceModels.swift */; };
 		A10000000000000000001036 /* HomeKnowledgeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001036 /* HomeKnowledgeModels.swift */; };
 		A100000000000000000011AC /* HomeDiarySelectionDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011AC /* HomeDiarySelectionDecision.swift */; };
 		A10000000000000000001016 /* ModelContextHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001016 /* ModelContextHelpers.swift */; };
@@ -71,7 +69,6 @@
 		A100000000000000000000F41 /* SettingsAIViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F41 /* SettingsAIViews.swift */; };
 		A10000000000000000001177 /* SettingsAISaveFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001177 /* SettingsAISaveFlow.swift */; };
 		A10000000000000000001008 /* SettingsAIFormSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001008 /* SettingsAIFormSections.swift */; };
-		A100000000000000000000F42 /* SettingsWritingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F42 /* SettingsWritingViews.swift */; };
 		A100000000000000000000FBC /* SettingsSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FBC /* SettingsSidebarView.swift */; };
 		A10000000000000000001073 /* FSRSExplanationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001073 /* FSRSExplanationView.swift */; };
 		A1000000000000000000115E /* FSRSExplanationContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000115E /* FSRSExplanationContent.swift */; };
@@ -90,20 +87,6 @@
 		A1000000000000000000117C /* KnowledgeAnalysisDecodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000117C /* KnowledgeAnalysisDecodable.swift */; };
 		A100000000000000000000FD2 /* AIServiceError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FD2 /* AIServiceError.swift */; };
 		A100000000000000000000F34 /* AIServicePayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F34 /* AIServicePayloads.swift */; };
-		A1000000000000000000115F /* AIWritingPromptModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000115F /* AIWritingPromptModels.swift */; };
-		A10000000000000000001160 /* AIWritingRecognitionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001160 /* AIWritingRecognitionModels.swift */; };
-		A100000000000000000000F27 /* AIWritingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F27 /* AIWritingModels.swift */; };
-		A10000000000000000001182 /* WritingReviewJSONStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001182 /* WritingReviewJSONStorage.swift */; };
-		A10000000000000000001161 /* AIWritingReviewDisplayText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001161 /* AIWritingReviewDisplayText.swift */; };
-		A10000000000000000001091 /* AIWritingReviewScoreModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001091 /* AIWritingReviewScoreModels.swift */; };
-			A10000000000000000001092 /* AIWritingReviewContentAdviceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001092 /* AIWritingReviewContentAdviceModels.swift */; };
-			A10000000000000000001093 /* AIWritingReviewLanguageAdviceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001093 /* AIWritingReviewLanguageAdviceModels.swift */; };
-			A10000000000000000001157 /* AIWritingReviewGoodWordsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001157 /* AIWritingReviewGoodWordsModels.swift */; };
-			A100000000000000000000F56 /* AIWritingReviewLanguageModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F56 /* AIWritingReviewLanguageModels.swift */; };
-		A100000000000000000000F57 /* AIWritingReviewAdvancedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F57 /* AIWritingReviewAdvancedModels.swift */; };
-		A100000000000000000000FEF /* AIWritingReviewBlueprintModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FEF /* AIWritingReviewBlueprintModels.swift */; };
-		A10000000000000000001100 /* AIWritingReviewCoreSceneModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001100 /* AIWritingReviewCoreSceneModels.swift */; };
-		A100000000000000000000FF0 /* AIWritingReviewReconstructionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FF0 /* AIWritingReviewReconstructionModels.swift */; };
 			A100000000000000000000FF2 /* DiaryAIPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FF2 /* DiaryAIPrompts.swift */; };
 			A100000000000000000000FF3 /* KnowledgeAIPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FF3 /* KnowledgeAIPrompts.swift */; };
 			A10000000000000000001169 /* KnowledgeAIAnalysisSubjectStrategies.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001169 /* KnowledgeAIAnalysisSubjectStrategies.swift */; };
@@ -116,7 +99,6 @@
 		A100000000000000000000F51 /* AIServiceImageEncoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F51 /* AIServiceImageEncoding.swift */; };
 		A100000000000000000000F52 /* AIServiceResponseDecoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F52 /* AIServiceResponseDecoding.swift */; };
 		A100000000000000000000FA2 /* AIServiceVocabularyProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA2 /* AIServiceVocabularyProcessing.swift */; };
-		A100000000000000000000FA3 /* AIServiceWritingProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA3 /* AIServiceWritingProcessing.swift */; };
 		A100000000000000000000FA4 /* AIServiceKnowledgeDiaryProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA4 /* AIServiceKnowledgeDiaryProcessing.swift */; };
 		A100000000000000000000F75 /* KnowledgeTagViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F75 /* KnowledgeTagViews.swift */; };
 		A10000000000000000000019 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000020 /* StatisticsView.swift */; };
@@ -291,10 +273,6 @@
 		A1000000000000000000112E /* VocabularySchedulingLearningIntervals.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000112E /* VocabularySchedulingLearningIntervals.swift */; };
 		A100000000000000000010A1 /* VocabularySchedulingTransitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010A1 /* VocabularySchedulingTransitions.swift */; };
 		A100000000000000000010A9 /* VocabularySchedulingReviewTransitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010A9 /* VocabularySchedulingReviewTransitions.swift */; };
-		A100000000000000000000FC9 /* chinese-generation.txt in Resources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FC9 /* chinese-generation.txt */; };
-		A100000000000000000000FCA /* english-generation.txt in Resources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FCA /* english-generation.txt */; };
-		A100000000000000000000FCB /* chinese-review.txt in Resources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FCB /* chinese-review.txt */; };
-		A100000000000000000000FCC /* english-review.txt in Resources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FCC /* english-review.txt */; };
 		A100000000000000000000FA /* DiaryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA /* DiaryModels.swift */; };
 		A1000000000000000000105A /* DiaryEntryContentPresence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000105A /* DiaryEntryContentPresence.swift */; };
 		A1000000000000000000105B /* DiaryPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000105B /* DiaryPersistence.swift */; };
@@ -308,7 +286,6 @@
 		A100000000000000000010C3 /* DiaryKnowledgeDraftRowContentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010C3 /* DiaryKnowledgeDraftRowContentViews.swift */; };
 		A10000000000000000001120 /* DiaryKnowledgeItemRowOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001120 /* DiaryKnowledgeItemRowOperations.swift */; };
 		A10000000000000000001121 /* VocabularyCardSplitFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001121 /* VocabularyCardSplitFlow.swift */; };
-		A10000000000000000001122 /* WritingWorkspaceInteractionFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001122 /* WritingWorkspaceInteractionFlow.swift */; };
 		A10000000000000000001123 /* PaperClipModelContainerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001123 /* PaperClipModelContainerFactory.swift */; };
 		A10000000000000000001124 /* PaperClipRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001124 /* PaperClipRootView.swift */; };
 		A10000000000000000001125 /* PaperClipStartup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001125 /* PaperClipStartup.swift */; };
@@ -337,66 +314,14 @@
 		A100000000000000000000FFC /* DiaryCalendarGridViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FFC /* DiaryCalendarGridViews.swift */; };
 		A100000000000000000010D9 /* DiaryCalendarDateCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010D9 /* DiaryCalendarDateCell.swift */; };
 		A100000000000000000000E7 /* DiaryKnowledgeViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000E7 /* DiaryKnowledgeViews.swift */; };
-		A100000000000000000000F94 /* WritingLanguageModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F94 /* WritingLanguageModels.swift */; };
-		A100000000000000000000F95 /* WritingPaperModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F95 /* WritingPaperModels.swift */; };
-		A1000000000000000000114C /* WritingPromptGenerationDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000114C /* WritingPromptGenerationDraft.swift */; };
 		A100000000000000000000F96 /* WritingPromptModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F96 /* WritingPromptModel.swift */; };
 		A100000000000000000000F97 /* WritingDraftModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F97 /* WritingDraftModel.swift */; };
 		A100000000000000000000F98 /* WritingReviewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F98 /* WritingReviewModel.swift */; };
-		A1000000000000000000115B /* WritingPromptQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000115B /* WritingPromptQueries.swift */; };
-		A1000000000000000000115C /* WritingDraftQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000115C /* WritingDraftQueries.swift */; };
-		A1000000000000000000115D /* WritingReviewQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000115D /* WritingReviewQueries.swift */; };
-		A100000000000000000010D5 /* WritingCascadeDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010D5 /* WritingCascadeDeletion.swift */; };
 		A100000000000000000000F91 /* DiaryEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F91 /* DiaryEditorSheet.swift */; };
 		A100000000000000000000F92 /* DiaryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F92 /* DiaryDetailView.swift */; };
 		A100000000000000000000F93 /* DiaryEntryDetailActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F93 /* DiaryEntryDetailActions.swift */; };
 		A10000000000000000001087 /* DiaryKnowledgeExtractionFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001087 /* DiaryKnowledgeExtractionFlow.swift */; };
 		A10000000000000000001088 /* DiaryKnowledgeBatchAnalysisFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001088 /* DiaryKnowledgeBatchAnalysisFlow.swift */; };
-		A100000000000000000000F29 /* WritingPromptConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F29 /* WritingPromptConfiguration.swift */; };
-		A100000000000000000000F5D /* WritingPromptDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F5D /* WritingPromptDefaults.swift */; };
-		A100000000000000000000F28 /* WritingHomeViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F28 /* WritingHomeViews.swift */; };
-			A100000000000000000000F85 /* WritingHomeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F85 /* WritingHomeModels.swift */; };
-			A1000000000000000000113C /* WritingHomeSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000113C /* WritingHomeSnapshot.swift */; };
-			A1000000000000000000114E /* WritingPromptDeletionSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000114E /* WritingPromptDeletionSelection.swift */; };
-			A10000000000000000001150 /* WritingPromptListDataLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001150 /* WritingPromptListDataLoader.swift */; };
-			A100000000000000000010B7 /* WritingPromptRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010B7 /* WritingPromptRow.swift */; };
-			A1000000000000000000114F /* WritingPromptListContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000114F /* WritingPromptListContentView.swift */; };
-		A100000000000000000000F86 /* WritingPromptListViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F86 /* WritingPromptListViews.swift */; };
-		A100000000000000000000F87 /* WritingWorkspaceLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F87 /* WritingWorkspaceLoader.swift */; };
-		A1000000000000000000114D /* NewWritingPromptFormSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000114D /* NewWritingPromptFormSections.swift */; };
-		A100000000000000000000F88 /* NewWritingPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F88 /* NewWritingPromptView.swift */; };
-		A100000000000000000000FD /* WritingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FD /* WritingViews.swift */; };
-		A100000000000000000010CB /* WritingWorkspacePresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010CB /* WritingWorkspacePresentation.swift */; };
-		A1000000000000000000119C /* WritingWorkspacePaperSettingsFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000119C /* WritingWorkspacePaperSettingsFlow.swift */; };
-		A10000000000000000001007 /* WritingWorkspaceReviewFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001007 /* WritingWorkspaceReviewFlow.swift */; };
-		A100000000000000000000F49 /* WritingWorkspaceSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F49 /* WritingWorkspaceSections.swift */; };
-		A100000000000000000010B6 /* WritingWorkspaceReviewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010B6 /* WritingWorkspaceReviewSections.swift */; };
-		A100000000000000000010D8 /* WritingWorkspaceReviewPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010D8 /* WritingWorkspaceReviewPersistence.swift */; };
-		A100000000000000000000F4A /* WritingWorkspacePersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F4A /* WritingWorkspacePersistence.swift */; };
-		A10000000000000000001024 /* WritingDraftPersistenceSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001024 /* WritingDraftPersistenceSupport.swift */; };
-			A100000000000000000000F0 /* WritingPaperViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F0 /* WritingPaperViews.swift */; };
-			A100000000000000000000FA5 /* WritingDrawingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA5 /* WritingDrawingStore.swift */; };
-			A100000000000000000000FA6 /* WritingOCRImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA6 /* WritingOCRImageRenderer.swift */; };
-			A10000000000000000001151 /* WritingFullscreenPaperWidthPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001151 /* WritingFullscreenPaperWidthPlan.swift */; };
-			A10000000000000000001152 /* WritingFullscreenPaperViewport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001152 /* WritingFullscreenPaperViewport.swift */; };
-			A10000000000000000001153 /* WritingFullscreenWriterControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001153 /* WritingFullscreenWriterControls.swift */; };
-			A100000000000000000000FA7 /* WritingFullscreenWriterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA7 /* WritingFullscreenWriterView.swift */; };
-		A100000000000000000000FA8 /* WritingPaperSizingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA8 /* WritingPaperSizingView.swift */; };
-		A100000000000000000000FA9 /* WritingRequirementContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA9 /* WritingRequirementContent.swift */; };
-		A100000000000000000000FB0 /* WritingPaperBackgroundViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FB0 /* WritingPaperBackgroundViews.swift */; };
-		A100000000000000000000EF /* WritingReviewViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000EF /* WritingReviewViews.swift */; };
-		A10000000000000000001109 /* WritingRecognitionReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001109 /* WritingRecognitionReviewSheet.swift */; };
-			A1000000000000000000110A /* WritingReviewDetailLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000110A /* WritingReviewDetailLoader.swift */; };
-			A100000000000000000000F48 /* WritingReviewDetailSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F48 /* WritingReviewDetailSections.swift */; };
-			A10000000000000000001159 /* WritingReviewTextAdviceViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001159 /* WritingReviewTextAdviceViews.swift */; };
-			A1000000000000000000115A /* WritingReviewAdviceRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000115A /* WritingReviewAdviceRows.swift */; };
-			A100000000000000000000F6F /* WritingReviewAdviceSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F6F /* WritingReviewAdviceSections.swift */; };
-		A100000000000000000010C8 /* WritingReviewGoodWordsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010C8 /* WritingReviewGoodWordsSection.swift */; };
-		A100000000000000000000F70 /* WritingReviewAdvancedSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F70 /* WritingReviewAdvancedSections.swift */; };
-		A1000000000000000000119B /* WritingReviewBlueprintSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000119B /* WritingReviewBlueprintSection.swift */; };
-		A100000000000000000000FEE /* WritingReviewReconstructionSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FEE /* WritingReviewReconstructionSections.swift */; };
-		A100000000000000000010AA /* WritingReviewParagraphReconstructionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010AA /* WritingReviewParagraphReconstructionSection.swift */; };
-		A100000000000000000010AB /* WritingReviewCoreSceneSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010AB /* WritingReviewCoreSceneSection.swift */; };
 		A100000000000000000010AC /* VocabularyStudySessionSnapshots.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010AC /* VocabularyStudySessionSnapshots.swift */; };
 		A100000000000000000011AF /* VocabularyStudySessionFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011AF /* VocabularyStudySessionFormat.swift */; };
 		A100000000000000000010AE /* AIServiceModelConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010AE /* AIServiceModelConfiguration.swift */; };
@@ -445,13 +370,11 @@
 		A20000000000000000001204 /* DrawingDataSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingDataSupport.swift; sourceTree = "<group>"; };
 		A2000000000000000000120D /* VocabularyStudySessionTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionTransaction.swift; sourceTree = "<group>"; };
 		A2000000000000000000120E /* VocabularyTestSessionCommitTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestSessionCommitTransaction.swift; sourceTree = "<group>"; };
-		A2000000000000000000120F /* WritingReviewTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewTransaction.swift; sourceTree = "<group>"; };
 		A20000000000000000001014 /* ImageJPEGEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageJPEGEncoder.swift; sourceTree = "<group>"; };
 		A2000000000000000000103D /* ImageEncodingPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageEncodingPlan.swift; sourceTree = "<group>"; };
 		A2000000000000000000103E /* ImageJPEGProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageJPEGProfile.swift; sourceTree = "<group>"; };
 		A20000000000000000001033 /* CanvasSizeReportSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasSizeReportSupport.swift; sourceTree = "<group>"; };
 		A20000000000000000001034 /* AIServiceErrorMessageSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceErrorMessageSupport.swift; sourceTree = "<group>"; };
-		A20000000000000000001035 /* WritingDraftPersistenceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingDraftPersistenceModels.swift; sourceTree = "<group>"; };
 		A20000000000000000001036 /* HomeKnowledgeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeKnowledgeModels.swift; sourceTree = "<group>"; };
 		A200000000000000000011AC /* HomeDiarySelectionDecision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDiarySelectionDecision.swift; sourceTree = "<group>"; };
 		A20000000000000000001016 /* ModelContextHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelContextHelpers.swift; sourceTree = "<group>"; };
@@ -484,7 +407,6 @@
 		A200000000000000000000F41 /* SettingsAIViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAIViews.swift; sourceTree = "<group>"; };
 		A20000000000000000001177 /* SettingsAISaveFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAISaveFlow.swift; sourceTree = "<group>"; };
 		A20000000000000000001008 /* SettingsAIFormSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAIFormSections.swift; sourceTree = "<group>"; };
-		A200000000000000000000F42 /* SettingsWritingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWritingViews.swift; sourceTree = "<group>"; };
 		A200000000000000000000FBC /* SettingsSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSidebarView.swift; sourceTree = "<group>"; };
 		A20000000000000000001073 /* FSRSExplanationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSRSExplanationView.swift; sourceTree = "<group>"; };
 		A2000000000000000000115E /* FSRSExplanationContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSRSExplanationContent.swift; sourceTree = "<group>"; };
@@ -503,20 +425,6 @@
 		A2000000000000000000117C /* KnowledgeAnalysisDecodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeAnalysisDecodable.swift; sourceTree = "<group>"; };
 		A200000000000000000000FD2 /* AIServiceError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceError.swift; sourceTree = "<group>"; };
 		A200000000000000000000F34 /* AIServicePayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServicePayloads.swift; sourceTree = "<group>"; };
-		A2000000000000000000115F /* AIWritingPromptModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingPromptModels.swift; sourceTree = "<group>"; };
-		A20000000000000000001160 /* AIWritingRecognitionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingRecognitionModels.swift; sourceTree = "<group>"; };
-		A200000000000000000000F27 /* AIWritingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingModels.swift; sourceTree = "<group>"; };
-		A20000000000000000001182 /* WritingReviewJSONStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewJSONStorage.swift; sourceTree = "<group>"; };
-		A20000000000000000001161 /* AIWritingReviewDisplayText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewDisplayText.swift; sourceTree = "<group>"; };
-		A20000000000000000001091 /* AIWritingReviewScoreModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewScoreModels.swift; sourceTree = "<group>"; };
-			A20000000000000000001092 /* AIWritingReviewContentAdviceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewContentAdviceModels.swift; sourceTree = "<group>"; };
-			A20000000000000000001093 /* AIWritingReviewLanguageAdviceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewLanguageAdviceModels.swift; sourceTree = "<group>"; };
-			A20000000000000000001157 /* AIWritingReviewGoodWordsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewGoodWordsModels.swift; sourceTree = "<group>"; };
-			A200000000000000000000F56 /* AIWritingReviewLanguageModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewLanguageModels.swift; sourceTree = "<group>"; };
-		A200000000000000000000F57 /* AIWritingReviewAdvancedModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewAdvancedModels.swift; sourceTree = "<group>"; };
-		A200000000000000000000FEF /* AIWritingReviewBlueprintModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewBlueprintModels.swift; sourceTree = "<group>"; };
-		A20000000000000000001100 /* AIWritingReviewCoreSceneModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewCoreSceneModels.swift; sourceTree = "<group>"; };
-		A200000000000000000000FF0 /* AIWritingReviewReconstructionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewReconstructionModels.swift; sourceTree = "<group>"; };
 			A200000000000000000000FF2 /* DiaryAIPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryAIPrompts.swift; sourceTree = "<group>"; };
 			A200000000000000000000FF3 /* KnowledgeAIPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeAIPrompts.swift; sourceTree = "<group>"; };
 			A20000000000000000001169 /* KnowledgeAIAnalysisSubjectStrategies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeAIAnalysisSubjectStrategies.swift; sourceTree = "<group>"; };
@@ -529,7 +437,6 @@
 		A200000000000000000000F51 /* AIServiceImageEncoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceImageEncoding.swift; sourceTree = "<group>"; };
 		A200000000000000000000F52 /* AIServiceResponseDecoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceResponseDecoding.swift; sourceTree = "<group>"; };
 		A200000000000000000000FA2 /* AIServiceVocabularyProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceVocabularyProcessing.swift; sourceTree = "<group>"; };
-		A200000000000000000000FA3 /* AIServiceWritingProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceWritingProcessing.swift; sourceTree = "<group>"; };
 		A200000000000000000000FA4 /* AIServiceKnowledgeDiaryProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceKnowledgeDiaryProcessing.swift; sourceTree = "<group>"; };
 		A200000000000000000000F75 /* KnowledgeTagViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeTagViews.swift; sourceTree = "<group>"; };
 		A20000000000000000000020 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
@@ -689,10 +596,6 @@
 		A2000000000000000000112E /* VocabularySchedulingLearningIntervals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySchedulingLearningIntervals.swift; sourceTree = "<group>"; };
 		A200000000000000000010A1 /* VocabularySchedulingTransitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySchedulingTransitions.swift; sourceTree = "<group>"; };
 		A200000000000000000010A9 /* VocabularySchedulingReviewTransitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySchedulingReviewTransitions.swift; sourceTree = "<group>"; };
-		A200000000000000000000FC9 /* chinese-generation.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Resources/WritingPrompts/chinese-generation.txt; sourceTree = "<group>"; };
-		A200000000000000000000FCA /* english-generation.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Resources/WritingPrompts/english-generation.txt; sourceTree = "<group>"; };
-		A200000000000000000000FCB /* chinese-review.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Resources/WritingPrompts/chinese-review.txt; sourceTree = "<group>"; };
-		A200000000000000000000FCC /* english-review.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Resources/WritingPrompts/english-review.txt; sourceTree = "<group>"; };
 		A200000000000000000000FA /* DiaryModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryModels.swift; sourceTree = "<group>"; };
 		A2000000000000000000105A /* DiaryEntryContentPresence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryEntryContentPresence.swift; sourceTree = "<group>"; };
 		A2000000000000000000105B /* DiaryPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryPersistence.swift; sourceTree = "<group>"; };
@@ -706,7 +609,6 @@
 		A200000000000000000010C3 /* DiaryKnowledgeDraftRowContentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryKnowledgeDraftRowContentViews.swift; sourceTree = "<group>"; };
 		A20000000000000000001120 /* DiaryKnowledgeItemRowOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryKnowledgeItemRowOperations.swift; sourceTree = "<group>"; };
 		A20000000000000000001121 /* VocabularyCardSplitFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyCardSplitFlow.swift; sourceTree = "<group>"; };
-		A20000000000000000001122 /* WritingWorkspaceInteractionFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingWorkspaceInteractionFlow.swift; sourceTree = "<group>"; };
 		A20000000000000000001123 /* PaperClipModelContainerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperClipModelContainerFactory.swift; sourceTree = "<group>"; };
 		A20000000000000000001124 /* PaperClipRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperClipRootView.swift; sourceTree = "<group>"; };
 		A20000000000000000001125 /* PaperClipStartup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperClipStartup.swift; sourceTree = "<group>"; };
@@ -735,66 +637,14 @@
 		A200000000000000000000FFC /* DiaryCalendarGridViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryCalendarGridViews.swift; sourceTree = "<group>"; };
 		A200000000000000000010D9 /* DiaryCalendarDateCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryCalendarDateCell.swift; sourceTree = "<group>"; };
 		A200000000000000000000E7 /* DiaryKnowledgeViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryKnowledgeViews.swift; sourceTree = "<group>"; };
-		A200000000000000000000F94 /* WritingLanguageModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingLanguageModels.swift; sourceTree = "<group>"; };
-		A200000000000000000000F95 /* WritingPaperModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPaperModels.swift; sourceTree = "<group>"; };
-		A2000000000000000000114C /* WritingPromptGenerationDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPromptGenerationDraft.swift; sourceTree = "<group>"; };
 		A200000000000000000000F96 /* WritingPromptModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPromptModel.swift; sourceTree = "<group>"; };
 		A200000000000000000000F97 /* WritingDraftModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingDraftModel.swift; sourceTree = "<group>"; };
 		A200000000000000000000F98 /* WritingReviewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewModel.swift; sourceTree = "<group>"; };
-		A2000000000000000000115B /* WritingPromptQueries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPromptQueries.swift; sourceTree = "<group>"; };
-		A2000000000000000000115C /* WritingDraftQueries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingDraftQueries.swift; sourceTree = "<group>"; };
-		A2000000000000000000115D /* WritingReviewQueries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewQueries.swift; sourceTree = "<group>"; };
-		A200000000000000000010D5 /* WritingCascadeDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingCascadeDeletion.swift; sourceTree = "<group>"; };
 		A200000000000000000000F91 /* DiaryEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryEditorSheet.swift; sourceTree = "<group>"; };
 		A200000000000000000000F92 /* DiaryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryDetailView.swift; sourceTree = "<group>"; };
 		A200000000000000000000F93 /* DiaryEntryDetailActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryEntryDetailActions.swift; sourceTree = "<group>"; };
 		A20000000000000000001087 /* DiaryKnowledgeExtractionFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryKnowledgeExtractionFlow.swift; sourceTree = "<group>"; };
 		A20000000000000000001088 /* DiaryKnowledgeBatchAnalysisFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryKnowledgeBatchAnalysisFlow.swift; sourceTree = "<group>"; };
-		A200000000000000000000F29 /* WritingPromptConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPromptConfiguration.swift; sourceTree = "<group>"; };
-		A200000000000000000000F5D /* WritingPromptDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPromptDefaults.swift; sourceTree = "<group>"; };
-		A200000000000000000000F28 /* WritingHomeViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingHomeViews.swift; sourceTree = "<group>"; };
-			A200000000000000000000F85 /* WritingHomeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingHomeModels.swift; sourceTree = "<group>"; };
-			A2000000000000000000113C /* WritingHomeSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingHomeSnapshot.swift; sourceTree = "<group>"; };
-			A2000000000000000000114E /* WritingPromptDeletionSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPromptDeletionSelection.swift; sourceTree = "<group>"; };
-			A20000000000000000001150 /* WritingPromptListDataLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPromptListDataLoader.swift; sourceTree = "<group>"; };
-			A200000000000000000010B7 /* WritingPromptRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPromptRow.swift; sourceTree = "<group>"; };
-			A2000000000000000000114F /* WritingPromptListContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPromptListContentView.swift; sourceTree = "<group>"; };
-		A200000000000000000000F86 /* WritingPromptListViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPromptListViews.swift; sourceTree = "<group>"; };
-		A200000000000000000000F87 /* WritingWorkspaceLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingWorkspaceLoader.swift; sourceTree = "<group>"; };
-		A2000000000000000000114D /* NewWritingPromptFormSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewWritingPromptFormSections.swift; sourceTree = "<group>"; };
-		A200000000000000000000F88 /* NewWritingPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewWritingPromptView.swift; sourceTree = "<group>"; };
-		A200000000000000000000FD /* WritingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingViews.swift; sourceTree = "<group>"; };
-		A200000000000000000010CB /* WritingWorkspacePresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingWorkspacePresentation.swift; sourceTree = "<group>"; };
-		A2000000000000000000119C /* WritingWorkspacePaperSettingsFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingWorkspacePaperSettingsFlow.swift; sourceTree = "<group>"; };
-		A20000000000000000001007 /* WritingWorkspaceReviewFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingWorkspaceReviewFlow.swift; sourceTree = "<group>"; };
-		A200000000000000000000F49 /* WritingWorkspaceSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingWorkspaceSections.swift; sourceTree = "<group>"; };
-		A200000000000000000010B6 /* WritingWorkspaceReviewSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingWorkspaceReviewSections.swift; sourceTree = "<group>"; };
-		A200000000000000000010D8 /* WritingWorkspaceReviewPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingWorkspaceReviewPersistence.swift; sourceTree = "<group>"; };
-		A200000000000000000000F4A /* WritingWorkspacePersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingWorkspacePersistence.swift; sourceTree = "<group>"; };
-		A20000000000000000001024 /* WritingDraftPersistenceSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingDraftPersistenceSupport.swift; sourceTree = "<group>"; };
-			A200000000000000000000F0 /* WritingPaperViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPaperViews.swift; sourceTree = "<group>"; };
-			A200000000000000000000FA5 /* WritingDrawingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingDrawingStore.swift; sourceTree = "<group>"; };
-			A200000000000000000000FA6 /* WritingOCRImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingOCRImageRenderer.swift; sourceTree = "<group>"; };
-			A20000000000000000001151 /* WritingFullscreenPaperWidthPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingFullscreenPaperWidthPlan.swift; sourceTree = "<group>"; };
-			A20000000000000000001152 /* WritingFullscreenPaperViewport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingFullscreenPaperViewport.swift; sourceTree = "<group>"; };
-			A20000000000000000001153 /* WritingFullscreenWriterControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingFullscreenWriterControls.swift; sourceTree = "<group>"; };
-			A200000000000000000000FA7 /* WritingFullscreenWriterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingFullscreenWriterView.swift; sourceTree = "<group>"; };
-		A200000000000000000000FA8 /* WritingPaperSizingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPaperSizingView.swift; sourceTree = "<group>"; };
-		A200000000000000000000FA9 /* WritingRequirementContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingRequirementContent.swift; sourceTree = "<group>"; };
-		A200000000000000000000FB0 /* WritingPaperBackgroundViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingPaperBackgroundViews.swift; sourceTree = "<group>"; };
-		A200000000000000000000EF /* WritingReviewViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewViews.swift; sourceTree = "<group>"; };
-		A20000000000000000001109 /* WritingRecognitionReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingRecognitionReviewSheet.swift; sourceTree = "<group>"; };
-			A2000000000000000000110A /* WritingReviewDetailLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewDetailLoader.swift; sourceTree = "<group>"; };
-			A200000000000000000000F48 /* WritingReviewDetailSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewDetailSections.swift; sourceTree = "<group>"; };
-			A20000000000000000001159 /* WritingReviewTextAdviceViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewTextAdviceViews.swift; sourceTree = "<group>"; };
-			A2000000000000000000115A /* WritingReviewAdviceRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewAdviceRows.swift; sourceTree = "<group>"; };
-			A200000000000000000000F6F /* WritingReviewAdviceSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewAdviceSections.swift; sourceTree = "<group>"; };
-		A200000000000000000010C8 /* WritingReviewGoodWordsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewGoodWordsSection.swift; sourceTree = "<group>"; };
-		A200000000000000000000F70 /* WritingReviewAdvancedSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewAdvancedSections.swift; sourceTree = "<group>"; };
-		A2000000000000000000119B /* WritingReviewBlueprintSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewBlueprintSection.swift; sourceTree = "<group>"; };
-		A200000000000000000000FEE /* WritingReviewReconstructionSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewReconstructionSections.swift; sourceTree = "<group>"; };
-		A200000000000000000010AA /* WritingReviewParagraphReconstructionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewParagraphReconstructionSection.swift; sourceTree = "<group>"; };
-		A200000000000000000010AB /* WritingReviewCoreSceneSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewCoreSceneSection.swift; sourceTree = "<group>"; };
 		A200000000000000000010AC /* VocabularyStudySessionSnapshots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionSnapshots.swift; sourceTree = "<group>"; };
 		A200000000000000000011AF /* VocabularyStudySessionFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionFormat.swift; sourceTree = "<group>"; };
 		A200000000000000000010AE /* AIServiceModelConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceModelConfiguration.swift; sourceTree = "<group>"; };
@@ -867,13 +717,11 @@
 				A20000000000000000001204 /* DrawingDataSupport.swift */,
 				A2000000000000000000120D /* VocabularyStudySessionTransaction.swift */,
 				A2000000000000000000120E /* VocabularyTestSessionCommitTransaction.swift */,
-				A2000000000000000000120F /* WritingReviewTransaction.swift */,
 				A20000000000000000001014 /* ImageJPEGEncoder.swift */,
 				A2000000000000000000103D /* ImageEncodingPlan.swift */,
 				A2000000000000000000103E /* ImageJPEGProfile.swift */,
 				A20000000000000000001033 /* CanvasSizeReportSupport.swift */,
 				A20000000000000000001034 /* AIServiceErrorMessageSupport.swift */,
-				A20000000000000000001035 /* WritingDraftPersistenceModels.swift */,
 				A20000000000000000001036 /* HomeKnowledgeModels.swift */,
 				A20000000000000000001016 /* ModelContextHelpers.swift */,
 				A20000000000000000001032 /* VisibleElementDiff.swift */,
@@ -906,7 +754,6 @@
 				A200000000000000000000F41 /* SettingsAIViews.swift */,
 				A20000000000000000001177 /* SettingsAISaveFlow.swift */,
 				A20000000000000000001008 /* SettingsAIFormSections.swift */,
-				A200000000000000000000F42 /* SettingsWritingViews.swift */,
 				A200000000000000000000FBC /* SettingsSidebarView.swift */,
 				A20000000000000000001073 /* FSRSExplanationView.swift */,
 				A2000000000000000000115E /* FSRSExplanationContent.swift */,
@@ -928,20 +775,6 @@
 				A20000000000000000001127 /* AIServiceDeepSeekPayloads.swift */,
 				A20000000000000000001128 /* AIServiceErrorPayloads.swift */,
 				A20000000000000000001129 /* AIServiceResponsesPayloads.swift */,
-				A2000000000000000000115F /* AIWritingPromptModels.swift */,
-				A20000000000000000001160 /* AIWritingRecognitionModels.swift */,
-				A200000000000000000000F27 /* AIWritingModels.swift */,
-				A20000000000000000001182 /* WritingReviewJSONStorage.swift */,
-				A20000000000000000001161 /* AIWritingReviewDisplayText.swift */,
-				A20000000000000000001091 /* AIWritingReviewScoreModels.swift */,
-					A20000000000000000001092 /* AIWritingReviewContentAdviceModels.swift */,
-					A20000000000000000001093 /* AIWritingReviewLanguageAdviceModels.swift */,
-					A20000000000000000001157 /* AIWritingReviewGoodWordsModels.swift */,
-					A200000000000000000000F56 /* AIWritingReviewLanguageModels.swift */,
-				A200000000000000000000F57 /* AIWritingReviewAdvancedModels.swift */,
-				A200000000000000000000FEF /* AIWritingReviewBlueprintModels.swift */,
-				A20000000000000000001100 /* AIWritingReviewCoreSceneModels.swift */,
-				A200000000000000000000FF0 /* AIWritingReviewReconstructionModels.swift */,
 					A200000000000000000000FF2 /* DiaryAIPrompts.swift */,
 					A200000000000000000000FF3 /* KnowledgeAIPrompts.swift */,
 					A20000000000000000001169 /* KnowledgeAIAnalysisSubjectStrategies.swift */,
@@ -955,7 +788,6 @@
 				A200000000000000000000F51 /* AIServiceImageEncoding.swift */,
 				A200000000000000000000F52 /* AIServiceResponseDecoding.swift */,
 				A200000000000000000000FA2 /* AIServiceVocabularyProcessing.swift */,
-				A200000000000000000000FA3 /* AIServiceWritingProcessing.swift */,
 				A200000000000000000000FA4 /* AIServiceKnowledgeDiaryProcessing.swift */,
 				A200000000000000000000F75 /* KnowledgeTagViews.swift */,
 				A20000000000000000000020 /* StatisticsView.swift */,
@@ -1119,10 +951,6 @@
 				A2000000000000000000112E /* VocabularySchedulingLearningIntervals.swift */,
 				A200000000000000000010A1 /* VocabularySchedulingTransitions.swift */,
 				A200000000000000000010A9 /* VocabularySchedulingReviewTransitions.swift */,
-				A200000000000000000000FC9 /* chinese-generation.txt */,
-				A200000000000000000000FCA /* english-generation.txt */,
-				A200000000000000000000FCB /* chinese-review.txt */,
-				A200000000000000000000FCC /* english-review.txt */,
 				A200000000000000000000FA /* DiaryModels.swift */,
 				A2000000000000000000105A /* DiaryEntryContentPresence.swift */,
 				A2000000000000000000105B /* DiaryPersistence.swift */,
@@ -1156,67 +984,14 @@
 				A200000000000000000000FFC /* DiaryCalendarGridViews.swift */,
 				A200000000000000000010D9 /* DiaryCalendarDateCell.swift */,
 				A200000000000000000000E7 /* DiaryKnowledgeViews.swift */,
-				A200000000000000000000F94 /* WritingLanguageModels.swift */,
-				A200000000000000000000F95 /* WritingPaperModels.swift */,
-				A2000000000000000000114C /* WritingPromptGenerationDraft.swift */,
 				A200000000000000000000F96 /* WritingPromptModel.swift */,
 				A200000000000000000000F97 /* WritingDraftModel.swift */,
 				A200000000000000000000F98 /* WritingReviewModel.swift */,
-				A2000000000000000000115B /* WritingPromptQueries.swift */,
-				A2000000000000000000115C /* WritingDraftQueries.swift */,
-				A2000000000000000000115D /* WritingReviewQueries.swift */,
-				A200000000000000000010D5 /* WritingCascadeDeletion.swift */,
 				A200000000000000000000F91 /* DiaryEditorSheet.swift */,
 				A200000000000000000000F92 /* DiaryDetailView.swift */,
 				A200000000000000000000F93 /* DiaryEntryDetailActions.swift */,
 				A20000000000000000001087 /* DiaryKnowledgeExtractionFlow.swift */,
 				A20000000000000000001088 /* DiaryKnowledgeBatchAnalysisFlow.swift */,
-				A200000000000000000000F29 /* WritingPromptConfiguration.swift */,
-				A200000000000000000000F5D /* WritingPromptDefaults.swift */,
-				A200000000000000000000F28 /* WritingHomeViews.swift */,
-					A200000000000000000000F85 /* WritingHomeModels.swift */,
-					A2000000000000000000113C /* WritingHomeSnapshot.swift */,
-					A2000000000000000000114E /* WritingPromptDeletionSelection.swift */,
-					A20000000000000000001150 /* WritingPromptListDataLoader.swift */,
-					A200000000000000000010B7 /* WritingPromptRow.swift */,
-					A2000000000000000000114F /* WritingPromptListContentView.swift */,
-				A200000000000000000000F86 /* WritingPromptListViews.swift */,
-				A200000000000000000000F87 /* WritingWorkspaceLoader.swift */,
-				A2000000000000000000114D /* NewWritingPromptFormSections.swift */,
-				A200000000000000000000F88 /* NewWritingPromptView.swift */,
-				A200000000000000000000FD /* WritingViews.swift */,
-				A200000000000000000010CB /* WritingWorkspacePresentation.swift */,
-				A2000000000000000000119C /* WritingWorkspacePaperSettingsFlow.swift */,
-				A20000000000000000001007 /* WritingWorkspaceReviewFlow.swift */,
-				A20000000000000000001122 /* WritingWorkspaceInteractionFlow.swift */,
-				A200000000000000000000F49 /* WritingWorkspaceSections.swift */,
-				A200000000000000000010B6 /* WritingWorkspaceReviewSections.swift */,
-				A200000000000000000010D8 /* WritingWorkspaceReviewPersistence.swift */,
-				A200000000000000000000F4A /* WritingWorkspacePersistence.swift */,
-				A20000000000000000001024 /* WritingDraftPersistenceSupport.swift */,
-					A200000000000000000000F0 /* WritingPaperViews.swift */,
-					A200000000000000000000FA5 /* WritingDrawingStore.swift */,
-					A200000000000000000000FA6 /* WritingOCRImageRenderer.swift */,
-					A20000000000000000001151 /* WritingFullscreenPaperWidthPlan.swift */,
-					A20000000000000000001152 /* WritingFullscreenPaperViewport.swift */,
-					A20000000000000000001153 /* WritingFullscreenWriterControls.swift */,
-					A200000000000000000000FA7 /* WritingFullscreenWriterView.swift */,
-				A200000000000000000000FA8 /* WritingPaperSizingView.swift */,
-				A200000000000000000000FA9 /* WritingRequirementContent.swift */,
-				A200000000000000000000FB0 /* WritingPaperBackgroundViews.swift */,
-				A200000000000000000000EF /* WritingReviewViews.swift */,
-				A20000000000000000001109 /* WritingRecognitionReviewSheet.swift */,
-					A2000000000000000000110A /* WritingReviewDetailLoader.swift */,
-					A200000000000000000000F48 /* WritingReviewDetailSections.swift */,
-					A20000000000000000001159 /* WritingReviewTextAdviceViews.swift */,
-					A2000000000000000000115A /* WritingReviewAdviceRows.swift */,
-					A200000000000000000000F6F /* WritingReviewAdviceSections.swift */,
-				A200000000000000000010C8 /* WritingReviewGoodWordsSection.swift */,
-				A200000000000000000000F70 /* WritingReviewAdvancedSections.swift */,
-				A2000000000000000000119B /* WritingReviewBlueprintSection.swift */,
-				A200000000000000000000FEE /* WritingReviewReconstructionSections.swift */,
-				A200000000000000000010AA /* WritingReviewParagraphReconstructionSection.swift */,
-				A200000000000000000010AB /* WritingReviewCoreSceneSection.swift */,
 			);
 			path = PaperClip;
 			sourceTree = "<group>";
@@ -1289,10 +1064,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000010 /* Assets.xcassets in Resources */,
-				A100000000000000000000FC9 /* chinese-generation.txt in Resources */,
-				A100000000000000000000FCA /* english-generation.txt in Resources */,
-				A100000000000000000000FCB /* chinese-review.txt in Resources */,
-				A100000000000000000000FCC /* english-review.txt in Resources */,
 				C9000000000000000000A013 /* KaTeX.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1347,13 +1118,11 @@
 				A10000000000000000001204 /* DrawingDataSupport.swift in Sources */,
 				A1000000000000000000120D /* VocabularyStudySessionTransaction.swift in Sources */,
 				A1000000000000000000120E /* VocabularyTestSessionCommitTransaction.swift in Sources */,
-				A1000000000000000000120F /* WritingReviewTransaction.swift in Sources */,
 				A10000000000000000001014 /* ImageJPEGEncoder.swift in Sources */,
 				A1000000000000000000103D /* ImageEncodingPlan.swift in Sources */,
 				A1000000000000000000103E /* ImageJPEGProfile.swift in Sources */,
 				A10000000000000000001033 /* CanvasSizeReportSupport.swift in Sources */,
 				A10000000000000000001034 /* AIServiceErrorMessageSupport.swift in Sources */,
-				A10000000000000000001035 /* WritingDraftPersistenceModels.swift in Sources */,
 				A10000000000000000001036 /* HomeKnowledgeModels.swift in Sources */,
 				A10000000000000000001016 /* ModelContextHelpers.swift in Sources */,
 				A10000000000000000001032 /* VisibleElementDiff.swift in Sources */,
@@ -1385,7 +1154,6 @@
 				A100000000000000000000F41 /* SettingsAIViews.swift in Sources */,
 				A10000000000000000001177 /* SettingsAISaveFlow.swift in Sources */,
 				A10000000000000000001008 /* SettingsAIFormSections.swift in Sources */,
-				A100000000000000000000F42 /* SettingsWritingViews.swift in Sources */,
 				A100000000000000000000FBC /* SettingsSidebarView.swift in Sources */,
 				A10000000000000000001073 /* FSRSExplanationView.swift in Sources */,
 				A1000000000000000000115E /* FSRSExplanationContent.swift in Sources */,
@@ -1407,20 +1175,6 @@
 				A10000000000000000001127 /* AIServiceDeepSeekPayloads.swift in Sources */,
 				A10000000000000000001128 /* AIServiceErrorPayloads.swift in Sources */,
 				A10000000000000000001129 /* AIServiceResponsesPayloads.swift in Sources */,
-				A1000000000000000000115F /* AIWritingPromptModels.swift in Sources */,
-				A10000000000000000001160 /* AIWritingRecognitionModels.swift in Sources */,
-				A100000000000000000000F27 /* AIWritingModels.swift in Sources */,
-				A10000000000000000001182 /* WritingReviewJSONStorage.swift in Sources */,
-				A10000000000000000001161 /* AIWritingReviewDisplayText.swift in Sources */,
-				A10000000000000000001091 /* AIWritingReviewScoreModels.swift in Sources */,
-					A10000000000000000001092 /* AIWritingReviewContentAdviceModels.swift in Sources */,
-					A10000000000000000001093 /* AIWritingReviewLanguageAdviceModels.swift in Sources */,
-					A10000000000000000001157 /* AIWritingReviewGoodWordsModels.swift in Sources */,
-					A100000000000000000000F56 /* AIWritingReviewLanguageModels.swift in Sources */,
-				A100000000000000000000F57 /* AIWritingReviewAdvancedModels.swift in Sources */,
-				A100000000000000000000FEF /* AIWritingReviewBlueprintModels.swift in Sources */,
-				A10000000000000000001100 /* AIWritingReviewCoreSceneModels.swift in Sources */,
-				A100000000000000000000FF0 /* AIWritingReviewReconstructionModels.swift in Sources */,
 					A100000000000000000000FF2 /* DiaryAIPrompts.swift in Sources */,
 					A100000000000000000000FF3 /* KnowledgeAIPrompts.swift in Sources */,
 					A10000000000000000001169 /* KnowledgeAIAnalysisSubjectStrategies.swift in Sources */,
@@ -1434,7 +1188,6 @@
 				A100000000000000000000F51 /* AIServiceImageEncoding.swift in Sources */,
 				A100000000000000000000F52 /* AIServiceResponseDecoding.swift in Sources */,
 				A100000000000000000000FA2 /* AIServiceVocabularyProcessing.swift in Sources */,
-				A100000000000000000000FA3 /* AIServiceWritingProcessing.swift in Sources */,
 				A100000000000000000000FA4 /* AIServiceKnowledgeDiaryProcessing.swift in Sources */,
 				A100000000000000000000F75 /* KnowledgeTagViews.swift in Sources */,
 				A10000000000000000000019 /* StatisticsView.swift in Sources */,
@@ -1631,67 +1384,14 @@
 				A100000000000000000000FFC /* DiaryCalendarGridViews.swift in Sources */,
 				A100000000000000000010D9 /* DiaryCalendarDateCell.swift in Sources */,
 				A100000000000000000000E7 /* DiaryKnowledgeViews.swift in Sources */,
-				A100000000000000000000F94 /* WritingLanguageModels.swift in Sources */,
-				A100000000000000000000F95 /* WritingPaperModels.swift in Sources */,
-				A1000000000000000000114C /* WritingPromptGenerationDraft.swift in Sources */,
 				A100000000000000000000F96 /* WritingPromptModel.swift in Sources */,
 				A100000000000000000000F97 /* WritingDraftModel.swift in Sources */,
 				A100000000000000000000F98 /* WritingReviewModel.swift in Sources */,
-				A1000000000000000000115B /* WritingPromptQueries.swift in Sources */,
-				A1000000000000000000115C /* WritingDraftQueries.swift in Sources */,
-				A1000000000000000000115D /* WritingReviewQueries.swift in Sources */,
-				A100000000000000000010D5 /* WritingCascadeDeletion.swift in Sources */,
 				A100000000000000000000F91 /* DiaryEditorSheet.swift in Sources */,
 				A100000000000000000000F92 /* DiaryDetailView.swift in Sources */,
 				A100000000000000000000F93 /* DiaryEntryDetailActions.swift in Sources */,
 				A10000000000000000001087 /* DiaryKnowledgeExtractionFlow.swift in Sources */,
 				A10000000000000000001088 /* DiaryKnowledgeBatchAnalysisFlow.swift in Sources */,
-				A100000000000000000000F29 /* WritingPromptConfiguration.swift in Sources */,
-				A100000000000000000000F5D /* WritingPromptDefaults.swift in Sources */,
-				A100000000000000000000F28 /* WritingHomeViews.swift in Sources */,
-					A100000000000000000000F85 /* WritingHomeModels.swift in Sources */,
-					A1000000000000000000113C /* WritingHomeSnapshot.swift in Sources */,
-					A1000000000000000000114E /* WritingPromptDeletionSelection.swift in Sources */,
-					A10000000000000000001150 /* WritingPromptListDataLoader.swift in Sources */,
-					A100000000000000000010B7 /* WritingPromptRow.swift in Sources */,
-					A1000000000000000000114F /* WritingPromptListContentView.swift in Sources */,
-				A100000000000000000000F86 /* WritingPromptListViews.swift in Sources */,
-				A100000000000000000000F87 /* WritingWorkspaceLoader.swift in Sources */,
-				A1000000000000000000114D /* NewWritingPromptFormSections.swift in Sources */,
-				A100000000000000000000F88 /* NewWritingPromptView.swift in Sources */,
-				A100000000000000000000FD /* WritingViews.swift in Sources */,
-				A100000000000000000010CB /* WritingWorkspacePresentation.swift in Sources */,
-				A1000000000000000000119C /* WritingWorkspacePaperSettingsFlow.swift in Sources */,
-				A10000000000000000001007 /* WritingWorkspaceReviewFlow.swift in Sources */,
-				A10000000000000000001122 /* WritingWorkspaceInteractionFlow.swift in Sources */,
-				A100000000000000000000F49 /* WritingWorkspaceSections.swift in Sources */,
-				A100000000000000000010B6 /* WritingWorkspaceReviewSections.swift in Sources */,
-				A100000000000000000010D8 /* WritingWorkspaceReviewPersistence.swift in Sources */,
-				A100000000000000000000F4A /* WritingWorkspacePersistence.swift in Sources */,
-				A10000000000000000001024 /* WritingDraftPersistenceSupport.swift in Sources */,
-					A100000000000000000000F0 /* WritingPaperViews.swift in Sources */,
-					A100000000000000000000FA5 /* WritingDrawingStore.swift in Sources */,
-					A100000000000000000000FA6 /* WritingOCRImageRenderer.swift in Sources */,
-					A10000000000000000001151 /* WritingFullscreenPaperWidthPlan.swift in Sources */,
-					A10000000000000000001152 /* WritingFullscreenPaperViewport.swift in Sources */,
-					A10000000000000000001153 /* WritingFullscreenWriterControls.swift in Sources */,
-					A100000000000000000000FA7 /* WritingFullscreenWriterView.swift in Sources */,
-				A100000000000000000000FA8 /* WritingPaperSizingView.swift in Sources */,
-				A100000000000000000000FA9 /* WritingRequirementContent.swift in Sources */,
-				A100000000000000000000FB0 /* WritingPaperBackgroundViews.swift in Sources */,
-				A100000000000000000000EF /* WritingReviewViews.swift in Sources */,
-				A10000000000000000001109 /* WritingRecognitionReviewSheet.swift in Sources */,
-					A1000000000000000000110A /* WritingReviewDetailLoader.swift in Sources */,
-					A100000000000000000000F48 /* WritingReviewDetailSections.swift in Sources */,
-					A10000000000000000001159 /* WritingReviewTextAdviceViews.swift in Sources */,
-					A1000000000000000000115A /* WritingReviewAdviceRows.swift in Sources */,
-					A100000000000000000000F6F /* WritingReviewAdviceSections.swift in Sources */,
-				A100000000000000000010C8 /* WritingReviewGoodWordsSection.swift in Sources */,
-				A100000000000000000000F70 /* WritingReviewAdvancedSections.swift in Sources */,
-				A1000000000000000000119B /* WritingReviewBlueprintSection.swift in Sources */,
-				A100000000000000000000FEE /* WritingReviewReconstructionSections.swift in Sources */,
-				A100000000000000000010AA /* WritingReviewParagraphReconstructionSection.swift in Sources */,
-				A100000000000000000010AB /* WritingReviewCoreSceneSection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

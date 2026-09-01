@@ -341,39 +341,39 @@ enum PaperClipLegacyStoreFixtureBuilder {
         context.insert(knowledge)
 
         context.insert(
-            WritingPrompt(
+            PaperClipSchemaV1.WritingPrompt(
                 id: promptID,
-                language: .chinese,
+                languageRaw: "chinese",
                 studentGrade: "八年级",
                 requirementInput: "记录一次安全升级",
                 generatedTitle: "一次平稳升级",
                 generatedRequirement: "写清操作过程与感受",
-                constraints: ["不少于 600 字"],
-                rubric: ["流程清晰"],
+                constraintsText: "不少于 600 字",
+                rubricText: "流程清晰",
                 createdAt: fixtureDate,
                 updatedAt: fixtureDate
             )
         )
         context.insert(
-            WritingDraft(
+            PaperClipSchemaV1.WritingDraft(
                 id: draftID,
                 promptID: promptID,
-                language: .chinese,
-                paperStyle: .grid,
+                languageRaw: "chinese",
+                paperStyleRaw: "grid",
                 blackPaperMode: true,
                 drawingData: externalFixtureData(marker: 0x10),
                 recognizedText: "升级过程很顺畅。",
-                reviewStatus: .graded,
+                reviewStatusRaw: "graded",
                 createdAt: fixtureDate,
                 updatedAt: fixtureDate
             )
         )
         context.insert(
-            WritingReview(
+            PaperClipSchemaV1.WritingReview(
                 id: fixtureUUID(25),
                 promptID: promptID,
                 draftID: draftID,
-                language: .chinese,
+                languageRaw: "chinese",
                 recognizedText: "升级过程很顺畅。",
                 reviewJSONData: externalFixtureData(marker: 0x25),
                 overallJudgement: "结构完整",
@@ -418,9 +418,9 @@ enum PaperClipLegacyStoreFixtureBuilder {
         VocabularyDistractorCache.self,
         DiaryEntry.self,
         KnowledgeItem.self,
-        WritingPrompt.self,
-        WritingDraft.self,
-        WritingReview.self
+        PaperClipSchemaV1.WritingPrompt.self,
+        PaperClipSchemaV1.WritingDraft.self,
+        PaperClipSchemaV1.WritingReview.self
     ]
 
     private static func removeStoreFiles(at url: URL) throws {

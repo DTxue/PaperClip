@@ -1,13 +1,10 @@
 import Foundation
 import SwiftData
 
+/// Historical V1–V4 migration model. Writing is not part of the current schema.
 extension PaperClipSchemaV1 {
 @Model
 final class WritingPrompt {
-    static var deletionPropertiesToFetch: [PartialKeyPath<WritingPrompt>] {
-        [\.id]
-    }
-
     @Attribute(.unique) var id: UUID
     var languageRaw: String
     var studentGrade: String
@@ -21,47 +18,26 @@ final class WritingPrompt {
 
     init(
         id: UUID = UUID(),
-        language: WritingLanguage,
+        languageRaw: String,
         studentGrade: String,
         requirementInput: String,
         generatedTitle: String,
         generatedRequirement: String,
-        constraints: [String] = [],
-        rubric: [String] = [],
+        constraintsText: String = "",
+        rubricText: String = "",
         createdAt: Date = .now,
         updatedAt: Date = .now
     ) {
         self.id = id
-        self.languageRaw = language.rawValue
+        self.languageRaw = languageRaw
         self.studentGrade = studentGrade
         self.requirementInput = requirementInput
         self.generatedTitle = generatedTitle
         self.generatedRequirement = generatedRequirement
-        self.constraintsText = constraints.joined(separator: "\n")
-        self.rubricText = rubric.joined(separator: "\n")
+        self.constraintsText = constraintsText
+        self.rubricText = rubricText
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
-
-    var language: WritingLanguage {
-        get { WritingLanguage(rawValue: languageRaw) ?? .chinese }
-        set { languageRaw = newValue.rawValue }
-    }
-
-    var constraints: [String] {
-        constraintsText
-            .split(separator: "\n")
-            .map(String.init)
-            .filter { !$0.isEmpty }
-    }
-
-    var rubric: [String] {
-        rubricText
-            .split(separator: "\n")
-            .map(String.init)
-            .filter { !$0.isEmpty }
-    }
 }
 }
-
-typealias WritingPrompt = PaperClipSchemaV1.WritingPrompt

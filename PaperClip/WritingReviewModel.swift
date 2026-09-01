@@ -1,33 +1,10 @@
 import Foundation
 import SwiftData
 
-enum WritingReviewStatus: String, Codable {
-    case draft
-    case recognizing
-    case recognized
-    case grading
-    case graded
-    case failed
-
-    var title: String {
-        switch self {
-        case .draft: "草稿"
-        case .recognizing: "识别中"
-        case .recognized: "已识别"
-        case .grading: "批阅中"
-        case .graded: "已批阅"
-        case .failed: "失败"
-        }
-    }
-}
-
+/// Historical V1–V4 migration model. Writing is not part of the current schema.
 extension PaperClipSchemaV1 {
 @Model
 final class WritingReview {
-    static var deletionPropertiesToFetch: [PartialKeyPath<WritingReview>] {
-        [\.id]
-    }
-
     @Attribute(.unique) var id: UUID
     var promptID: UUID
     var draftID: UUID
@@ -43,7 +20,7 @@ final class WritingReview {
         id: UUID = UUID(),
         promptID: UUID,
         draftID: UUID,
-        language: WritingLanguage,
+        languageRaw: String,
         recognizedText: String,
         reviewJSONData: Data,
         overallJudgement: String,
@@ -54,7 +31,7 @@ final class WritingReview {
         self.id = id
         self.promptID = promptID
         self.draftID = draftID
-        self.languageRaw = language.rawValue
+        self.languageRaw = languageRaw
         self.recognizedText = recognizedText
         self.reviewJSONData = reviewJSONData
         self.overallJudgement = overallJudgement
@@ -62,11 +39,5 @@ final class WritingReview {
         self.scoreText = scoreText
         self.createdAt = createdAt
     }
-
-    var language: WritingLanguage {
-        WritingLanguage(rawValue: languageRaw) ?? .chinese
-    }
 }
 }
-
-typealias WritingReview = PaperClipSchemaV1.WritingReview

@@ -28,9 +28,9 @@ extension PaperClipSchemaV1: VersionedSchema {
         VocabularyDistractorCache.self,
         DiaryEntry.self,
         KnowledgeItem.self,
-        WritingPrompt.self,
-        WritingDraft.self,
-        WritingReview.self
+        PaperClipSchemaV1.WritingPrompt.self,
+        PaperClipSchemaV1.WritingDraft.self,
+        PaperClipSchemaV1.WritingReview.self
     ]
 }
 
@@ -58,9 +58,9 @@ extension PaperClipSchemaV2: VersionedSchema {
         VocabularyDistractorCache.self,
         DiaryEntry.self,
         KnowledgeItem.self,
-        WritingPrompt.self,
-        WritingDraft.self,
-        WritingReview.self,
+        PaperClipSchemaV1.WritingPrompt.self,
+        PaperClipSchemaV1.WritingDraft.self,
+        PaperClipSchemaV1.WritingReview.self,
         MistakeLibraryItem.self,
         MistakeAttachment.self,
         MistakeReviewAttempt.self
@@ -91,9 +91,9 @@ extension PaperClipSchemaV3: VersionedSchema {
         VocabularyDistractorCache.self,
         DiaryEntry.self,
         KnowledgeItem.self,
-        WritingPrompt.self,
-        WritingDraft.self,
-        WritingReview.self,
+        PaperClipSchemaV1.WritingPrompt.self,
+        PaperClipSchemaV1.WritingDraft.self,
+        PaperClipSchemaV1.WritingReview.self,
         MistakeLibraryItem.self,
         PaperClipSchemaV2.MistakeAttachment.self,
         PaperClipSchemaV2.MistakeReviewAttempt.self
@@ -116,9 +116,31 @@ extension PaperClipSchemaV4: VersionedSchema {
         VocabularyDistractorCache.self,
         DiaryEntry.self,
         KnowledgeItem.self,
-        WritingPrompt.self,
-        WritingDraft.self,
-        WritingReview.self,
+        PaperClipSchemaV1.WritingPrompt.self,
+        PaperClipSchemaV1.WritingDraft.self,
+        PaperClipSchemaV1.WritingReview.self,
+        MistakeLibraryItem.self,
+        PaperClipSchemaV2.MistakeAttachment.self,
+        PaperClipSchemaV2.MistakeReviewAttempt.self
+    ]
+}
+
+extension PaperClipSchemaV5: VersionedSchema {
+    static let versionIdentifier = Schema.Version(5, 0, 0)
+
+    static let models: [any PersistentModel.Type] = [
+        VocabularyFolder.self,
+        VocabularyDeck.self,
+        VocabularyCard.self,
+        VocabularyMemoryState.self,
+        VocabularyReviewLog.self,
+        VocabularyStudySession.self,
+        VocabularyTestDraft.self,
+        VocabularyHandwritingAttempt.self,
+        VocabularyImportBatch.self,
+        VocabularyDistractorCache.self,
+        DiaryEntry.self,
+        KnowledgeItem.self,
         MistakeLibraryItem.self,
         PaperClipSchemaV2.MistakeAttachment.self,
         PaperClipSchemaV2.MistakeReviewAttempt.self
@@ -130,7 +152,8 @@ enum PaperClipMigrationPlan: SchemaMigrationPlan {
         PaperClipSchemaV1.self,
         PaperClipSchemaV2.self,
         PaperClipSchemaV3.self,
-        PaperClipSchemaV4.self
+        PaperClipSchemaV4.self,
+        PaperClipSchemaV5.self
     ]
 
     static let stages: [MigrationStage] = [
@@ -186,6 +209,23 @@ enum PaperClipMigrationPlan: SchemaMigrationPlan {
                 try context.save()
             },
             didMigrate: nil
+        ),
+        .custom(
+            fromVersion: PaperClipSchemaV4.self,
+            toVersion: PaperClipSchemaV5.self,
+            willMigrate: { context in
+                for model in try context.fetch(FetchDescriptor<PaperClipSchemaV1.WritingReview>()) {
+                    context.delete(model)
+                }
+                for model in try context.fetch(FetchDescriptor<PaperClipSchemaV1.WritingDraft>()) {
+                    context.delete(model)
+                }
+                for model in try context.fetch(FetchDescriptor<PaperClipSchemaV1.WritingPrompt>()) {
+                    context.delete(model)
+                }
+                try context.save()
+            },
+            didMigrate: nil
         )
     ]
 }
@@ -219,7 +259,7 @@ enum PaperClipStore {
         at url: URL?,
         isStoredInMemoryOnly: Bool
     ) throws -> ModelContainer {
-        let schema = Schema(versionedSchema: PaperClipSchemaV4.self)
+        let schema = Schema(versionedSchema: PaperClipSchemaV5.self)
         let configuration: ModelConfiguration
         if let url {
             configuration = ModelConfiguration(

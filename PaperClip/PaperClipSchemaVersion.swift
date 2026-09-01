@@ -16,3 +16,6 @@ enum PaperClipSchemaV3 {}
 /// Removes the retired PDF/exam and vocabulary-article entities while keeping
 /// all active learning data intact.
 enum PaperClipSchemaV4 {}
+
+/// Removes the retired writing entities while keeping every active domain.
+enum PaperClipSchemaV5 {}

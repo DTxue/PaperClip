@@ -12,9 +12,6 @@ struct AIServiceModelsTests {
     static func main() throws {
         try testVocabularyGradingDefaults()
         try testVocabularyGradingOutputTokenBudgetScalesWithQuestionCount()
-        try testWritingReviewDisplayText()
-        try testWritingReviewJSONStorage()
-        try testGoodWordsAndSentencesDecoding()
         try testDiaryRequestConfiguration()
         try testKnowledgeRequestConfiguration()
         try testFixedProviderRequestConfiguration()
@@ -47,122 +44,6 @@ struct AIServiceModelsTests {
         )
     }
 
-    private static func testWritingReviewDisplayText() throws {
-        let topicData = """
-        {
-          "keywords": ["成长", "责任"],
-          "realTask": "写清成长",
-          "studentHandling": "",
-          "riskOfShallowWriting": "",
-          "bestWritingDirection": ""
-        }
-        """.data(using: .utf8)!
-        let topic = try JSONDecoder().decode(
-            AIWritingReviewResult.TopicTaskAnalysis.self,
-            from: topicData
-        )
-        expect(topic.keywordsText == "成长、责任", "topic keywords should use shared Chinese list text")
-
-        let sceneData = """
-        {
-          "scene": "雨中等待",
-          "whyThisSceneMatters": "承载变化",
-          "detailsToAdd": ["动作", "心理"]
-        }
-        """.data(using: .utf8)!
-        let scene = try JSONDecoder().decode(
-            AIWritingReviewResult.WritingBlueprint.CoreSceneToBuild.self,
-            from: sceneData
-        )
-        expect(scene.detailsToAddText == "动作、心理", "core scene details should use shared Chinese list text")
-
-        let languageData = """
-        {
-          "originalExpression": "很好",
-          "problem": "笼统",
-          "betterWords": ["温暖", "坚定"],
-          "betterSentence": "灯光很温暖",
-          "whyBetter": "更具体"
-        }
-        """.data(using: .utf8)!
-        let language = try JSONDecoder().decode(
-            AIWritingReviewResult.LanguageUpgrade.self,
-            from: languageData
-        )
-        expect(language.betterWordsText == "温暖、坚定", "language upgrade words should use shared Chinese list text")
-    }
-
-    private static func testWritingReviewJSONStorage() throws {
-        let result = try JSONDecoder().decode(
-            AIWritingReviewResult.self,
-            from: writingReviewFixtureData()
-        )
-
-        let encoded = WritingReviewJSONStorage.encode(result)
-        let decoded = WritingReviewJSONStorage.decode(encoded)
-        let methodDecoded = WritingReviewJSONStorage.decode(result.encodedData())
-
-        expect(decoded?.overallJudgement == "结构清楚", "storage should decode encoded writing review")
-        expect(decoded?.scoreText == "55/60", "storage should preserve score formatting fields")
-        expect(methodDecoded?.teacherComment == "继续保持", "result encodedData should round-trip through shared storage")
-        expect(WritingReviewJSONStorage.decode(Data([0x7B])) == nil, "invalid storage data should fail softly")
-    }
-
-    private static func writingReviewFixtureData() -> Data {
-        """
-        {
-          "overallJudgement": "结构清楚",
-          "advancedTargetStandard": "扣题具体",
-          "actualLevel": { "level": "B", "reason": "细节尚可" },
-          "score": { "score": 55, "fullScore": 60 },
-          "coreGap": "缺少关键场景",
-          "possibleOCRIssues": [],
-          "strengths": ["开头清楚"],
-          "mainProblems": [],
-          "ideaUpgrade": {},
-          "contentAdvice": [],
-          "structureAdvice": [],
-          "languageUpgrade": [],
-          "goodWordsAndSentences": {},
-          "priorityRevisionPlan": ["补充动作"],
-          "teacherComment": "继续保持"
-        }
-        """.data(using: .utf8)!
-    }
-
-    private static func testGoodWordsAndSentencesDecoding() throws {
-        let data = """
-        {
-          "words": [
-            { "word": "vivid", "meaning": "生动", "whereToUse": "描写", "example": "a vivid memory" }
-          ],
-          "phrases": [
-            { "phrase": "light up", "whereToUse": "情绪变化", "example": "Her face lit up." }
-          ],
-          "sentences": [
-            { "sentence": "I will never forget that day.", "whereToUse": "结尾", "whyUseful": "点题" }
-          ],
-          "sentencePatterns": [
-            { "pattern": "Not only..., but also...", "usage": "递进", "example": "Not only did I learn, but I also grew." }
-          ],
-          "openingSentences": "开头一句",
-          "transitionSentences": ["过渡一句"],
-          "endingSentences": [],
-          "stackingAdvice": "少量使用"
-        }
-        """.data(using: .utf8)!
-
-        let value = try JSONDecoder().decode(
-            AIWritingReviewResult.GoodWordsAndSentences.self,
-            from: data
-        )
-        expect(value.words.first?.meaning == "生动", "good word should decode after model split")
-        expect(value.phrases.first?.example == "Her face lit up.", "phrase should decode after model split")
-        expect(value.sentences.first?.whyUseful == "点题", "sentence should decode after model split")
-        expect(value.sentencePatterns.first?.usage == "递进", "sentence pattern should decode after model split")
-        expect(value.openingSentences == ["开头一句"], "single opening sentence should normalize to array")
-    }
-
     private static func testDiaryRequestConfiguration() throws {
         let doubao = AIRequestConfiguration.diary(model: .doubao)
         expect(doubao.thinking == "disabled", "doubao diary requests should not enable thinking")
@@ -188,18 +69,18 @@ struct AIServiceModelsTests {
     }
 
     private static func testFixedProviderRequestConfiguration() throws {
-        let writing = AIRequestConfiguration.deepSeek(
-            modelName: "DeepSeek 写作命题",
+        let deepSeek = AIRequestConfiguration.deepSeek(
+            modelName: "DeepSeek 通用任务",
             maxOutputTokens: 4_096
         )
-        expect(writing.model == .deepSeek, "deepSeek helper should pin deepSeek model")
-        expect(writing.usesDeepThinking, "deepSeek helper should enable thinking")
+        expect(deepSeek.model == .deepSeek, "deepSeek helper should pin deepSeek model")
+        expect(deepSeek.usesDeepThinking, "deepSeek helper should enable thinking")
 
-        let recognition = AIRequestConfiguration.doubao(
-            modelName: "豆包作文识别",
+        let doubao = AIRequestConfiguration.doubao(
+            modelName: "豆包图片识别",
             maxOutputTokens: 8_192
         )
-        expect(recognition.model == .doubao, "doubao helper should pin doubao model")
-        expect(!recognition.usesDeepThinking, "doubao helper should disable thinking")
+        expect(doubao.model == .doubao, "doubao helper should pin doubao model")
+        expect(!doubao.usesDeepThinking, "doubao helper should disable thinking")
     }
 }

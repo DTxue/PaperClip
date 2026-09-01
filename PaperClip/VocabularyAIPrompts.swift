@@ -91,7 +91,7 @@ enum VocabularyAIPrompts {
         comment 字段只写结论，不超过15字，不要写推理过程。
         必须返回恰好 \(count) 个 items，index 必须从 1 到 \(count) 连续完整。
         仅输出合法 JSON，不含 Markdown 代码块：
-        {"items":[{"index":1,"isCorrect":true,"recognizedText":"answer","comment":"正确"},{"index":2,"isCorrect":false,"recognizedText":"XXX","comment":"写作 XXX"}]}
+        {"items":[{"index":1,"isCorrect":true,"recognizedText":"answer","comment":"正确"},{"index":2,"isCorrect":false,"recognizedText":"XXX","comment":"应为 XXX"}]}
         """
     }
 

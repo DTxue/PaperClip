@@ -22,20 +22,6 @@ run_swift_test AIServiceModelsTests \
     PaperClip/AIDecodingSupport.swift \
     PaperClip/AIServiceModels.swift \
     PaperClip/AIVocabularyModels.swift \
-    PaperClip/AIWritingPromptModels.swift \
-    PaperClip/AIWritingRecognitionModels.swift \
-    PaperClip/AIWritingModels.swift \
-    PaperClip/WritingReviewJSONStorage.swift \
-    PaperClip/AIWritingReviewDisplayText.swift \
-    PaperClip/AIWritingReviewScoreModels.swift \
-    PaperClip/AIWritingReviewContentAdviceModels.swift \
-    PaperClip/AIWritingReviewLanguageAdviceModels.swift \
-    PaperClip/AIWritingReviewGoodWordsModels.swift \
-    PaperClip/AIWritingReviewLanguageModels.swift \
-    PaperClip/AIWritingReviewBlueprintModels.swift \
-    PaperClip/AIWritingReviewAdvancedModels.swift \
-    PaperClip/AIWritingReviewCoreSceneModels.swift \
-    PaperClip/AIWritingReviewReconstructionModels.swift \
     Tests/AIServiceModelsTests.swift
 
 run_swift_test AIModelRoutingTests \
@@ -153,8 +139,6 @@ run_swift_test PaperClipSchemaMigrationTests \
     PaperClip/VocabularyDistractorCache.swift \
     PaperClip/DiaryEntryContentPresence.swift \
     PaperClip/DiaryModels.swift \
-    PaperClip/WritingLanguageModels.swift \
-    PaperClip/WritingPaperModels.swift \
     PaperClip/WritingPromptModel.swift \
     PaperClip/WritingDraftModel.swift \
     PaperClip/WritingReviewModel.swift \
@@ -488,42 +472,6 @@ run_swift_test VocabularyTextImporterTests \
     PaperClip/VocabularyTextRowBuilder.swift \
     PaperClip/StringRegexSplitting.swift \
     Tests/VocabularyTextImporterTests.swift
-
-run_swift_test WritingHomeSnapshotTests \
-    PaperClip/WritingLanguageModels.swift \
-    PaperClip/WritingPromptConfiguration.swift \
-    PaperClip/WritingPromptDefaults.swift \
-    PaperClip/WritingPaperModels.swift \
-    PaperClip/WritingPromptGenerationDraft.swift \
-    PaperClip/WritingPromptModel.swift \
-    PaperClip/WritingDraftModel.swift \
-    PaperClip/WritingReviewModel.swift \
-    PaperClip/WritingHomeModels.swift \
-    PaperClip/WritingHomeSnapshot.swift \
-    PaperClip/WritingPromptDeletionSelection.swift \
-    Tests/WritingHomeSnapshotTests.swift
-
-run_swift_test WritingDraftPersistenceSupportTests \
-    PaperClip/WritingLanguageModels.swift \
-    PaperClip/WritingPaperModels.swift \
-    PaperClip/WritingReviewModel.swift \
-    PaperClip/WritingDraftModel.swift \
-    PaperClip/WritingFullscreenPaperWidthPlan.swift \
-    PaperClip/WritingDraftPersistenceModels.swift \
-    Tests/WritingDraftPersistenceSupportTests.swift
-
-run_swift_test WritingPersistenceTests \
-    PaperClip/ModelContextHelpers.swift \
-    PaperClip/WritingLanguageModels.swift \
-    PaperClip/WritingPromptModel.swift \
-    PaperClip/WritingPaperModels.swift \
-    PaperClip/WritingDraftModel.swift \
-    PaperClip/WritingReviewModel.swift \
-    PaperClip/WritingPromptQueries.swift \
-    PaperClip/WritingDraftQueries.swift \
-    PaperClip/WritingReviewQueries.swift \
-    PaperClip/WritingCascadeDeletion.swift \
-    Tests/WritingPersistenceTests.swift
 
 run_swift_test StatisticsSnapshotTests \
     PaperClip/ModelContextHelpers.swift \

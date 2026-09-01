@@ -10,7 +10,7 @@ enum PaperClipSchemaMigrationTests {
 
         let container = try PaperClipStore.makeContainer(at: storeURL)
         try verifyEveryV1Model(in: container.mainContext)
-        verifyRetiredModelsAreAbsentFromV4()
+        verifyRetiredModelsAreAbsentFromV5()
         let newMistakes = try container.mainContext.fetch(FetchDescriptor<MistakeLibraryItem>())
         let newAttachments = try container.mainContext.fetch(FetchDescriptor<MistakeAttachment>())
         let newAttempts = try container.mainContext.fetch(FetchDescriptor<MistakeReviewAttempt>())
@@ -34,16 +34,16 @@ enum PaperClipSchemaMigrationTests {
             includingPropertiesForKeys: nil
         )
         expect(
-            remainingExternalFiles.count == 4,
-            "migration removes retired mistake and PDF/exam drawing sidecars"
+            remainingExternalFiles.count == 2,
+            "migration removes retired mistake, PDF/exam, and writing sidecars"
         )
 
-        try verifyV2ToV4Migration()
+        try verifyV2ToV5Migration()
 
-        print("PaperClipSchemaMigrationTests: active V1 data preserved; retired entities removed; V4 ready")
+        print("PaperClipSchemaMigrationTests: active V1 data preserved; retired entities removed; V5 ready")
     }
 
-    private static func verifyV2ToV4Migration() throws {
+    private static func verifyV2ToV5Migration() throws {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("PaperClipV2ToV3Tests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -68,11 +68,11 @@ enum PaperClipSchemaMigrationTests {
 
         let migratedContainer = try PaperClipStore.makeContainer(at: storeURL)
         let migrated = try only(MistakeLibraryItem.self, in: migratedContainer.mainContext)
-        expect(migrated.questionText == "V2 物理错题", "V4 keeps V2 mistake text")
-        expect(migrated.correctAnswer == "旧答案", "V4 keeps hidden legacy answer data")
-        expect(migrated.explanation == "旧解析", "V4 keeps hidden legacy explanation data")
-        expect(migrated.grade == Grade.grade7.rawValue, "V4 backfills the default grade")
-        expect(migrated.semester == Semester.first.rawValue, "V4 backfills the default semester")
+        expect(migrated.questionText == "V2 物理错题", "V5 keeps V2 mistake text")
+        expect(migrated.correctAnswer == "旧答案", "V5 keeps hidden legacy answer data")
+        expect(migrated.explanation == "旧解析", "V5 keeps hidden legacy explanation data")
+        expect(migrated.grade == Grade.grade7.rawValue, "V5 backfills the default grade")
+        expect(migrated.semester == Semester.first.rawValue, "V5 backfills the default semester")
     }
 
     private static func copiedLegacyStoreURL() throws -> URL {
@@ -154,24 +154,10 @@ enum PaperClipSchemaMigrationTests {
         expect(knowledge.diaryEntry?.id == diary.id, "keeps inverse diary relationship")
         expect(knowledge.aiEssence == "迁移要保持数据完整", "keeps knowledge analysis")
 
-        let prompt = try only(WritingPrompt.self, in: context)
-        expect(prompt.id == fixtureUUID(9) && prompt.generatedTitle == "一次平稳升级", "keeps writing prompt")
-        expect(prompt.constraints == ["不少于 600 字"], "keeps writing constraints")
-
-        let writingDraft = try only(WritingDraft.self, in: context)
-        expect(writingDraft.id == fixtureUUID(10) && writingDraft.promptID == prompt.id, "keeps writing draft binding")
-        expect(writingDraft.recognizedText == "升级过程很顺畅。", "keeps recognized writing text")
-        expect(writingDraft.drawingData == externalFixtureData(marker: 0x10), "keeps external writing drawing")
-        expect(writingDraft.reviewStatus == .graded, "keeps writing review state")
-
-        let writingReview = try only(WritingReview.self, in: context)
-        expect(writingReview.promptID == prompt.id && writingReview.draftID == writingDraft.id, "keeps writing review binding")
-        expect(writingReview.reviewJSONData == externalFixtureData(marker: 0x25), "keeps external writing review data")
-        expect(writingReview.scoreText == "92", "keeps writing score")
     }
 
-    private static func verifyRetiredModelsAreAbsentFromV4() {
-        let currentModelIDs = Set(PaperClipSchemaV4.models.map(ObjectIdentifier.init))
+    private static func verifyRetiredModelsAreAbsentFromV5() {
+        let currentModelIDs = Set(PaperClipSchemaV5.models.map(ObjectIdentifier.init))
         let retiredModelIDs = [
             ObjectIdentifier(PaperClipSchemaV1.PDFDocumentItem.self),
             ObjectIdentifier(PaperClipSchemaV1.HandwritingLayer.self),
@@ -180,11 +166,14 @@ enum PaperClipSchemaMigrationTests {
             ObjectIdentifier(PaperClipSchemaV1.ExamHandwritingLayer.self),
             ObjectIdentifier(PaperClipSchemaV1.ExamGradeMark.self),
             ObjectIdentifier(PaperClipSchemaV1.VocabularyGeneratedArticle.self),
-            ObjectIdentifier(PaperClipSchemaV1.VocabularyArticleRecitationHistory.self)
+            ObjectIdentifier(PaperClipSchemaV1.VocabularyArticleRecitationHistory.self),
+            ObjectIdentifier(PaperClipSchemaV1.WritingPrompt.self),
+            ObjectIdentifier(PaperClipSchemaV1.WritingDraft.self),
+            ObjectIdentifier(PaperClipSchemaV1.WritingReview.self)
         ]
         expect(
             retiredModelIDs.allSatisfy { !currentModelIDs.contains($0) },
-            "V4 excludes every retired PDF/exam and vocabulary-article entity"
+            "V5 excludes every retired PDF/exam, vocabulary-article, and writing entity"
         )
     }
 
