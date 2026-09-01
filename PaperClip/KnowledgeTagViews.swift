@@ -61,27 +61,3 @@ struct KnowledgeTagLayout: Layout {
         }
     }
 }
-
-struct KnowledgeTag: View {
-    static let palette: [Color] = [
-        .blue, .purple, .orange, .green, .pink, .indigo, .teal
-    ]
-
-    let title: String
-    let color: Color
-
-    var body: some View {
-        Text(title)
-            .font(.subheadline.weight(.medium))
-            .foregroundStyle(color)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 7)
-            .background(color.opacity(0.13), in: Capsule())
-            .overlay {
-                Capsule()
-                    .stroke(color.opacity(0.28), lineWidth: 1)
-            }
-            .fixedSize(horizontal: true, vertical: false)
-            .accessibilityLabel("知识点：\(title)")
-    }
-}

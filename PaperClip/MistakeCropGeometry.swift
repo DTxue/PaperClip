@@ -28,13 +28,6 @@ enum MistakeCropGeometry {
         )
     }
 
-    static func defaultSelection(in imageRect: CGRect) -> CGRect {
-        imageRect.insetBy(
-            dx: imageRect.width * 0.08,
-            dy: imageRect.height * 0.08
-        )
-    }
-
     static func normalizedSelection(_ selection: CGRect, in imageRect: CGRect) -> CGRect? {
         guard imageRect.width > 0, imageRect.height > 0 else { return nil }
         let clipped = selection.standardized.intersection(imageRect)

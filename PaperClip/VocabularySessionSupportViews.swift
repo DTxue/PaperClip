@@ -68,19 +68,3 @@ struct VocabularySessionCompleteView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
-
-enum VocabularyStudyKind: Int, CaseIterable {
-    case choice
-    case spelling
-    case listening
-    case handwriting
-
-    var title: String {
-        switch self {
-        case .choice: "拼句"
-        case .spelling: "拼写"
-        case .listening: "听写"
-        case .handwriting: "手写"
-        }
-    }
-}

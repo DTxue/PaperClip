@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 
 extension PaperClipSchemaV1 {
+/// 旧版数据兼容模型。试卷批阅运行时功能已移除。
 @Model
 final class ExamGradeMark {
     @Attribute(.unique) var id: UUID
@@ -40,23 +41,4 @@ final class ExamGradeMark {
         self.updatedAt = updatedAt
     }
 }
-}
-
-typealias ExamGradeMark = PaperClipSchemaV1.ExamGradeMark
-
-extension ExamGradeMark {
-    static var deletionPropertiesToFetch: [PartialKeyPath<ExamGradeMark>] {
-        [\.id]
-    }
-
-    static var workspacePropertiesToFetch: [PartialKeyPath<ExamGradeMark>] {
-        [
-            \.id,
-            \.attemptId,
-            \.pageIndex,
-            \.isCorrect,
-            \.normalizedAnchor,
-            \.confidence
-        ]
-    }
 }

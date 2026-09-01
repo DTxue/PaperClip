@@ -4,10 +4,6 @@ import SwiftData
 extension PaperClipSchemaV1 {
 @Model
 final class HandwritingLayer {
-    static var deletionPropertiesToFetch: [PartialKeyPath<HandwritingLayer>] {
-        [\.id]
-    }
-
     @Attribute(.unique) var id: UUID
     var documentId: UUID
     var pageIndex: Int
@@ -37,5 +33,3 @@ final class HandwritingLayer {
     }
 }
 }
-
-typealias HandwritingLayer = PaperClipSchemaV1.HandwritingLayer

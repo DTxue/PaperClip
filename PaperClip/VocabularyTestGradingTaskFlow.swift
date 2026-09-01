@@ -10,7 +10,6 @@ extension VocabularyTestView {
         batches[batchIndex].result = nil
         batches[batchIndex].renderedImages = []
         batches[batchIndex].gradingAttempts = 0
-        saveDraft()
 
         let task = VocabularyBatchGradingRunner.makeTask(
             request: VocabularyBatchGradingRequest(
@@ -40,14 +39,12 @@ extension VocabularyTestView {
                 markAttempt: { batchIndex, attempt, status in
                     batches[batchIndex].status = status
                     batches[batchIndex].gradingAttempts = attempt
-                    saveDraft()
                 },
                 finishSuccess: { batchIndex, images, result, context in
                     batches[batchIndex].renderedImages = images
                     batches[batchIndex].result = result
                     batches[batchIndex].status = .graded
                     batches[batchIndex].errorMessage = nil
-                    saveDraft()
                     finishSessionIfReady()
                     clearGradingTask(
                         batchID: batches[batchIndex].id,
@@ -58,7 +55,6 @@ extension VocabularyTestView {
                     batches[batchIndex].renderedImages = images
                     batches[batchIndex].status = .failed
                     batches[batchIndex].errorMessage = errorMessage
-                    saveDraft()
                     clearGradingTask(
                         batchID: batches[batchIndex].id,
                         taskID: context.taskID

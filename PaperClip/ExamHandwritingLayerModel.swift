@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 
 extension PaperClipSchemaV1 {
+/// 旧版数据兼容模型。试卷手写运行时功能已移除。
 @Model
 final class ExamHandwritingLayer {
     @Attribute(.unique) var id: UUID
@@ -30,16 +31,4 @@ final class ExamHandwritingLayer {
         self.updatedAt = updatedAt
     }
 }
-}
-
-typealias ExamHandwritingLayer = PaperClipSchemaV1.ExamHandwritingLayer
-
-extension ExamHandwritingLayer {
-    static var deletionPropertiesToFetch: [PartialKeyPath<ExamHandwritingLayer>] {
-        [\.id]
-    }
-
-    static var workspacePropertiesToFetch: [PartialKeyPath<ExamHandwritingLayer>] {
-        [\.id, \.pageIndex, \.drawingData, \.updatedAt]
-    }
 }

@@ -9,8 +9,6 @@ struct VocabularyPersistenceTests {
             VocabularyFolder.self,
             VocabularyDeck.self,
             VocabularyCard.self,
-            VocabularyGeneratedArticle.self,
-            VocabularyArticleRecitationHistory.self,
             VocabularyMemoryState.self,
             VocabularyReviewLog.self,
             VocabularyStudySession.self,
@@ -115,10 +113,7 @@ struct VocabularyPersistenceTests {
         expect(VocabularyCard.deletionPropertiesToFetch.count == 1)
         expect(VocabularyCard.homeCountPropertiesToFetch.count == 2)
         expect(VocabularyCard.deckSettingsPropertiesToFetch.count == 7)
-        expect(VocabularyCard.articleGenerationPropertiesToFetch.count == 11)
         expect(VocabularyCard.importMergePropertiesToFetch.count == 8)
-        expect(VocabularyGeneratedArticle.deletionPropertiesToFetch.count == 1)
-        expect(VocabularyArticleRecitationHistory.deletionPropertiesToFetch.count == 1)
         expect(VocabularyMemoryState.deletionPropertiesToFetch.count == 1)
         expect(VocabularyMemoryState.futureDuePropertiesToFetch.count == 3)
         expect(VocabularyReviewLog.deletionPropertiesToFetch.count == 1)
@@ -281,109 +276,6 @@ struct VocabularyPersistenceTests {
         context.insert(distractorCache)
         try context.save()
 
-        let articleDraft = VocabularyArticleDraft(
-            title: "Memory Day",
-            articleText: "Memory matters. Focus helps memory.",
-            coveredTerms: ["memory", "focus"],
-            sourceCardSnapshotHash: "fixture",
-            modelName: "deepseek-v4-pro",
-            promptVersion: 1
-        )
-        let storedArticle = try context.upsertVocabularyGeneratedArticle(
-            deckID: deck.id,
-            draft: articleDraft
-        )
-        try context.save()
-        let fetchedArticle = try context.fetchVocabularyGeneratedArticle(deckID: deck.id)
-        expect(fetchedArticle?.id == storedArticle.id)
-        expect(fetchedArticle?.title == "Memory Day")
-        let recitationHistory = context.recordVocabularyArticleRecitationHistory(
-            article: storedArticle,
-            duration: 42,
-            sentenceCount: 2,
-            wordCount: 5,
-            stuckSentenceIndexes: [1, 1, 0]
-        )
-        try context.save()
-        let fetchedHistories = try context.fetchVocabularyArticleRecitationHistories(
-            deckID: deck.id,
-            articleSnapshotHash: "fixture"
-        )
-        expect(fetchedHistories.map(\.id) == [recitationHistory.id])
-        expect(fetchedHistories.first?.stuckSentenceIndexes == [0, 1])
-        expect(fetchedHistories.first?.duration == 42)
-
-        let storyDrafts = [
-            VocabularyArticleDraft(
-                title: "The First Clue",
-                articleText: "A short first story.",
-                coveredTerms: ["memory"],
-                sourceCardSnapshotHash: "series-2",
-                modelName: "deepseek-v4-pro",
-                promptVersion: 2
-            ),
-            VocabularyArticleDraft(
-                title: "The Second Clue",
-                articleText: "A short second story.",
-                coveredTerms: ["focus"],
-                sourceCardSnapshotHash: "series-2",
-                modelName: "deepseek-v4-pro",
-                promptVersion: 2
-            )
-        ]
-        let storedStories = try context.insertVocabularyGeneratedArticleSeries(
-            deckID: deck.id,
-            drafts: storyDrafts
-        )
-        try context.save()
-        let currentSeries = try context.fetchVocabularyGeneratedArticleSeries(deckID: deck.id)
-        expect(storedStories.count == 2)
-        expect(currentSeries.map(\.id) == storedStories.map(\.id))
-        expect(currentSeries.map(\.title) == ["The First Clue", "The Second Clue"])
-        expect(currentSeries.allSatisfy { $0.sourceCardSnapshotHash == "series-2" })
-        let archivedArticles = try context.fetchVocabularyGeneratedArticleArchive(deckID: deck.id)
-        expect(archivedArticles.map(\.id) == [storedArticle.id])
-        let failedDraft = VocabularyArticleDraft(
-            title: "Must Not Persist",
-            articleText: "This pending story must be removed after a failed save.",
-            coveredTerms: ["memory"],
-            sourceCardSnapshotHash: "failed-series",
-            modelName: "deepseek-v4-pro",
-            promptVersion: 2
-        )
-        do {
-            _ = try VocabularyArticleSeriesTransaction.commit(
-                modelContext: context,
-                deckID: deck.id,
-                drafts: [failedDraft],
-                saving: { _ in throw ExpectedSaveFailure() }
-            )
-            expect(false)
-        } catch is ExpectedSaveFailure {
-            // Expected: the transaction must remove its pending inserts before rethrowing.
-        }
-        let articlesAfterFailedSave = try context.fetch(FetchDescriptor<VocabularyGeneratedArticle>())
-        expect(!articlesAfterFailedSave.contains { $0.sourceCardSnapshotHash == "failed-series" })
-        let firstStoryHistory = context.recordVocabularyArticleRecitationHistory(
-            article: storedStories[0],
-            duration: 20,
-            sentenceCount: 1,
-            wordCount: 4,
-            stuckSentenceIndexes: []
-        )
-        _ = context.recordVocabularyArticleRecitationHistory(
-            article: storedStories[1],
-            duration: 30,
-            sentenceCount: 1,
-            wordCount: 4,
-            stuckSentenceIndexes: [0]
-        )
-        try context.save()
-        let firstStoryHistories = try context.fetchVocabularyArticleRecitationHistories(
-            articleID: storedStories[0].id
-        )
-        expect(firstStoryHistories.map(\.id) == [firstStoryHistory.id])
-
         let scoreSessions = try context.fetchVocabularyScoreSessions(
             deckID: deck.id,
             limit: 100,
@@ -480,8 +372,6 @@ struct VocabularyPersistenceTests {
         let remainingAttempts = try context.fetch(FetchDescriptor<VocabularyHandwritingAttempt>())
         let remainingBatches = try context.fetch(FetchDescriptor<VocabularyImportBatch>())
         let remainingCaches = try context.fetch(FetchDescriptor<VocabularyDistractorCache>())
-        let remainingArticles = try context.fetch(FetchDescriptor<VocabularyGeneratedArticle>())
-        let remainingArticleHistories = try context.fetch(FetchDescriptor<VocabularyArticleRecitationHistory>())
 
         expect(remainingDecks.isEmpty)
         expect(remainingCards.isEmpty)
@@ -492,10 +382,8 @@ struct VocabularyPersistenceTests {
         expect(remainingAttempts.isEmpty)
         expect(remainingBatches.isEmpty)
         expect(remainingCaches.isEmpty)
-        expect(remainingArticles.isEmpty)
-        expect(remainingArticleHistories.isEmpty)
 
-        print("VocabularyPersistenceTests: 83 passed")
+        print("VocabularyPersistenceTests: passed")
     }
 
     private static func expect(
@@ -507,6 +395,4 @@ struct VocabularyPersistenceTests {
             fatalError("Expectation failed", file: file, line: line)
         }
     }
-
-    private struct ExpectedSaveFailure: Error {}
 }

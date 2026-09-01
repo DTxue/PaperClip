@@ -32,18 +32,5 @@ enum PaperClipStartup {
         }
 
         VocabularyMaintenance.backfillMemoryStateDeckIDs(in: container)
-        PDFExamRecordMaintenance.repairLinks(in: container)
-    }
-}
-
-@MainActor
-enum PDFExamRecordMaintenance {
-    static func repairLinks(in container: ModelContainer) {
-        do {
-            try PDFExamArchiveStore.restoreMissingArchives(in: container.mainContext)
-            try container.mainContext.repairAllExamAttemptLinks()
-        } catch {
-            assertionFailure("考试记录关联修复失败：\(error.localizedDescription)")
-        }
     }
 }

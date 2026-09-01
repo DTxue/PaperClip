@@ -23,34 +23,6 @@ extension StatisticsView {
         }
     }
 
-    // MARK: - PDF Exam Summary Card
-    func pdfExamSummaryCard(_ summary: StatisticsPDFExamSummary) -> some View {
-        StatCard(title: "今日 PDF 考试统计", icon: "doc.richtext") {
-            if summary.hasAttempts {
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(summary.rows) { row in
-                        Button {
-                            selectedPDFExamRow = row
-                        } label: {
-                            pdfExamStatRow(row)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityHint("打开考试记录")
-                        if row.id != summary.rows.last?.id {
-                            Divider()
-                        }
-                    }
-                }
-            } else {
-                StatisticsCardEmptyState(
-                    title: "暂无 PDF 考试数据",
-                    systemImage: "doc.richtext",
-                    description: "这里会显示已有 PDF 考试记录的做题时间和批阅结果。"
-                )
-            }
-        }
-    }
-
     private func vocabularyDeckStatRow(_ row: StatisticsVocabularyDeckRow) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(row.deckTitle)
@@ -73,44 +45,6 @@ extension StatisticsView {
                     correctCount: row.testCorrectCount,
                     incorrectCount: row.testIncorrectCount,
                     isEmpty: !row.hasTest
-                )
-            }
-        }
-    }
-
-    private func pdfExamStatRow(_ row: StatisticsPDFExamRow) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(row.title)
-                    .font(.subheadline.weight(.semibold))
-                    .lineLimit(2)
-                Spacer(minLength: 8)
-                Text(row.completedAt, format: .dateTime.hour().minute())
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.tertiary)
-            }
-
-            HStack(spacing: 10) {
-                compactMetric(
-                    value: VocabularyStudySessionFormat.clockDuration(row.duration),
-                    label: "用时",
-                    color: .secondary
-                )
-                Spacer(minLength: 4)
-                compactMetric(
-                    value: VocabularyStudySessionFormat.percent(row.accuracy),
-                    label: "正确率",
-                    color: .accentColor
-                )
-                compactMetric(value: "\(row.correctCount)", label: "对", color: .green)
-                compactMetric(value: "\(row.incorrectCount)", label: "错", color: .red)
-                compactMetric(
-                    value: row.averageQuestionDuration.map(VocabularyStudySessionFormat.duration) ?? "暂无",
-                    label: "平均/题",
-                    color: .orange
                 )
             }
         }

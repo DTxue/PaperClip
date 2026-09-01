@@ -23,12 +23,12 @@ enum VocabularyContextPracticeFlow {
     @MainActor
     static func loadCached(
         deck: VocabularyDeck,
-        gradePreset: VocabularyArticleGradePreset,
+        gradePreset: VocabularyContextGradePreset,
         maximumCardCount: Int,
         modelContext: ModelContext,
         cacheStore: VocabularyContextPracticeCacheStore = .init()
     ) throws -> VocabularyContextPracticeOutput? {
-        let cards = try modelContext.fetchVocabularyArticleCards(deckID: deck.id)
+        let cards = try modelContext.fetchVocabularyCards(deckID: deck.id)
         guard !cards.isEmpty else { return nil }
         let identity = cacheIdentity(
             deckID: deck.id,
@@ -43,13 +43,13 @@ enum VocabularyContextPracticeFlow {
     @MainActor
     static func generate(
         deck: VocabularyDeck,
-        gradePreset: VocabularyArticleGradePreset,
+        gradePreset: VocabularyContextGradePreset,
         maximumCardCount: Int,
         modelContext: ModelContext,
         cacheStore: VocabularyContextPracticeCacheStore = .init()
     ) async throws -> VocabularyContextPracticeOutput {
         try Task.checkCancellation()
-        let cards = try modelContext.fetchVocabularyArticleCards(deckID: deck.id)
+        let cards = try modelContext.fetchVocabularyCards(deckID: deck.id)
         let allInputs = cards.map(VocabularyContextCardInput.init)
         let sourceFingerprint = VocabularyContextPracticeSourceFingerprint.make(
             cards: allInputs
@@ -80,7 +80,7 @@ enum VocabularyContextPracticeFlow {
         )
         try Task.checkCancellation()
 
-        let currentCards = try modelContext.fetchVocabularyArticleCards(deckID: deck.id)
+        let currentCards = try modelContext.fetchVocabularyCards(deckID: deck.id)
         let currentInputs = currentCards.map(VocabularyContextCardInput.init)
         guard VocabularyContextPracticeSourceFingerprint.make(cards: currentInputs)
                 == sourceFingerprint
@@ -103,7 +103,7 @@ enum VocabularyContextPracticeFlow {
     private static func cacheIdentity(
         deckID: UUID,
         cards: [VocabularyContextCardInput],
-        gradePreset: VocabularyArticleGradePreset,
+        gradePreset: VocabularyContextGradePreset,
         maximumCardCount: Int
     ) -> VocabularyContextPracticeCacheIdentity {
         VocabularyContextPracticeCacheIdentity(

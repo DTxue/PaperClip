@@ -10,20 +10,10 @@ struct StatisticsSnapshot {
         [\.id, \.title]
     }
 
-    static var pdfExamAttemptPropertiesToFetch: [PartialKeyPath<ExamAttempt>] {
-        [\.id, \.sourceDocumentId, \.sourceDocumentTitle, \.status, \.createdAt, \.submittedAt, \.updatedAt]
-    }
-
-    static var pdfExamGradeMarkPropertiesToFetch: [PartialKeyPath<ExamGradeMark>] {
-        [\.attemptId, \.isCorrect]
-    }
-
     let vocabularySummary: StatisticsVocabularySummary
-    let pdfExamSummary: StatisticsPDFExamSummary
 
     static let empty = StatisticsSnapshot(
-        vocabularySummary: .empty,
-        pdfExamSummary: .empty
+        vocabularySummary: .empty
     )
 
     static func load(
@@ -31,34 +21,23 @@ struct StatisticsSnapshot {
         calendar: Calendar = .current,
         now: Date = .now
     ) throws -> StatisticsSnapshot {
-        return StatisticsSnapshot(
+        StatisticsSnapshot(
             vocabularySummary: try StatisticsVocabularySummary.make(
                 modelContext: modelContext,
                 calendar: calendar,
                 now: now,
                 sessionPropertiesToFetch: vocabularySessionPropertiesToFetch,
                 deckPropertiesToFetch: vocabularyDeckPropertiesToFetch
-            ),
-            pdfExamSummary: try StatisticsPDFExamSummary.make(
-                modelContext: modelContext,
-                calendar: calendar,
-                now: now,
-                attemptPropertiesToFetch: pdfExamAttemptPropertiesToFetch,
-                gradeMarkPropertiesToFetch: pdfExamGradeMarkPropertiesToFetch
             )
         )
     }
 
-    private init(
-        vocabularySummary: StatisticsVocabularySummary,
-        pdfExamSummary: StatisticsPDFExamSummary
-    ) {
+    private init(vocabularySummary: StatisticsVocabularySummary) {
         self.vocabularySummary = vocabularySummary
-        self.pdfExamSummary = pdfExamSummary
     }
 
     var hasAnyData: Bool {
-        vocabularySummary.hasSessions || pdfExamSummary.hasAttempts
+        vocabularySummary.hasSessions
     }
 }
 
@@ -182,99 +161,5 @@ private struct StatisticsVocabularyDeckAccumulator {
                 sessionMetrics
             ])
         }
-    }
-}
-
-struct StatisticsPDFExamSummary: Equatable {
-    let rows: [StatisticsPDFExamRow]
-
-    static let empty = StatisticsPDFExamSummary(rows: [])
-
-    static func make(
-        modelContext: ModelContext,
-        calendar: Calendar,
-        now: Date,
-        attemptPropertiesToFetch: [PartialKeyPath<ExamAttempt>],
-        gradeMarkPropertiesToFetch: [PartialKeyPath<ExamGradeMark>]
-    ) throws -> StatisticsPDFExamSummary {
-        let startOfDay = calendar.startOfDay(for: now)
-        guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
-            return .empty
-        }
-
-        var attemptDescriptor = FetchDescriptor<ExamAttempt>(
-            predicate: #Predicate<ExamAttempt> { attempt in
-                attempt.status == "graded"
-                    && attempt.updatedAt >= startOfDay
-                    && attempt.updatedAt < endOfDay
-            },
-            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
-        )
-        attemptDescriptor.propertiesToFetch = attemptPropertiesToFetch
-        let attempts = try modelContext.fetch(attemptDescriptor)
-        guard !attempts.isEmpty else { return .empty }
-
-        var markDescriptor = FetchDescriptor<ExamGradeMark>()
-        markDescriptor.propertiesToFetch = gradeMarkPropertiesToFetch
-        return StatisticsPDFExamSummary(
-            attempts: attempts,
-            marks: try modelContext.fetch(markDescriptor)
-        )
-    }
-
-    init(attempts: [ExamAttempt], marks: [ExamGradeMark]) {
-        let attemptIDSet = Set(attempts.map(\.id))
-        var metricByAttemptID: [UUID: ExamAttemptQuestionMetrics] = [:]
-        for mark in marks where attemptIDSet.contains(mark.attemptId) {
-            metricByAttemptID[mark.attemptId, default: ExamAttemptQuestionMetrics()].add(isCorrect: mark.isCorrect)
-        }
-
-        rows = attempts.map { attempt in
-            let metric = metricByAttemptID[attempt.id, default: ExamAttemptQuestionMetrics()]
-            return StatisticsPDFExamRow(
-                id: attempt.id,
-                sourceDocumentID: attempt.sourceDocumentId,
-                title: attempt.sourceDocumentTitle,
-                completedAt: attempt.updatedAt,
-                duration: Self.duration(for: attempt),
-                correctCount: metric.correctCount,
-                incorrectCount: metric.incorrectCount
-            )
-        }
-        .sorted { lhs, rhs in
-            if lhs.completedAt != rhs.completedAt { return lhs.completedAt > rhs.completedAt }
-            return lhs.title.localizedStandardCompare(rhs.title) == .orderedAscending
-        }
-    }
-
-    private init(rows: [StatisticsPDFExamRow]) { self.rows = rows }
-
-    private static func duration(for attempt: ExamAttempt) -> Double {
-        guard let submittedAt = attempt.submittedAt else { return 0 }
-        return max(submittedAt.timeIntervalSince(attempt.createdAt), 0)
-    }
-
-    var hasAttempts: Bool { !rows.isEmpty }
-}
-
-struct StatisticsPDFExamRow: Identifiable, Equatable {
-    let id: UUID
-    let sourceDocumentID: UUID
-    let title: String
-    let completedAt: Date
-    let duration: Double
-    let correctCount: Int
-    let incorrectCount: Int
-
-    var totalCount: Int { correctCount + incorrectCount }
-
-    var averageQuestionDuration: Double? {
-        guard totalCount > 0 else { return nil }
-        return duration / Double(totalCount)
-    }
-
-    var accuracy: Double {
-        guard totalCount > 0 else { return 0 }
-        return Double(correctCount) / Double(totalCount)
     }
 }

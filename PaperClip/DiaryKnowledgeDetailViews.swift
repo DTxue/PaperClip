@@ -1,16 +1,6 @@
 import SwiftUI
 import SwiftData
 
-struct KnowledgeItemDetailView: View {
-    let item: KnowledgeItem
-
-    var body: some View {
-        KnowledgeItemDetailContent(item: item)
-            .navigationTitle("知识点详情")
-            .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
 struct KnowledgeItemSheetView: View {
     let item: KnowledgeItem
     @Environment(\.dismiss) private var dismiss

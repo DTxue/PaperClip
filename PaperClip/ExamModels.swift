@@ -1,13 +1,18 @@
 import Foundation
 import SwiftData
 
+/// 仅用于读取旧版试卷数据；试卷库运行时功能已移除。
+enum ExamAttemptStatus: String {
+    case inProgress
+    case submitted
+    case submitting
+    case graded
+}
+
 extension PaperClipSchemaV1 {
+/// 旧版数据兼容模型。试卷考试运行时功能已移除。
 @Model
 final class ExamAttempt {
-    static var cascadeDeletionPropertiesToFetch: [PartialKeyPath<ExamAttempt>] {
-        [\.id, \.generatedPDFFileName]
-    }
-
     @Attribute(.unique) var id: UUID
     var sourceDocumentId: UUID
     var sourceDocumentTitle: String
@@ -33,7 +38,7 @@ final class ExamAttempt {
         sourceDocumentFingerprint: String = "",
         generatedPDFFileName: String,
         selectedPageIndices: [Int],
-        status: String = ExamAttemptStatus.inProgress.rawValue,
+        status: String = "inProgress",
         createdAt: Date = .now,
         submittedAt: Date? = nil,
         updatedAt: Date = .now
@@ -44,7 +49,7 @@ final class ExamAttempt {
         self.sourceDocumentLocalFileName = sourceDocumentLocalFileName
         self.sourceDocumentFingerprint = sourceDocumentFingerprint
         self.generatedPDFFileName = generatedPDFFileName
-        self.selectedPageIndicesText = PDFPageIndexDisplay.serializeStoredIndices(selectedPageIndices)
+        self.selectedPageIndicesText = selectedPageIndices.map(String.init).joined(separator: ",")
         self.status = status
         self.createdAt = createdAt
         self.submittedAt = submittedAt
@@ -52,33 +57,7 @@ final class ExamAttempt {
     }
 
     var selectedPageIndices: [Int] {
-        PDFPageIndexDisplay.parseStoredIndices(selectedPageIndicesText)
-    }
-
-    var generatedPDFURL: URL {
-        StoredFile.examPDF(fileName: generatedPDFFileName).url
+        selectedPageIndicesText.split(separator: ",").compactMap { Int($0) }
     }
 }
-}
-
-typealias ExamAttempt = PaperClipSchemaV1.ExamAttempt
-
-struct ExamAttemptQuestionMetrics: Equatable, Hashable {
-    var correctCount: Int = 0
-    var incorrectCount: Int = 0
-
-    var totalCount: Int { correctCount + incorrectCount }
-
-    mutating func add(isCorrect: Bool) {
-        if isCorrect {
-            correctCount += 1
-        } else {
-            incorrectCount += 1
-        }
-    }
-
-    mutating func add(_ other: ExamAttemptQuestionMetrics) {
-        correctCount += other.correctCount
-        incorrectCount += other.incorrectCount
-    }
 }

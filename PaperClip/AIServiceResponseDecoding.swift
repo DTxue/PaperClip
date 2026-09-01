@@ -67,29 +67,6 @@ extension AIService {
         return try decode(type, from: response, modelName: modelName)
     }
 
-    static func requestDecodedResponse<T: Decodable & Sendable>(
-        _ type: T.Type,
-        content: [ResponsesRequest.Content],
-        configuration: AIRequestConfiguration
-    ) async throws -> AIServiceResponse<T> {
-        let response = try await requestContentResponse(
-            content,
-            configuration: configuration
-        )
-        return AIServiceResponse(
-            value: try decode(
-                type,
-                from: response.value,
-                modelName: configuration.modelName
-            ),
-            providerModelID: response.providerModelID
-        )
-    }
-
-    static func sanitizedJSONValue(from content: String) -> String {
-        AIResponseDecodingSupport.sanitizedJSONValue(from: content)
-    }
-
     static func decode<T: Decodable>(
         _ type: T.Type,
         from content: String,

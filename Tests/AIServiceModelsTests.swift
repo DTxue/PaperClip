@@ -10,7 +10,6 @@ private func expect(_ condition: @autoclosure () -> Bool, _ message: String) {
 @main
 struct AIServiceModelsTests {
     static func main() throws {
-        try testExamGradingFlexibleFields()
         try testVocabularyGradingDefaults()
         try testVocabularyGradingOutputTokenBudgetScalesWithQuestionCount()
         try testWritingReviewDisplayText()
@@ -21,28 +20,6 @@ struct AIServiceModelsTests {
         try testFixedProviderRequestConfiguration()
 
         print("AIServiceModelsTests: passed")
-    }
-
-    private static func testExamGradingFlexibleFields() throws {
-        let data = """
-        {
-          "items": [
-            {
-              "pageIndex": "3",
-              "questionNumber": 7,
-              "isCorrect": true,
-              "stampAnchor": { "x": "0.25", "y": 0.75 },
-              "confidence": "0.9"
-            }
-          ]
-        }
-        """.data(using: .utf8)!
-
-        let value = try JSONDecoder().decode(AIExamGradingResult.self, from: data)
-        let item = value.items[0]
-        expect(item.pageIndex == 3, "decodes string page index")
-        expect(item.questionNumber == "7", "decodes numeric question number as string")
-        expect(item.stampAnchor.x == 0.25 && item.confidence == 0.9, "decodes flexible doubles")
     }
 
     private static func testVocabularyGradingDefaults() throws {

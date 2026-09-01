@@ -14,7 +14,6 @@ struct VocabularyTestAnsweringContentView: View {
     let answerCanvasSession: VocabularyAnswerCanvasSession
     let currentDrawingReloadToken: Int
     let didFinishAnswering: Bool
-    let onDrawingChanged: () -> Void
 
     var body: some View {
         let progress = VocabularyAnsweringProgressSnapshot(
@@ -44,9 +43,6 @@ struct VocabularyTestAnsweringContentView: View {
             Spacer()
         }
         .padding(28)
-        .onChange(of: currentDrawing.strokes.count) {
-            onDrawingChanged()
-        }
     }
 
     private var isExam: Bool {

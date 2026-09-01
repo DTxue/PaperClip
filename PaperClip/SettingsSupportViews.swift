@@ -38,26 +38,3 @@ struct SecureSettingsField: View {
         }
     }
 }
-
-struct ConnectionTestButton: View {
-    let title: String
-    let systemImage: String
-    let isTesting: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Spacer()
-                if isTesting {
-                    ProgressView()
-                        .controlSize(.small)
-                    Text("正在测试…")
-                } else {
-                    Label(title, systemImage: systemImage)
-                }
-                Spacer()
-            }
-        }
-    }
-}

@@ -35,15 +35,6 @@ extension ModelContext {
         return try deleteFetched(descriptor)
     }
 
-    func deleteMatching<Model: PersistentModel>(
-        _ models: [Model],
-        where shouldDelete: (Model) -> Bool
-    ) {
-        for model in models where shouldDelete(model) {
-            delete(model)
-        }
-    }
-
     func fetchFirst<Model: PersistentModel>(_ descriptor: FetchDescriptor<Model>) throws -> Model? {
         var descriptor = descriptor
         descriptor.fetchLimit = 1

@@ -48,7 +48,7 @@ private struct DataBackupSettingsView: View {
     var body: some View {
         Form {
             Section("导出整库备份") {
-                Text("为避免多窗口或后台任务在复制期间改动数据，备份会在下次完全启动时、数据库打开前生成并校验。备份包含数据库、PDF、考试记录、笔迹、图片、词集和词生文等数据。")
+                Text("为避免多窗口或后台任务在复制期间改动数据，备份会在下次完全启动时、数据库打开前生成并校验。备份包含数据库、图片、词集、日记和写作等数据，也会保留旧版本遗留文件。")
 
                 Button {
                     createBackup()

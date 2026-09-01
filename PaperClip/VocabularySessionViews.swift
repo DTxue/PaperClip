@@ -15,7 +15,6 @@ struct VocabularyTestView: View {
     @State var selectedEnglishDefinitionCardIDs: Set<UUID> = []
     @State var sessionMode: VocabularyTestMode?
     @State var questionCount = 5
-    @State var latestDraft: VocabularyTestDraft?
     @State var batches: [VocabularyTestBatch] = []
     @State var currentBatchIndex = 0
     @State var currentIndex = 0
@@ -26,7 +25,6 @@ struct VocabularyTestView: View {
     @State var startedAt = Date.now
     @State var didRecordSession = false
     @State var didFinishAnswering = false
-    @State var draftSaveAction = DebouncedAction()
     @State var draftDrawingDataCache = VocabularyDraftDrawingDataCache()
     @State var gradingTaskStore = VocabularyTestGradingTaskStore()
     @State var answerAdvanceUndoTarget: VocabularyAnswerAdvanceUndoTarget?

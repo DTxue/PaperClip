@@ -10,9 +10,7 @@ enum PaperClipSchemaMigrationTests {
 
         let container = try PaperClipStore.makeContainer(at: storeURL)
         try verifyEveryV1Model(in: container.mainContext)
-
-        let newPageSubmissions = try container.mainContext.fetch(FetchDescriptor<ExamPageSubmission>())
-        expect(newPageSubmissions.isEmpty, "new page submission model migrates without fabricating records")
+        verifyRetiredModelsAreAbsentFromV4()
         let newMistakes = try container.mainContext.fetch(FetchDescriptor<MistakeLibraryItem>())
         let newAttachments = try container.mainContext.fetch(FetchDescriptor<MistakeAttachment>())
         let newAttempts = try container.mainContext.fetch(FetchDescriptor<MistakeReviewAttempt>())
@@ -36,16 +34,16 @@ enum PaperClipSchemaMigrationTests {
             includingPropertiesForKeys: nil
         )
         expect(
-            remainingExternalFiles.count == 6,
-            "migration removes the legacy practice drawing sidecar"
+            remainingExternalFiles.count == 4,
+            "migration removes retired mistake and PDF/exam drawing sidecars"
         )
 
-        try verifyV2ToV3Migration()
+        try verifyV2ToV4Migration()
 
-        print("PaperClipSchemaMigrationTests: V1 data preserved; legacy mistakes removed; V3 ready")
+        print("PaperClipSchemaMigrationTests: active V1 data preserved; retired entities removed; V4 ready")
     }
 
-    private static func verifyV2ToV3Migration() throws {
+    private static func verifyV2ToV4Migration() throws {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("PaperClipV2ToV3Tests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -70,11 +68,11 @@ enum PaperClipSchemaMigrationTests {
 
         let migratedContainer = try PaperClipStore.makeContainer(at: storeURL)
         let migrated = try only(MistakeLibraryItem.self, in: migratedContainer.mainContext)
-        expect(migrated.questionText == "V2 物理错题", "V3 keeps V2 mistake text")
-        expect(migrated.correctAnswer == "旧答案", "V3 keeps hidden legacy answer data")
-        expect(migrated.explanation == "旧解析", "V3 keeps hidden legacy explanation data")
-        expect(migrated.grade == Grade.grade7.rawValue, "V3 backfills the default grade")
-        expect(migrated.semester == Semester.first.rawValue, "V3 backfills the default semester")
+        expect(migrated.questionText == "V2 物理错题", "V4 keeps V2 mistake text")
+        expect(migrated.correctAnswer == "旧答案", "V4 keeps hidden legacy answer data")
+        expect(migrated.explanation == "旧解析", "V4 keeps hidden legacy explanation data")
+        expect(migrated.grade == Grade.grade7.rawValue, "V4 backfills the default grade")
+        expect(migrated.semester == Semester.first.rawValue, "V4 backfills the default semester")
     }
 
     private static func copiedLegacyStoreURL() throws -> URL {
@@ -103,33 +101,6 @@ enum PaperClipSchemaMigrationTests {
     }
 
     private static func verifyEveryV1Model(in context: ModelContext) throws {
-        let pdf = try only(PDFDocumentItem.self, in: context)
-        expect(pdf.id == fixtureUUID(1), "keeps PDF identity")
-        expect(pdf.title == "V1 期中数学", "keeps PDF title")
-        expect(pdf.localFileName == "v1-math.pdf", "keeps source PDF file binding")
-        expect(pdf.grade == Grade.grade8.rawValue, "keeps PDF classification")
-
-        let handwriting = try only(HandwritingLayer.self, in: context)
-        expect(handwriting.documentId == pdf.id, "keeps answer layer document binding")
-        expect(handwriting.pageIndex == 2 && handwriting.sessionIndex == 3, "keeps answer layer position")
-        expect(handwriting.drawingData == externalFixtureData(marker: 0x11), "keeps external answer drawing data")
-
-        let attempt = try only(ExamAttempt.self, in: context)
-        expect(attempt.id == fixtureUUID(2), "keeps exam identity")
-        expect(attempt.sourceDocumentId == pdf.id, "keeps exam source binding")
-        expect(attempt.sourceDocumentLocalFileName == "v1-math.pdf", "keeps exam source file")
-        expect(attempt.selectedPageIndices == [0, 2], "keeps selected exam pages")
-        expect(attempt.status == ExamAttemptStatus.submitted.rawValue, "keeps exam status")
-
-        let examDrawing = try only(ExamHandwritingLayer.self, in: context)
-        expect(examDrawing.attemptId == attempt.id, "keeps exam drawing attempt binding")
-        expect(examDrawing.drawingData == externalFixtureData(marker: 0x12), "keeps external exam drawing data")
-
-        let gradeMark = try only(ExamGradeMark.self, in: context)
-        expect(gradeMark.attemptId == attempt.id, "keeps grade mark attempt binding")
-        expect(gradeMark.isCorrect && gradeMark.questionNumber == "2", "keeps grade result")
-        expect(gradeMark.normalizedAnchor == "0.25,0.75", "keeps grade mark position")
-
         let folder = try only(VocabularyFolder.self, in: context)
         expect(folder.id == fixtureUUID(5) && folder.title == "V1 词汇文件夹", "keeps vocabulary folder")
 
@@ -141,14 +112,6 @@ enum PaperClipSchemaMigrationTests {
         expect(card.id == fixtureUUID(7) && card.deckID == deck.id, "keeps vocabulary card binding")
         expect(card.term == "migration" && card.definition == "迁移", "keeps vocabulary content")
         expect(card.note == "V1 card", "keeps vocabulary note")
-
-        let article = try only(VocabularyGeneratedArticle.self, in: context)
-        expect(article.id == fixtureUUID(8) && article.deckID == deck.id, "keeps article binding")
-        expect(article.articleText == "Every record survived the migration.", "keeps generated article")
-
-        let recitation = try only(VocabularyArticleRecitationHistory.self, in: context)
-        expect(recitation.articleID == article.id, "keeps recitation article binding")
-        expect(recitation.stuckSentenceIndexes == [0], "keeps recitation progress")
 
         let memory = try only(VocabularyMemoryState.self, in: context)
         expect(memory.cardID == card.id && memory.deckID == deck.id, "keeps memory state binding")
@@ -205,6 +168,24 @@ enum PaperClipSchemaMigrationTests {
         expect(writingReview.promptID == prompt.id && writingReview.draftID == writingDraft.id, "keeps writing review binding")
         expect(writingReview.reviewJSONData == externalFixtureData(marker: 0x25), "keeps external writing review data")
         expect(writingReview.scoreText == "92", "keeps writing score")
+    }
+
+    private static func verifyRetiredModelsAreAbsentFromV4() {
+        let currentModelIDs = Set(PaperClipSchemaV4.models.map(ObjectIdentifier.init))
+        let retiredModelIDs = [
+            ObjectIdentifier(PaperClipSchemaV1.PDFDocumentItem.self),
+            ObjectIdentifier(PaperClipSchemaV1.HandwritingLayer.self),
+            ObjectIdentifier(PaperClipSchemaV1.ExamAttempt.self),
+            ObjectIdentifier(PaperClipSchemaV1.ExamPageSubmission.self),
+            ObjectIdentifier(PaperClipSchemaV1.ExamHandwritingLayer.self),
+            ObjectIdentifier(PaperClipSchemaV1.ExamGradeMark.self),
+            ObjectIdentifier(PaperClipSchemaV1.VocabularyGeneratedArticle.self),
+            ObjectIdentifier(PaperClipSchemaV1.VocabularyArticleRecitationHistory.self)
+        ]
+        expect(
+            retiredModelIDs.allSatisfy { !currentModelIDs.contains($0) },
+            "V4 excludes every retired PDF/exam and vocabulary-article entity"
+        )
     }
 
     private static func only<Model: PersistentModel>(

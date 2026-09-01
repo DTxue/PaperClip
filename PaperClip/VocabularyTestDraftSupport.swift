@@ -37,7 +37,6 @@ struct VocabularyGradedQuestion: Identifiable {
 
 struct VocabularyTestViewSnapshot {
     let deckCards: [VocabularyCard]
-    let deckDraft: VocabularyTestDraft?
     let gradedQuestions: [VocabularyGradedQuestion]
     let gradedBatchCount: Int
     let failedBatchIndices: [Int]
@@ -46,11 +45,9 @@ struct VocabularyTestViewSnapshot {
 
     init(
         deckCards: [VocabularyCard],
-        deckDraft: VocabularyTestDraft?,
         batches: [VocabularyTestBatch]
     ) {
         self.deckCards = deckCards
-        self.deckDraft = deckDraft
 
         var questions: [VocabularyGradedQuestion] = []
         var gradedCount = 0

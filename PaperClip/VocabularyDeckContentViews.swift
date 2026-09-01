@@ -64,29 +64,4 @@ extension VocabularyDeckView {
         }
     }
 
-    func deckOverview(_ snapshot: VocabularyDeckSnapshot) -> some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 170), spacing: 14)], spacing: 14) {
-                VocabularyMetricTile(
-                    value: "\(snapshot.visibleCards.count)",
-                    label: deck.kind.listTitle,
-                    icon: deck.kind.systemImage,
-                    color: Color.blue
-                )
-                VocabularyMetricTile(
-                    value: "\(snapshot.dueDirectionCount)",
-                    label: "到期记忆方向",
-                    icon: "clock.fill",
-                    color: Color.orange
-                )
-                VocabularyMetricTile(
-                    value: "\(snapshot.todayReviewCount)",
-                    label: "今日复习",
-                    icon: "checkmark.circle.fill",
-                    color: Color.green
-                )
-            }
-            .padding(28)
-        }
-    }
 }

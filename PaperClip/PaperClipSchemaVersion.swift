@@ -12,3 +12,7 @@ enum PaperClipSchemaV2 {}
 
 /// Adds grade and semester classification to the independent mistake library.
 enum PaperClipSchemaV3 {}
+
+/// Removes the retired PDF/exam and vocabulary-article entities while keeping
+/// all active learning data intact.
+enum PaperClipSchemaV4 {}

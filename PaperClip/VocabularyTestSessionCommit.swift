@@ -37,9 +37,6 @@ extension VocabularyTestView {
                 encodedDrawingData(for: batch, drawingIndex: drawingIndex)
             }
             guard didCommit else { return }
-            if sessionMode == .exam {
-                deleteExamDraft()
-            }
             didRecordSession = true
         } catch {
             alert = AppAlert(title: "无法记录测验结果", error: error)

@@ -24,7 +24,7 @@ struct AIKeySettingsSection: View {
                 isVisible: $isDeepSeekAPIKeyVisible
             )
         } header: { Text("API 密钥") } footer: {
-            Text("密钥仅保存在本机 Keychain，供日记、写作、ENG 和 PDF 考试批阅使用。")
+            Text("密钥仅保存在本机 Keychain，供日记、写作和 ENG 功能使用。")
         }
     }
 }
@@ -39,7 +39,7 @@ struct DoubaoEndpointSettingsSection: View {
                 .autocorrectionDisabled()
                 .font(.system(.body, design: .monospaced))
         } header: { Text("豆包模型") } footer: {
-            Text("豆包负责图片理解和 PDF 考试批阅。默认使用 Doubao-Seed-2.1-pro（\(AIService.defaultDoubaoInferenceID)）。")
+            Text("豆包负责图片理解。默认使用 Doubao-Seed-2.1-pro（\(AIService.defaultDoubaoInferenceID)）。")
         }
     }
 }

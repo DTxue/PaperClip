@@ -83,7 +83,6 @@ extension VocabularyTestView {
         startedAt = .now
         didRecordSession = false
         didFinishAnswering = false
-        saveDraft()
     }
 
     func fetchSessionData() {
@@ -125,24 +124,4 @@ extension VocabularyTestView {
         currentDrawingReloadToken &+= 1
     }
 
-    func exitExam() {
-        guard sessionMode == .exam else { return }
-        guard saveDraft() else { return }
-
-        dismissAnswerAdvanceUndo()
-        isConfirmingEmptyAnswer = false
-        cancelGradingTasks()
-        refreshLatestDraft()
-        selectedMode = .exam
-        sessionMode = nil
-        batches = []
-        currentBatchIndex = 0
-        currentIndex = 0
-        replaceCurrentDrawing(with: PKDrawing())
-        startedAt = .now
-        didRecordSession = false
-        didFinishAnswering = false
-        enlargedImage = nil
-        draftDrawingDataCache.removeAll()
-    }
 }

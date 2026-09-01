@@ -2,12 +2,9 @@ import Foundation
 import SwiftData
 
 extension PaperClipSchemaV1 {
+/// 旧版数据兼容模型。PDF 试卷库运行时功能已移除。
 @Model
 final class PDFDocumentItem {
-    static var deletionPropertiesToFetch: [PartialKeyPath<PDFDocumentItem>] {
-        [\.id]
-    }
-
     @Attribute(.unique) var id: UUID
     var title: String
     var localFileName: String
@@ -42,10 +39,5 @@ final class PDFDocumentItem {
         self.lastOpenDate = lastOpenDate
     }
 
-    var localFileURL: URL {
-        StoredFile.importedPDF(fileName: localFileName).url
-    }
 }
 }
-
-typealias PDFDocumentItem = PaperClipSchemaV1.PDFDocumentItem

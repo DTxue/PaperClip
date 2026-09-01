@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 
 extension PaperClipSchemaV1 {
+/// 旧版数据兼容模型。逐页交卷运行时功能已移除。
 @Model
 final class ExamPageSubmission {
     @Attribute(.unique) var id: UUID
@@ -45,53 +46,8 @@ final class ExamPageSubmission {
 }
 }
 
-typealias ExamPageSubmission = PaperClipSchemaV1.ExamPageSubmission
 
 enum ExamPageSubmissionStatus: String {
     case submitted
     case graded
-
-    var countsAsSubmitted: Bool { true }
-    var countsAsGraded: Bool { self == .graded }
-}
-
-extension ExamPageSubmission {
-    static var deletionPropertiesToFetch: [PartialKeyPath<ExamPageSubmission>] {
-        [\.id]
-    }
-
-    static var workspacePropertiesToFetch: [PartialKeyPath<ExamPageSubmission>] {
-        [\.id, \.attemptId, \.pageIndex, \.status, \.submittedAt, \.gradedAt, \.updatedAt]
-    }
-}
-
-extension ModelContext {
-    func fetchExamPageSubmission(
-        attemptID: UUID,
-        pageIndex: Int
-    ) throws -> ExamPageSubmission? {
-        let submissionKey = ExamPageSubmission.makeSubmissionKey(
-            attemptID: attemptID,
-            pageIndex: pageIndex
-        )
-        return try fetchFirst(FetchDescriptor<ExamPageSubmission>(
-            predicate: #Predicate<ExamPageSubmission> { submission in
-                submission.submissionKey == submissionKey
-            }
-        ))
-    }
-
-    func fetchExamPageSubmissions(
-        attemptID: UUID,
-        propertiesToFetch: [PartialKeyPath<ExamPageSubmission>] = []
-    ) throws -> [ExamPageSubmission] {
-        var descriptor = FetchDescriptor<ExamPageSubmission>(
-            predicate: #Predicate<ExamPageSubmission> { submission in
-                submission.attemptId == attemptID
-            },
-            sortBy: [SortDescriptor(\.pageIndex)]
-        )
-        descriptor.propertiesToFetch = propertiesToFetch
-        return try fetch(descriptor)
-    }
 }

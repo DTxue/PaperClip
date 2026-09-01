@@ -39,22 +39,6 @@ extension VocabularyCard {
         ]
     }
 
-    static var articleGenerationPropertiesToFetch: [PartialKeyPath<VocabularyCard>] {
-        [
-            \.id,
-            \.term,
-            \.definition,
-            \.englishDefinition,
-            \.phonetic,
-            \.example,
-            \.partOfSpeech,
-            \.tagsText,
-            \.note,
-            \.alternativeAnswersText,
-            \.createdAt
-        ]
-    }
-
     static var importMergePropertiesToFetch: [PartialKeyPath<VocabularyCard>] {
         [
             \.term,

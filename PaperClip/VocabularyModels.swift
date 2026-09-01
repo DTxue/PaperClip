@@ -121,12 +121,9 @@ final class VocabularyCard {
 
 }
 
+/// V1–V3 迁移专用；V4 已移除该实体。
 @Model
 final class VocabularyGeneratedArticle {
-    static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyGeneratedArticle>] {
-        [\.id]
-    }
-
     @Attribute(.unique) var id: UUID
     var deckID: UUID
     var title: String
@@ -163,12 +160,9 @@ final class VocabularyGeneratedArticle {
     }
 }
 
+/// V1–V3 迁移专用；V4 已移除该实体。
 @Model
 final class VocabularyArticleRecitationHistory {
-    static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyArticleRecitationHistory>] {
-        [\.id]
-    }
-
     @Attribute(.unique) var id: UUID
     var deckID: UUID
     var articleID: UUID
@@ -232,5 +226,3 @@ final class VocabularyArticleRecitationHistory {
 typealias VocabularyFolder = PaperClipSchemaV1.VocabularyFolder
 typealias VocabularyDeck = PaperClipSchemaV1.VocabularyDeck
 typealias VocabularyCard = PaperClipSchemaV1.VocabularyCard
-typealias VocabularyGeneratedArticle = PaperClipSchemaV1.VocabularyGeneratedArticle
-typealias VocabularyArticleRecitationHistory = PaperClipSchemaV1.VocabularyArticleRecitationHistory

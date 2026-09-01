@@ -13,13 +13,13 @@ struct VocabularyContextPracticeView: View {
     @State private var generationTask: Task<Void, Never>?
     @State private var alert: AppAlert?
 
-    @AppStorage("vocabularyArticle.gradePreset")
-    private var storedGradePreset = VocabularyArticleGradePreset.juniorOneTwo.rawValue
+    @AppStorage("vocabularyContextPractice.gradePreset")
+    private var storedGradePreset = VocabularyContextGradePreset.juniorOneTwo.rawValue
 
     private let maximumCardCount = 6
 
-    private var gradePreset: VocabularyArticleGradePreset {
-        VocabularyArticleGradePreset(rawValue: storedGradePreset) ?? .juniorOneTwo
+    private var gradePreset: VocabularyContextGradePreset {
+        VocabularyContextGradePreset(rawValue: storedGradePreset) ?? .juniorOneTwo
     }
 
     private var cacheLoadID: String {
@@ -78,7 +78,7 @@ struct VocabularyContextPracticeView: View {
         } actions: {
             VStack(spacing: 14) {
                 Picker("适用年级", selection: $storedGradePreset) {
-                    ForEach(VocabularyArticleGradePreset.allCases) { preset in
+                    ForEach(VocabularyContextGradePreset.allCases) { preset in
                         Text(preset.title).tag(preset.rawValue)
                     }
                 }

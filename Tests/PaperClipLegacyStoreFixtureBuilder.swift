@@ -39,7 +39,7 @@ enum PaperClipLegacyStoreFixtureBuilder {
         let fixtureDate = Date(timeIntervalSince1970: 1_700_000_000)
 
         context.insert(
-            PDFDocumentItem(
+            PaperClipSchemaV1.PDFDocumentItem(
                 id: documentID,
                 title: "V1 期中数学",
                 localFileName: "v1-math.pdf",
@@ -52,7 +52,7 @@ enum PaperClipLegacyStoreFixtureBuilder {
             )
         )
         context.insert(
-            HandwritingLayer(
+            PaperClipSchemaV1.HandwritingLayer(
                 id: fixtureUUID(11),
                 documentId: documentID,
                 pageIndex: 2,
@@ -63,7 +63,7 @@ enum PaperClipLegacyStoreFixtureBuilder {
             )
         )
         context.insert(
-            ExamAttempt(
+            PaperClipSchemaV1.ExamAttempt(
                 id: attemptID,
                 sourceDocumentId: documentID,
                 sourceDocumentTitle: "V1 期中数学",
@@ -78,7 +78,7 @@ enum PaperClipLegacyStoreFixtureBuilder {
             )
         )
         context.insert(
-            ExamHandwritingLayer(
+            PaperClipSchemaV1.ExamHandwritingLayer(
                 id: fixtureUUID(12),
                 sourceDocumentId: documentID,
                 attemptId: attemptID,
@@ -89,7 +89,7 @@ enum PaperClipLegacyStoreFixtureBuilder {
             )
         )
         context.insert(
-            ExamGradeMark(
+            PaperClipSchemaV1.ExamGradeMark(
                 id: fixtureUUID(13),
                 sourceDocumentId: documentID,
                 attemptId: attemptID,
@@ -183,7 +183,7 @@ enum PaperClipLegacyStoreFixtureBuilder {
             )
         )
         context.insert(
-            VocabularyGeneratedArticle(
+            PaperClipSchemaV1.VocabularyGeneratedArticle(
                 id: articleID,
                 deckID: deckID,
                 title: "V1 Migration Story",
@@ -197,7 +197,7 @@ enum PaperClipLegacyStoreFixtureBuilder {
             )
         )
         context.insert(
-            VocabularyArticleRecitationHistory(
+            PaperClipSchemaV1.VocabularyArticleRecitationHistory(
                 id: fixtureUUID(16),
                 deckID: deckID,
                 articleID: articleID,
@@ -396,19 +396,19 @@ enum PaperClipLegacyStoreFixtureBuilder {
     }
 
     private static let legacyModelTypes: [any PersistentModel.Type] = [
-        PDFDocumentItem.self,
-        HandwritingLayer.self,
-        ExamAttempt.self,
-        ExamHandwritingLayer.self,
-        ExamGradeMark.self,
+        PaperClipSchemaV1.PDFDocumentItem.self,
+        PaperClipSchemaV1.HandwritingLayer.self,
+        PaperClipSchemaV1.ExamAttempt.self,
+        PaperClipSchemaV1.ExamHandwritingLayer.self,
+        PaperClipSchemaV1.ExamGradeMark.self,
         MistakeCard.self,
         ExportRecord.self,
         MistakePracticeLayer.self,
         VocabularyFolder.self,
         VocabularyDeck.self,
         VocabularyCard.self,
-        VocabularyGeneratedArticle.self,
-        VocabularyArticleRecitationHistory.self,
+        PaperClipSchemaV1.VocabularyGeneratedArticle.self,
+        PaperClipSchemaV1.VocabularyArticleRecitationHistory.self,
         VocabularyMemoryState.self,
         VocabularyReviewLog.self,
         VocabularyStudySession.self,

@@ -6,8 +6,6 @@ struct StatisticsSnapshotTests {
     @MainActor
     static func main() throws {
         let schema = Schema([
-            ExamAttempt.self,
-            ExamGradeMark.self,
             VocabularyDeck.self,
             VocabularyStudySession.self
         ])
@@ -17,8 +15,6 @@ struct StatisticsSnapshotTests {
 
         expect(StatisticsSnapshot.vocabularySessionPropertiesToFetch.count == 6)
         expect(StatisticsSnapshot.vocabularyDeckPropertiesToFetch.count == 2)
-        expect(StatisticsSnapshot.pdfExamAttemptPropertiesToFetch.count == 7)
-        expect(StatisticsSnapshot.pdfExamGradeMarkPropertiesToFetch.count == 2)
 
         try testVocabularyStudyCompletionAppearsInTodayStatistics()
 
@@ -89,98 +85,6 @@ struct StatisticsSnapshotTests {
             correctCount: 0,
             items: []
         ))
-        let todayAttemptID = UUID()
-        let earlierTodayAttemptID = UUID()
-        let yesterdayAttemptID = UUID()
-        let draftAttemptID = UUID()
-        let todayDocumentID = UUID()
-        let earlierTodayDocumentID = UUID()
-        context.insert(ExamAttempt(
-            id: todayAttemptID,
-            sourceDocumentId: todayDocumentID,
-            sourceDocumentTitle: "期中 PDF",
-            generatedPDFFileName: "today-exam.pdf",
-            selectedPageIndices: [0, 1],
-            status: ExamAttemptStatus.graded.rawValue,
-            createdAt: try require(calendar.date(byAdding: .minute, value: -35, to: now)),
-            submittedAt: try require(calendar.date(byAdding: .minute, value: -5, to: now)),
-            updatedAt: now
-        ))
-        context.insert(ExamAttempt(
-            id: earlierTodayAttemptID,
-            sourceDocumentId: earlierTodayDocumentID,
-            sourceDocumentTitle: "期中 PDF",
-            generatedPDFFileName: "earlier-today-exam.pdf",
-            selectedPageIndices: [2],
-            status: ExamAttemptStatus.graded.rawValue,
-            createdAt: try require(calendar.date(byAdding: .minute, value: -80, to: now)),
-            submittedAt: try require(calendar.date(byAdding: .minute, value: -70, to: now)),
-            updatedAt: try require(calendar.date(byAdding: .minute, value: -69, to: now))
-        ))
-        context.insert(ExamAttempt(
-            id: yesterdayAttemptID,
-            sourceDocumentId: UUID(),
-            sourceDocumentTitle: "昨日 PDF",
-            generatedPDFFileName: "yesterday-exam.pdf",
-            selectedPageIndices: [0],
-            status: ExamAttemptStatus.graded.rawValue,
-            createdAt: oldDate,
-            submittedAt: oldDate,
-            updatedAt: oldDate
-        ))
-        context.insert(ExamAttempt(
-            id: draftAttemptID,
-            sourceDocumentId: UUID(),
-            sourceDocumentTitle: "未批阅 PDF",
-            generatedPDFFileName: "draft-exam.pdf",
-            selectedPageIndices: [0],
-            status: ExamAttemptStatus.inProgress.rawValue,
-            createdAt: now,
-            submittedAt: nil,
-            updatedAt: now
-        ))
-        context.insert(ExamGradeMark(
-            sourceDocumentId: UUID(),
-            attemptId: todayAttemptID,
-            pageIndex: 0,
-            isCorrect: true,
-            normalizedAnchor: "0.5,0.5"
-        ))
-        context.insert(ExamGradeMark(
-            sourceDocumentId: UUID(),
-            attemptId: todayAttemptID,
-            pageIndex: 0,
-            isCorrect: true,
-            normalizedAnchor: "0.6,0.5"
-        ))
-        context.insert(ExamGradeMark(
-            sourceDocumentId: UUID(),
-            attemptId: todayAttemptID,
-            pageIndex: 1,
-            isCorrect: false,
-            normalizedAnchor: "0.5,0.6"
-        ))
-        context.insert(ExamGradeMark(
-            sourceDocumentId: UUID(),
-            attemptId: earlierTodayAttemptID,
-            pageIndex: 2,
-            isCorrect: false,
-            normalizedAnchor: "0.5,0.5"
-        ))
-        context.insert(ExamGradeMark(
-            sourceDocumentId: UUID(),
-            attemptId: earlierTodayAttemptID,
-            pageIndex: 2,
-            isCorrect: true,
-            normalizedAnchor: "0.6,0.5"
-        ))
-        context.insert(ExamGradeMark(
-            sourceDocumentId: UUID(),
-            attemptId: yesterdayAttemptID,
-            pageIndex: 0,
-            isCorrect: false,
-            normalizedAnchor: "0.4,0.4"
-        ))
         try context.save()
 
         let snapshot = try StatisticsSnapshot.load(
@@ -210,26 +114,6 @@ struct StatisticsSnapshotTests {
         expect(coreRow.testCorrectCount == 3)
         expect(coreRow.testIncorrectCount == 2)
         expect(abs(coreRow.testAccuracy - 0.6) < 0.0001)
-        expect(snapshot.pdfExamSummary.hasAttempts)
-        expect(snapshot.pdfExamSummary.rows.count == 2)
-        let pdfRow = try require(snapshot.pdfExamSummary.rows.first)
-        let earlierPDFRow = try require(snapshot.pdfExamSummary.rows.dropFirst().first)
-        expect(snapshot.pdfExamSummary.rows.map(\.id) == [todayAttemptID, earlierTodayAttemptID])
-        expect(pdfRow.sourceDocumentID == todayDocumentID)
-        expect(pdfRow.title == "期中 PDF")
-        expect(pdfRow.completedAt == now)
-        expect(pdfRow.duration == 1_800)
-        expect(pdfRow.correctCount == 2)
-        expect(pdfRow.incorrectCount == 1)
-        expect(pdfRow.averageQuestionDuration == 600)
-        expect(abs(pdfRow.accuracy - (2.0 / 3.0)) < 0.0001)
-        expect(earlierPDFRow.sourceDocumentID == earlierTodayDocumentID)
-        expect(earlierPDFRow.title == "期中 PDF")
-        expect(earlierPDFRow.duration == 600)
-        expect(earlierPDFRow.correctCount == 1)
-        expect(earlierPDFRow.incorrectCount == 1)
-        expect(earlierPDFRow.averageQuestionDuration == 300)
-        expect(abs(earlierPDFRow.accuracy - 0.5) < 0.0001)
         expect(snapshot.hasAnyData)
 
         print("StatisticsSnapshotTests: passed")
@@ -238,8 +122,6 @@ struct StatisticsSnapshotTests {
     @MainActor
     private static func testVocabularyStudyCompletionAppearsInTodayStatistics() throws {
         let schema = Schema([
-            ExamAttempt.self,
-            ExamGradeMark.self,
             VocabularyDeck.self,
             VocabularyStudySession.self
         ])

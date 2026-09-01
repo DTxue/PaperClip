@@ -40,8 +40,7 @@ extension VocabularyTestView {
             currentDrawing: $currentDrawing,
             answerCanvasSession: answerCanvasSession,
             currentDrawingReloadToken: currentDrawingReloadToken,
-            didFinishAnswering: didFinishAnswering,
-            onDrawingChanged: handleAnswerDrawingChanged
+            didFinishAnswering: didFinishAnswering
         )
     }
 
@@ -60,10 +59,6 @@ extension VocabularyTestView {
             return
         }
         advanceQuestion()
-    }
-
-    func handleAnswerDrawingChanged() {
-        scheduleDraftSave()
     }
 
     func undoLastAnswerAdvance() {
@@ -94,7 +89,6 @@ extension VocabularyTestView {
         dismissAnswerAdvanceUndo()
         currentIndex = target.answeredQuestionIndex
         replaceCurrentDrawing(with: restoredDrawing)
-        saveDraft()
     }
 
     func dismissAnswerAdvanceUndo() {

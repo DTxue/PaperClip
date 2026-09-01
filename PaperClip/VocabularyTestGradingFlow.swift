@@ -27,7 +27,6 @@ extension VocabularyTestView {
         replaceCurrentDrawing(with: PKDrawing())
         if currentIndex + 1 < batches[currentBatchIndex].cards.count {
             currentIndex += 1
-            saveDraft()
             if let undoTarget {
                 presentAnswerAdvanceUndo(undoTarget)
             }
@@ -44,10 +43,8 @@ extension VocabularyTestView {
                 currentBatchIndex += 1
                 currentIndex = 0
                 replaceCurrentDrawing(with: PKDrawing())
-                saveDraft()
             } else {
                 didFinishAnswering = true
-                saveDraft()
             }
         } else {
             startBatchGrading(batchIndex: submittedIndex, automaticRetry: false)

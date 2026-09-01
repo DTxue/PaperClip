@@ -18,13 +18,9 @@
 		A10000000000000000001107 /* ExamHandwritingLayerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001107 /* ExamHandwritingLayerModel.swift */; };
 		A10000000000000000001108 /* ExamGradeMarkModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001108 /* ExamGradeMarkModel.swift */; };
 		A10000000000000000001240 /* ExamPageSubmissionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001240 /* ExamPageSubmissionModel.swift */; };
-		A10000000000000000001241 /* PDFExamPageSubmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001241 /* PDFExamPageSubmission.swift */; };
-		A10000000000000000001242 /* PDFExamPageProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001242 /* PDFExamPageProgress.swift */; };
-		A10000000000000000001243 /* PDFExamResumePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001243 /* PDFExamResumePolicy.swift */; };
 		A100000000000000000000F66 /* MistakeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F66 /* MistakeModels.swift */; };
 		A1000000000000000000109A /* ExportRecordModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000109A /* ExportRecordModel.swift */; };
 		A100000000000000000000F67 /* AcademicTaxonomy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F67 /* AcademicTaxonomy.swift */; };
-		A100000000000000000000F68 /* ExamAttemptStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F68 /* ExamAttemptStatus.swift */; };
 		A100000000000000000000F69 /* MistakePracticeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F69 /* MistakePracticeModels.swift */; };
 		C9000000000000000000A001 /* MistakeLibraryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9000000000000000000B001 /* MistakeLibraryModels.swift */; };
 		C9000000000000000000A002 /* MistakeReviewEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9000000000000000000B002 /* MistakeReviewEngine.swift */; };
@@ -45,35 +41,16 @@
 		C9000000000000000000A011 /* MistakeQuestionRendering.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9000000000000000000B011 /* MistakeQuestionRendering.swift */; };
 		C9000000000000000000A012 /* MistakeQuestionTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9000000000000000000B012 /* MistakeQuestionTextView.swift */; };
 		C9000000000000000000A013 /* KaTeX.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C9000000000000000000B013 /* KaTeX.bundle */; };
-		A10000000000000000000003 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* StorageService.swift */; };
-		A100000000000000000011A1 /* StorageServiceFileSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011A1 /* StorageServiceFileSupport.swift */; };
 		A10000000000000000001013 /* AppStorageDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001013 /* AppStorageDirectory.swift */; };
 		A100000000000000000011A0 /* StoredFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011A0 /* StoredFile.swift */; };
 		A10000000000000000001041 /* ImageRenderSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001041 /* ImageRenderSupport.swift */; };
 		A10000000000000000001204 /* DrawingDataSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001204 /* DrawingDataSupport.swift */; };
-		A10000000000000000001200 /* PDFRenderSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001200 /* PDFRenderSupport.swift */; };
-		A10000000000000000001205 /* PDFExamGradingSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001205 /* PDFExamGradingSupport.swift */; };
-		A10000000000000000001206 /* PDFExamGradingTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001206 /* PDFExamGradingTransaction.swift */; };
-		A1000000000000000000120B /* ShareImageRequestFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000120B /* ShareImageRequestFactory.swift */; };
 		A1000000000000000000120D /* VocabularyStudySessionTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000120D /* VocabularyStudySessionTransaction.swift */; };
 		A1000000000000000000120E /* VocabularyTestSessionCommitTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000120E /* VocabularyTestSessionCommitTransaction.swift */; };
 		A1000000000000000000120F /* WritingReviewTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000120F /* WritingReviewTransaction.swift */; };
 		A10000000000000000001014 /* ImageJPEGEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001014 /* ImageJPEGEncoder.swift */; };
 		A1000000000000000000103D /* ImageEncodingPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000103D /* ImageEncodingPlan.swift */; };
 		A1000000000000000000103E /* ImageJPEGProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000103E /* ImageJPEGProfile.swift */; };
-		A10000000000000000001015 /* PDFDrawingRenderSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001015 /* PDFDrawingRenderSupport.swift */; };
-		A10000000000000000001040 /* PDFPageRenderGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001040 /* PDFPageRenderGeometry.swift */; };
-		A10000000000000000001030 /* PDFLongImageLayoutSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001030 /* PDFLongImageLayoutSupport.swift */; };
-		A100000000000000000010B2 /* PDFLongImageStackLayoutSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010B2 /* PDFLongImageStackLayoutSupport.swift */; };
-		A10000000000000000001184 /* PDFPageSelectionSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001184 /* PDFPageSelectionSet.swift */; };
-		A10000000000000000001031 /* PDFPageExportSelectionSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001031 /* PDFPageExportSelectionSupport.swift */; };
-		A10000000000000000001104 /* PDFPageExportRenderInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001104 /* PDFPageExportRenderInput.swift */; };
-		A100000000000000000011A3 /* PDFPageExportRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011A3 /* PDFPageExportRequest.swift */; };
-		A100000000000000000011A4 /* PDFCanvasUpdateState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011A4 /* PDFCanvasUpdateState.swift */; };
-		A10000000000000000001094 /* PDFPageExportFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001094 /* PDFPageExportFlow.swift */; };
-		A10000000000000000001095 /* PDFPageExportAlerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001095 /* PDFPageExportAlerts.swift */; };
-		A10000000000000000001050 /* PDFPageIndexDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001050 /* PDFPageIndexDisplay.swift */; };
-		A10000000000000000001051 /* PDFPageDocumentReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001051 /* PDFPageDocumentReader.swift */; };
 		A10000000000000000001033 /* CanvasSizeReportSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001033 /* CanvasSizeReportSupport.swift */; };
 		A10000000000000000001034 /* AIServiceErrorMessageSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001034 /* AIServiceErrorMessageSupport.swift */; };
 		A10000000000000000001035 /* WritingDraftPersistenceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001035 /* WritingDraftPersistenceModels.swift */; };
@@ -87,84 +64,6 @@
 		A100000000000000000011AD /* HomeViewOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011AD /* HomeViewOperations.swift */; };
 		A100000000000000000000FB7 /* HomeKnowledgeViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FB7 /* HomeKnowledgeViews.swift */; };
 		A100000000000000000000FB8 /* HomeDiaryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FB8 /* HomeDiaryDetailView.swift */; };
-		A10000000000000000001079 /* PDFDocumentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001079 /* PDFDocumentLoader.swift */; };
-		A10000000000000000000005 /* PDFWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* PDFWorkspaceView.swift */; };
-		A10000000000000000001220 /* PDFWorkspaceSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001220 /* PDFWorkspaceSession.swift */; };
-		A10000000000000000001221 /* PDFAnswerLayerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001221 /* PDFAnswerLayerStore.swift */; };
-		A1000000000000000000100A /* PDFWorkspaceCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000100A /* PDFWorkspaceCanvasView.swift */; };
-		A1000000000000000000100B /* PDFWorkspacePresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000100B /* PDFWorkspacePresentation.swift */; };
-		A100000000000000000011AE /* PDFWorkspaceConfirmationDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011AE /* PDFWorkspaceConfirmationDialogs.swift */; };
-		A1000000000000000000100C /* PDFWorkspaceToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000100C /* PDFWorkspaceToolbar.swift */; };
-		A10000000000000000001203 /* PDFWorkspaceToolbarSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001203 /* PDFWorkspaceToolbarSnapshot.swift */; };
-		A100000000000000000000F3F /* PDFWorkspaceExamFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F3F /* PDFWorkspaceExamFlow.swift */; };
-		A100000000000000000011BB /* PDFWorkspaceExamActivation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011BB /* PDFWorkspaceExamActivation.swift */; };
-		A10000000000000000001000 /* PDFWorkspaceExamHistoryFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001000 /* PDFWorkspaceExamHistoryFlow.swift */; };
-		A10000000000000000001001 /* PDFWorkspaceExamGradingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001001 /* PDFWorkspaceExamGradingFlow.swift */; };
-		A10000000000000000001136 /* PDFExamAttemptStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001136 /* PDFExamAttemptStore.swift */; };
-		A100000000000000000000F40 /* PDFWorkspaceDrawingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F40 /* PDFWorkspaceDrawingFlow.swift */; };
-		A100000000000000000000F30 /* PDFPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F30 /* PDFPersistence.swift */; };
-		A100000000000000000000FE /* PDFWorkspaceCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FE /* PDFWorkspaceCore.swift */; };
-		A100000000000000000000F2A /* PDFPendingDrawingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F2A /* PDFPendingDrawingStore.swift */; };
-		A100000000000000000000E1 /* PDFExamViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000E1 /* PDFExamViews.swift */; };
-		A10000000000000000001004 /* PDFExamOverlayViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001004 /* PDFExamOverlayViews.swift */; };
-		A10000000000000000001005 /* ShareImageLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001005 /* ShareImageLink.swift */; };
-		A10000000000000000001006 /* PDFWorkspaceToolbarButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001006 /* PDFWorkspaceToolbarButtons.swift */; };
-		A100000000000000000010C1 /* ExamPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010C1 /* ExamPageImageRenderer.swift */; };
-		A100000000000000000000F5A /* PDFExamHistoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F5A /* PDFExamHistoryViews.swift */; };
-		A100000000000000000000F5B /* PDFExamHistorySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F5B /* PDFExamHistorySheet.swift */; };
-		A100000000000000000000F5C /* PDFExamPageSelectionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F5C /* PDFExamPageSelectionViews.swift */; };
-		A1000000000000000000116F /* PDFExamPageSelectionLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000116F /* PDFExamPageSelectionLoading.swift */; };
-		A10000000000000000001170 /* PDFExamPageSelectionToolbarContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001170 /* PDFExamPageSelectionToolbarContent.swift */; };
-		A100000000000000000000E2 /* PDFWorkspaceSupportViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000E2 /* PDFWorkspaceSupportViews.swift */; };
-		A100000000000000000000E3 /* ScratchBoardModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000E3 /* ScratchBoardModels.swift */; };
-			A10000000000000000001131 /* ScratchBoardToolModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001131 /* ScratchBoardToolModels.swift */; };
-			A10000000000000000001132 /* ScratchBoardInteractionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001132 /* ScratchBoardInteractionModels.swift */; };
-			A10000000000000000001055 /* ScratchBoardPanelGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001055 /* ScratchBoardPanelGeometry.swift */; };
-			A100000000000000000011B5 /* ScratchBoardViewportLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011B5 /* ScratchBoardViewportLogic.swift */; };
-				A100000000000000000000FE0 /* ScratchBoardCanvasOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FE0 /* ScratchBoardCanvasOperations.swift */; };
-				A1000000000000000000112D /* ScratchBoardShapeGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000112D /* ScratchBoardShapeGeometry.swift */; };
-				A10000000000000000001130 /* ScratchBoardShapePaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001130 /* ScratchBoardShapePaths.swift */; };
-				A100000000000000000011B6 /* ScratchBoardPreviewPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011B6 /* ScratchBoardPreviewPath.swift */; };
-				A100000000000000000000FE1 /* ScratchBoardShapeHitTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FE1 /* ScratchBoardShapeHitTesting.swift */; };
-			A100000000000000000000E4 /* ScratchBoardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000E4 /* ScratchBoardViews.swift */; };
-			A100000000000000000010D2 /* ScratchBoardPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010D2 /* ScratchBoardPresentation.swift */; };
-			A10000000000000000001082 /* ScratchBoardCanvasArea.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001082 /* ScratchBoardCanvasArea.swift */; };
-			A100000000000000000011B7 /* ScratchBoardCanvasChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011B7 /* ScratchBoardCanvasChrome.swift */; };
-		A100000000000000000000F1A /* ScratchBoardLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F1A /* ScratchBoardLayers.swift */; };
-		A100000000000000000010C0 /* ScratchGridLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010C0 /* ScratchGridLayer.swift */; };
-		A100000000000000000000FC0 /* ScratchBoardRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FC0 /* ScratchBoardRenderer.swift */; };
-		A100000000000000000000FF7 /* ScratchBoardAngleRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FF7 /* ScratchBoardAngleRenderer.swift */; };
-		A100000000000000000000FF8 /* ScratchBoardAnnotationRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FF8 /* ScratchBoardAnnotationRenderer.swift */; };
-		A100000000000000000000FCD /* ScratchBoardInteractionRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FCD /* ScratchBoardInteractionRenderer.swift */; };
-		A100000000000000000000F24 /* ScratchBoardControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F24 /* ScratchBoardControls.swift */; };
-		A10000000000000000001101 /* ScratchBoardTitleBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001101 /* ScratchBoardTitleBar.swift */; };
-		A1000000000000000000101E /* ScratchBoardStatusViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000101E /* ScratchBoardStatusViews.swift */; };
-		A100000000000000000000FC2 /* ScratchBoardToolbarControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FC2 /* ScratchBoardToolbarControls.swift */; };
-		A100000000000000000010A4 /* ScratchBoardLineGridMenus.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010A4 /* ScratchBoardLineGridMenus.swift */; };
-		A100000000000000000010A5 /* ScratchBoardSnapMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010A5 /* ScratchBoardSnapMenu.swift */; };
-		A100000000000000000010A6 /* ScratchBoardLetterPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010A6 /* ScratchBoardLetterPalette.swift */; };
-		A100000000000000000000F4B /* ScratchBoardGeometryLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F4B /* ScratchBoardGeometryLogic.swift */; };
-		A1000000000000000000119D /* ScratchBoardPointDragEnd.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000119D /* ScratchBoardPointDragEnd.swift */; };
-		A100000000000000000010A7 /* ScratchBoardGestureTracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010A7 /* ScratchBoardGestureTracking.swift */; };
-		A100000000000000000000FDC /* ScratchBoardHistoryLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FDC /* ScratchBoardHistoryLogic.swift */; };
-		A100000000000000000000FDD /* ScratchBoardSnapLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FDD /* ScratchBoardSnapLogic.swift */; };
-		A100000000000000000000F4C /* ScratchBoardPanelLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F4C /* ScratchBoardPanelLayout.swift */; };
-		A10000000000000000000006 /* PDFKitCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* PDFKitCanvasView.swift */; };
-		A100000000000000000010CE /* PDFKitCanvasRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010CE /* PDFKitCanvasRepresentable.swift */; };
-		A100000000000000000000F76 /* PDFKitCanvasCoordinatorLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F76 /* PDFKitCanvasCoordinatorLifecycle.swift */; };
-		A100000000000000000000F77 /* PDFKitCanvasLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F77 /* PDFKitCanvasLayout.swift */; };
-		A1000000000000000000114A /* PDFKitCanvasLayoutScheduling.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000114A /* PDFKitCanvasLayoutScheduling.swift */; };
-		A1000000000000000000114B /* PDFKitCanvasInteractionConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000114B /* PDFKitCanvasInteractionConfiguration.swift */; };
-		A100000000000000000000F78 /* PDFKitCanvasDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F78 /* PDFKitCanvasDrawing.swift */; };
-		A100000000000000000000F4F /* PDFKitCanvasToolPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F4F /* PDFKitCanvasToolPicker.swift */; };
-		A10000000000000000001039 /* PDFToolPickerVisibilitySupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001039 /* PDFToolPickerVisibilitySupport.swift */; };
-		A10000000000000000001059 /* PDFCanvasFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001059 /* PDFCanvasFactory.swift */; };
-		A10000000000000000001060 /* PDFPageViewGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001060 /* PDFPageViewGeometry.swift */; };
-		A10000000000000000001061 /* PDFInteractionConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001061 /* PDFInteractionConfigurator.swift */; };
-		A10000000000000000001062 /* PDFDrawingHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001062 /* PDFDrawingHostView.swift */; };
-		A100000000000000000000F3A /* PDFGradeStampSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F3A /* PDFGradeStampSupport.swift */; };
-		A1000000000000000000116E /* PDFGradeStampModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000116E /* PDFGradeStampModels.swift */; };
-		A1000000000000000000111F /* PDFGradeStampLabelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000111F /* PDFGradeStampLabelFactory.swift */; };
 		A10000000000000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000010 /* Assets.xcassets */; };
 		A10000000000000000000011 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000012 /* KeychainService.swift */; };
 		A10000000000000000000012 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000013 /* SettingsView.swift */; };
@@ -185,7 +84,6 @@
 		A100000000000000000010BA /* AIResponseJSONSanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010BA /* AIResponseJSONSanitizer.swift */; };
 		A10000000000000000001199 /* AIResponseJSONValueExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001199 /* AIResponseJSONValueExtractor.swift */; };
 		A100000000000000000000FCE /* AIDecodingSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FCE /* AIDecodingSupport.swift */; };
-		A1000000000000000000110D /* AIExamGradingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000110D /* AIExamGradingModels.swift */; };
 		A100000000000000000000FD0 /* AIVocabularyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FD0 /* AIVocabularyModels.swift */; };
 		A100000000000000000000FD1 /* AIKnowledgeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FD1 /* AIKnowledgeModels.swift */; };
 		A1000000000000000000117B /* VocabularyAIPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000117B /* VocabularyAIPrompts.swift */; };
@@ -206,7 +104,6 @@
 		A100000000000000000000FEF /* AIWritingReviewBlueprintModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FEF /* AIWritingReviewBlueprintModels.swift */; };
 		A10000000000000000001100 /* AIWritingReviewCoreSceneModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001100 /* AIWritingReviewCoreSceneModels.swift */; };
 		A100000000000000000000FF0 /* AIWritingReviewReconstructionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FF0 /* AIWritingReviewReconstructionModels.swift */; };
-		A100000000000000000000FF1 /* AIExamGradingPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FF1 /* AIExamGradingPrompt.swift */; };
 			A100000000000000000000FF2 /* DiaryAIPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FF2 /* DiaryAIPrompts.swift */; };
 			A100000000000000000000FF3 /* KnowledgeAIPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FF3 /* KnowledgeAIPrompts.swift */; };
 			A10000000000000000001169 /* KnowledgeAIAnalysisSubjectStrategies.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001169 /* KnowledgeAIAnalysisSubjectStrategies.swift */; };
@@ -218,7 +115,6 @@
 		A100000000000000000000FE7 /* AIServiceHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FE7 /* AIServiceHTTPClient.swift */; };
 		A100000000000000000000F51 /* AIServiceImageEncoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F51 /* AIServiceImageEncoding.swift */; };
 		A100000000000000000000F52 /* AIServiceResponseDecoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F52 /* AIServiceResponseDecoding.swift */; };
-		A100000000000000000000FA1 /* AIServiceExamGradingProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA1 /* AIServiceExamGradingProcessing.swift */; };
 		A100000000000000000000FA2 /* AIServiceVocabularyProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA2 /* AIServiceVocabularyProcessing.swift */; };
 		A100000000000000000000FA3 /* AIServiceWritingProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA3 /* AIServiceWritingProcessing.swift */; };
 		A100000000000000000000FA4 /* AIServiceKnowledgeDiaryProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA4 /* AIServiceKnowledgeDiaryProcessing.swift */; };
@@ -227,42 +123,13 @@
 		A100000000000000000000F89 /* StatisticsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F89 /* StatisticsModels.swift */; };
 		A100000000000000000000F90 /* StatisticsCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F90 /* StatisticsCards.swift */; };
 		A1000000000000000000104F /* StatisticsCardChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000104F /* StatisticsCardChrome.swift */; };
-		A10000000000000000001111 /* VocabularyTestDraftSessionPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001111 /* VocabularyTestDraftSessionPersistence.swift */; };
 		A1000000000000000000116B /* VocabularyTestDraftDrawingAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000116B /* VocabularyTestDraftDrawingAccess.swift */; };
-		A1000000000000000000116C /* VocabularyTestDraftSessionQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000116C /* VocabularyTestDraftSessionQueries.swift */; };
 		A10000000000000000001112 /* VocabularyDeckSettingsPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001112 /* VocabularyDeckSettingsPersistence.swift */; };
-		A1000000000000000000001B /* ReviewSubmissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000022 /* ReviewSubmissionView.swift */; };
-		A100000000000000000010D0 /* ReviewSubmissionFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010D0 /* ReviewSubmissionFlow.swift */; };
-		A100000000000000000011A5 /* ReviewSubmissionGenerationRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011A5 /* ReviewSubmissionGenerationRequest.swift */; };
-		A100000000000000000011A6 /* ReviewSubmissionGenerationFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011A6 /* ReviewSubmissionGenerationFlow.swift */; };
-		A100000000000000000011A2 /* ReviewSubmissionSelectionLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011A2 /* ReviewSubmissionSelectionLoader.swift */; };
-		A100000000000000000000FBE /* ReviewSubmissionSupportViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FBE /* ReviewSubmissionSupportViews.swift */; };
-		A100000000000000000000FBF /* ReviewSubmissionRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FBF /* ReviewSubmissionRenderer.swift */; };
-		A10000000000000000001167 /* ReviewSubmissionRenderPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001167 /* ReviewSubmissionRenderPlan.swift */; };
-		A10000000000000000001168 /* ReviewSubmissionPageDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001168 /* ReviewSubmissionPageDrawer.swift */; };
-		A1000000000000000000111B /* ReviewSubmissionRenderError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000111B /* ReviewSubmissionRenderError.swift */; };
-		A100000000000000000010B9 /* ReviewSubmissionRenderLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010B9 /* ReviewSubmissionRenderLayout.swift */; };
-		A10000000000000000001037 /* ReviewSubmissionSelectionSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001037 /* ReviewSubmissionSelectionSupport.swift */; };
-		A1000000000000000000103F /* ReviewSubmissionGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000103F /* ReviewSubmissionGeometry.swift */; };
-		A1000000000000000000001C /* PDFPageExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000023 /* PDFPageExportView.swift */; };
-		A1000000000000000000111A /* PDFPageExportTaskFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000111A /* PDFPageExportTaskFlow.swift */; };
-		A100000000000000000010C9 /* PDFPageExportContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010C9 /* PDFPageExportContentView.swift */; };
-		A10000000000000000001072 /* PDFPageExportToolbarContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001072 /* PDFPageExportToolbarContent.swift */; };
-		A10000000000000000001065 /* PhotoLibraryImageWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001065 /* PhotoLibraryImageWriter.swift */; };
-		A10000000000000000001066 /* PDFPageExportProgressOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001066 /* PDFPageExportProgressOverlay.swift */; };
-		A10000000000000000001191 /* PDFPageLongImageSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001191 /* PDFPageLongImageSource.swift */; };
-		A100000000000000000011B4 /* PDFPageDrawingRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011B4 /* PDFPageDrawingRenderer.swift */; };
-		A100000000000000000000FDA /* PDFPageLongImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FDA /* PDFPageLongImageRenderer.swift */; };
-		A100000000000000000000FDB /* PDFPageSelectionGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FDB /* PDFPageSelectionGrid.swift */; };
-		A10000000000000000001063 /* PDFPageSelectionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001063 /* PDFPageSelectionModels.swift */; };
-		A10000000000000000001064 /* PDFPageSelectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001064 /* PDFPageSelectionCell.swift */; };
-		A10000000000000000001141 /* PDFPageSelectionCellChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001141 /* PDFPageSelectionCellChrome.swift */; };
 		A100000000000000000000F1 /* SharedUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F1 /* SharedUI.swift */; };
 		A100000000000000000000F5F /* DebouncedAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F5F /* DebouncedAction.swift */; };
 		A10000000000000000001201 /* MainActorScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001201 /* MainActorScheduler.swift */; };
 		A10000000000000000001202 /* VocabularySessionDataLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001202 /* VocabularySessionDataLoading.swift */; };
 		A1000000000000000000108B /* SharedAlertModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000108B /* SharedAlertModifiers.swift */; };
-		A1000000000000000000108C /* SharedFileImportModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000108C /* SharedFileImportModifiers.swift */; };
 		A1000000000000000000108D /* SharedNavigationModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000108D /* SharedNavigationModifiers.swift */; };
 		A1000000000000000000108E /* SharedToolbarModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000108E /* SharedToolbarModifiers.swift */; };
 		A1000000000000000000108F /* OptionalPresentationBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000108F /* OptionalPresentationBinding.swift */; };
@@ -296,7 +163,6 @@
 		A10000000000000000001146 /* VocabularyMemoryPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001146 /* VocabularyMemoryPersistence.swift */; };
 		A1000000000000000000100F /* VocabularyStudyPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000100F /* VocabularyStudyPersistence.swift */; };
 		A10000000000000000001010 /* VocabularyReviewPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001010 /* VocabularyReviewPersistence.swift */; };
-		A10000000000000000001011 /* VocabularyTestDraftPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001011 /* VocabularyTestDraftPersistence.swift */; };
 		A10000000000000000001012 /* VocabularyDistractorPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001012 /* VocabularyDistractorPersistence.swift */; };
 		A10000000000000000001038 /* VocabularyDistractorReplacementSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001038 /* VocabularyDistractorReplacementSupport.swift */; };
 		A10000000000000000001144 /* VocabularyJSONStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001144 /* VocabularyJSONStorage.swift */; };
@@ -321,7 +187,6 @@
 			A100000000000000000000FD5 /* VocabularyAnswerChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FD5 /* VocabularyAnswerChecker.swift */; };
 		A100000000000000000000FD6 /* VocabularyWeightedMastery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FD6 /* VocabularyWeightedMastery.swift */; };
 		A100000000000000000000FD7 /* VocabularyTestDraftRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FD7 /* VocabularyTestDraftRuntime.swift */; };
-		A100000000000000000000FD8 /* VocabularyTestDraftSnapshots.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FD8 /* VocabularyTestDraftSnapshots.swift */; };
 		A1000000000000000000111E /* VocabularyTestDraftSnapshotBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000111E /* VocabularyTestDraftSnapshotBuilder.swift */; };
 		A100000000000000000000F4 /* VocabularyTextImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F4 /* VocabularyTextImporter.swift */; };
 		A10000000000000000001097 /* VocabularyTextImportModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001097 /* VocabularyTextImportModels.swift */; };
@@ -340,11 +205,6 @@
 		A10000000000000000001171 /* VocabularyHomeOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001171 /* VocabularyHomeOperations.swift */; };
 		A100000000000000000010C2 /* VocabularyHomeContentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010C2 /* VocabularyHomeContentViews.swift */; };
 		A10000000000000000001231 /* VocabularyFolderViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001231 /* VocabularyFolderViews.swift */; };
-		A10000000000000000001232 /* VocabularyArticleRecitation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001232 /* VocabularyArticleRecitation.swift */; };
-		A10000000000000000001233 /* VocabularyArticleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001233 /* VocabularyArticleView.swift */; };
-		A10000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift */; };
-		A10000000000000000001236 /* VocabularyArticleModePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001236 /* VocabularyArticleModePolicy.swift */; };
-		A10000000000000000001239 /* VocabularyArticleGenerationFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001239 /* VocabularyArticleGenerationFlow.swift */; };
 		C0DEC0DE0000000000000001 /* VocabularyContextPractice.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0DEC0DE0000000000000001 /* VocabularyContextPractice.swift */; };
 		C0DEC0DE0000000000000002 /* VocabularyContextAIPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0DEC0DE0000000000000002 /* VocabularyContextAIPrompts.swift */; };
 		C0DEC0DE0000000000000003 /* AIServiceVocabularyContextProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0DEC0DE0000000000000003 /* AIServiceVocabularyContextProcessing.swift */; };
@@ -374,7 +234,6 @@
 		A100000000000000000010C6 /* VocabularyImportFileLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010C6 /* VocabularyImportFileLoading.swift */; };
 		A100000000000000000000F6 /* VocabularySessionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F6 /* VocabularySessionViews.swift */; };
 		A100000000000000000000F9D /* VocabularyTestSessionData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F9D /* VocabularyTestSessionData.swift */; };
-		A100000000000000000000F9E /* VocabularyTestDraftFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F9E /* VocabularyTestDraftFlow.swift */; };
 		A100000000000000000000F9F /* VocabularyTestGradingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F9F /* VocabularyTestGradingFlow.swift */; };
 		A1000000000000000000111D /* VocabularyTestGradingTaskFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000111D /* VocabularyTestGradingTaskFlow.swift */; };
 		A100000000000000000000FA0 /* VocabularyTestSessionCommit.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FA0 /* VocabularyTestSessionCommit.swift */; };
@@ -441,7 +300,6 @@
 		A1000000000000000000105B /* DiaryPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000105B /* DiaryPersistence.swift */; };
 		A100000000000000000000F2D /* DiaryViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F2D /* DiaryViewModels.swift */; };
 		A10000000000000000001194 /* ViewTaskSlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001194 /* ViewTaskSlot.swift */; };
-		A10000000000000000001056 /* DiaryHistoryRowData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001056 /* DiaryHistoryRowData.swift */; };
 		A10000000000000000001057 /* DiaryKnowledgeSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001057 /* DiaryKnowledgeSnapshot.swift */; };
 		A100000000000000000000FB /* DiaryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FB /* DiaryViews.swift */; };
 		A1000000000000000000116D /* DiaryEntryDetailPhaseViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000116D /* DiaryEntryDetailPhaseViews.swift */; };
@@ -454,11 +312,9 @@
 		A10000000000000000001123 /* PaperClipModelContainerFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001123 /* PaperClipModelContainerFactory.swift */; };
 		A10000000000000000001124 /* PaperClipRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001124 /* PaperClipRootView.swift */; };
 		A10000000000000000001125 /* PaperClipStartup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001125 /* PaperClipStartup.swift */; };
-		A10000000000000000001126 /* PDFKitCanvasSizeReporting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001126 /* PDFKitCanvasSizeReporting.swift */; };
 		A10000000000000000001127 /* AIServiceDeepSeekPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001127 /* AIServiceDeepSeekPayloads.swift */; };
 		A10000000000000000001128 /* AIServiceErrorPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001128 /* AIServiceErrorPayloads.swift */; };
 		A10000000000000000001129 /* AIServiceResponsesPayloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001129 /* AIServiceResponsesPayloads.swift */; };
-		A1000000000000000000112A /* PDFExamHistoryStatusStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000112A /* PDFExamHistoryStatusStyle.swift */; };
 		A1000000000000000000112B /* HomeDiaryDetailFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000112B /* HomeDiaryDetailFlow.swift */; };
 		A10000000000000000001069 /* DiaryKnowledgeAnalysisViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001069 /* DiaryKnowledgeAnalysisViews.swift */; };
 		A1000000000000000000101F /* DiaryKnowledgeDetailViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000101F /* DiaryKnowledgeDetailViews.swift */; };
@@ -475,9 +331,6 @@
 		A100000000000000000000FE4 /* DiaryEntryReadSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FE4 /* DiaryEntryReadSections.swift */; };
 		A10000000000000000001186 /* DiaryReadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001186 /* DiaryReadSection.swift */; };
 		A100000000000000000000E6 /* DiarySupportViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000E6 /* DiarySupportViews.swift */; };
-		A100000000000000000000FB4 /* DiaryHistoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FB4 /* DiaryHistoryViews.swift */; };
-		A1000000000000000000117D /* DiaryHistoryRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000117D /* DiaryHistoryRowView.swift */; };
-		A1000000000000000000117E /* DiaryHistoryDetailLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000117E /* DiaryHistoryDetailLoader.swift */; };
 		A100000000000000000000FB5 /* MarkdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FB5 /* MarkdownView.swift */; };
 		A100000000000000000000F33 /* HomeCalendarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000F33 /* HomeCalendarViews.swift */; };
 		A100000000000000000000FFB /* DiaryCalendarSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000000FFB /* DiaryCalendarSupport.swift */; };
@@ -547,8 +400,6 @@
 		A100000000000000000010AC /* VocabularyStudySessionSnapshots.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010AC /* VocabularyStudySessionSnapshots.swift */; };
 		A100000000000000000011AF /* VocabularyStudySessionFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000011AF /* VocabularyStudySessionFormat.swift */; };
 		A100000000000000000010AE /* AIServiceModelConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010AE /* AIServiceModelConfiguration.swift */; };
-		A100000000000000000010B0 /* PDFExamPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010B0 /* PDFExamPersistence.swift */; };
-		A100000000000000000010B1 /* PDFDocumentCascadeDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000000000000000010B1 /* PDFDocumentCascadeDeletion.swift */; };
 		A10000000000000000001235 /* PaperClipReadingTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000001235 /* PaperClipReadingTheme.swift */; };
 /* End PBXBuildFile section */
 
@@ -565,13 +416,9 @@
 		A20000000000000000001107 /* ExamHandwritingLayerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamHandwritingLayerModel.swift; sourceTree = "<group>"; };
 		A20000000000000000001108 /* ExamGradeMarkModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamGradeMarkModel.swift; sourceTree = "<group>"; };
 		A20000000000000000001240 /* ExamPageSubmissionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamPageSubmissionModel.swift; sourceTree = "<group>"; };
-		A20000000000000000001241 /* PDFExamPageSubmission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamPageSubmission.swift; sourceTree = "<group>"; };
-		A20000000000000000001242 /* PDFExamPageProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamPageProgress.swift; sourceTree = "<group>"; };
-		A20000000000000000001243 /* PDFExamResumePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamResumePolicy.swift; sourceTree = "<group>"; };
 		A200000000000000000000F66 /* MistakeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MistakeModels.swift; sourceTree = "<group>"; };
 		A2000000000000000000109A /* ExportRecordModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportRecordModel.swift; sourceTree = "<group>"; };
 		A200000000000000000000F67 /* AcademicTaxonomy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcademicTaxonomy.swift; sourceTree = "<group>"; };
-		A200000000000000000000F68 /* ExamAttemptStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamAttemptStatus.swift; sourceTree = "<group>"; };
 		A200000000000000000000F69 /* MistakePracticeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MistakePracticeModels.swift; sourceTree = "<group>"; };
 		C9000000000000000000B001 /* MistakeLibraryModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MistakeLibraryModels.swift; sourceTree = "<group>"; };
 		C9000000000000000000B002 /* MistakeReviewEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MistakeReviewEngine.swift; sourceTree = "<group>"; };
@@ -592,35 +439,16 @@
 		C9000000000000000000B011 /* MistakeQuestionRendering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MistakeQuestionRendering.swift; sourceTree = "<group>"; };
 		C9000000000000000000B012 /* MistakeQuestionTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MistakeQuestionTextView.swift; sourceTree = "<group>"; };
 		C9000000000000000000B013 /* KaTeX.bundle */ = {isa = PBXFileReference; lastKnownFileType = wrapper.plug-in; path = KaTeX.bundle; sourceTree = "<group>"; };
-		A20000000000000000000003 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
-		A200000000000000000011A1 /* StorageServiceFileSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageServiceFileSupport.swift; sourceTree = "<group>"; };
 		A20000000000000000001013 /* AppStorageDirectory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStorageDirectory.swift; sourceTree = "<group>"; };
 		A200000000000000000011A0 /* StoredFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredFile.swift; sourceTree = "<group>"; };
 		A20000000000000000001041 /* ImageRenderSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRenderSupport.swift; sourceTree = "<group>"; };
 		A20000000000000000001204 /* DrawingDataSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingDataSupport.swift; sourceTree = "<group>"; };
-		A20000000000000000001200 /* PDFRenderSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFRenderSupport.swift; sourceTree = "<group>"; };
-		A20000000000000000001205 /* PDFExamGradingSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamGradingSupport.swift; sourceTree = "<group>"; };
-		A20000000000000000001206 /* PDFExamGradingTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamGradingTransaction.swift; sourceTree = "<group>"; };
-		A2000000000000000000120B /* ShareImageRequestFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareImageRequestFactory.swift; sourceTree = "<group>"; };
 		A2000000000000000000120D /* VocabularyStudySessionTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionTransaction.swift; sourceTree = "<group>"; };
 		A2000000000000000000120E /* VocabularyTestSessionCommitTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestSessionCommitTransaction.swift; sourceTree = "<group>"; };
 		A2000000000000000000120F /* WritingReviewTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingReviewTransaction.swift; sourceTree = "<group>"; };
 		A20000000000000000001014 /* ImageJPEGEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageJPEGEncoder.swift; sourceTree = "<group>"; };
 		A2000000000000000000103D /* ImageEncodingPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageEncodingPlan.swift; sourceTree = "<group>"; };
 		A2000000000000000000103E /* ImageJPEGProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageJPEGProfile.swift; sourceTree = "<group>"; };
-		A20000000000000000001015 /* PDFDrawingRenderSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDrawingRenderSupport.swift; sourceTree = "<group>"; };
-		A20000000000000000001040 /* PDFPageRenderGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageRenderGeometry.swift; sourceTree = "<group>"; };
-		A20000000000000000001030 /* PDFLongImageLayoutSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFLongImageLayoutSupport.swift; sourceTree = "<group>"; };
-		A200000000000000000010B2 /* PDFLongImageStackLayoutSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFLongImageStackLayoutSupport.swift; sourceTree = "<group>"; };
-		A20000000000000000001184 /* PDFPageSelectionSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageSelectionSet.swift; sourceTree = "<group>"; };
-		A20000000000000000001031 /* PDFPageExportSelectionSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageExportSelectionSupport.swift; sourceTree = "<group>"; };
-		A20000000000000000001104 /* PDFPageExportRenderInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageExportRenderInput.swift; sourceTree = "<group>"; };
-		A200000000000000000011A3 /* PDFPageExportRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageExportRequest.swift; sourceTree = "<group>"; };
-		A200000000000000000011A4 /* PDFCanvasUpdateState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFCanvasUpdateState.swift; sourceTree = "<group>"; };
-		A20000000000000000001094 /* PDFPageExportFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageExportFlow.swift; sourceTree = "<group>"; };
-		A20000000000000000001095 /* PDFPageExportAlerts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageExportAlerts.swift; sourceTree = "<group>"; };
-		A20000000000000000001050 /* PDFPageIndexDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageIndexDisplay.swift; sourceTree = "<group>"; };
-		A20000000000000000001051 /* PDFPageDocumentReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageDocumentReader.swift; sourceTree = "<group>"; };
 		A20000000000000000001033 /* CanvasSizeReportSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasSizeReportSupport.swift; sourceTree = "<group>"; };
 		A20000000000000000001034 /* AIServiceErrorMessageSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceErrorMessageSupport.swift; sourceTree = "<group>"; };
 		A20000000000000000001035 /* WritingDraftPersistenceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WritingDraftPersistenceModels.swift; sourceTree = "<group>"; };
@@ -633,7 +461,6 @@
 		A20000000000000000001201 /* MainActorScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainActorScheduler.swift; sourceTree = "<group>"; };
 		A20000000000000000001202 /* VocabularySessionDataLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySessionDataLoading.swift; sourceTree = "<group>"; };
 		A2000000000000000000108B /* SharedAlertModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedAlertModifiers.swift; sourceTree = "<group>"; };
-		A2000000000000000000108C /* SharedFileImportModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedFileImportModifiers.swift; sourceTree = "<group>"; };
 		A2000000000000000000108D /* SharedNavigationModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedNavigationModifiers.swift; sourceTree = "<group>"; };
 		A2000000000000000000108E /* SharedToolbarModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedToolbarModifiers.swift; sourceTree = "<group>"; };
 		A2000000000000000000108F /* OptionalPresentationBinding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionalPresentationBinding.swift; sourceTree = "<group>"; };
@@ -650,84 +477,6 @@
 		A200000000000000000011AD /* HomeViewOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewOperations.swift; sourceTree = "<group>"; };
 		A200000000000000000000FB7 /* HomeKnowledgeViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeKnowledgeViews.swift; sourceTree = "<group>"; };
 		A200000000000000000000FB8 /* HomeDiaryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDiaryDetailView.swift; sourceTree = "<group>"; };
-		A20000000000000000001079 /* PDFDocumentLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentLoader.swift; sourceTree = "<group>"; };
-		A20000000000000000000005 /* PDFWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceView.swift; sourceTree = "<group>"; };
-		A20000000000000000001220 /* PDFWorkspaceSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceSession.swift; sourceTree = "<group>"; };
-		A20000000000000000001221 /* PDFAnswerLayerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFAnswerLayerStore.swift; sourceTree = "<group>"; };
-		A2000000000000000000100A /* PDFWorkspaceCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceCanvasView.swift; sourceTree = "<group>"; };
-		A2000000000000000000100B /* PDFWorkspacePresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspacePresentation.swift; sourceTree = "<group>"; };
-		A200000000000000000011AE /* PDFWorkspaceConfirmationDialogs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceConfirmationDialogs.swift; sourceTree = "<group>"; };
-		A2000000000000000000100C /* PDFWorkspaceToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceToolbar.swift; sourceTree = "<group>"; };
-		A20000000000000000001203 /* PDFWorkspaceToolbarSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceToolbarSnapshot.swift; sourceTree = "<group>"; };
-		A200000000000000000000F3F /* PDFWorkspaceExamFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceExamFlow.swift; sourceTree = "<group>"; };
-		A200000000000000000011BB /* PDFWorkspaceExamActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceExamActivation.swift; sourceTree = "<group>"; };
-		A20000000000000000001000 /* PDFWorkspaceExamHistoryFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceExamHistoryFlow.swift; sourceTree = "<group>"; };
-		A20000000000000000001001 /* PDFWorkspaceExamGradingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceExamGradingFlow.swift; sourceTree = "<group>"; };
-		A20000000000000000001136 /* PDFExamAttemptStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamAttemptStore.swift; sourceTree = "<group>"; };
-		A200000000000000000000F40 /* PDFWorkspaceDrawingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceDrawingFlow.swift; sourceTree = "<group>"; };
-		A200000000000000000000F30 /* PDFPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPersistence.swift; sourceTree = "<group>"; };
-		A200000000000000000000FE /* PDFWorkspaceCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceCore.swift; sourceTree = "<group>"; };
-		A200000000000000000000F2A /* PDFPendingDrawingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPendingDrawingStore.swift; sourceTree = "<group>"; };
-		A200000000000000000000E1 /* PDFExamViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamViews.swift; sourceTree = "<group>"; };
-		A20000000000000000001004 /* PDFExamOverlayViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamOverlayViews.swift; sourceTree = "<group>"; };
-		A20000000000000000001005 /* ShareImageLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareImageLink.swift; sourceTree = "<group>"; };
-		A20000000000000000001006 /* PDFWorkspaceToolbarButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceToolbarButtons.swift; sourceTree = "<group>"; };
-		A200000000000000000010C1 /* ExamPageImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamPageImageRenderer.swift; sourceTree = "<group>"; };
-		A200000000000000000000F5A /* PDFExamHistoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamHistoryViews.swift; sourceTree = "<group>"; };
-		A200000000000000000000F5B /* PDFExamHistorySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamHistorySheet.swift; sourceTree = "<group>"; };
-		A200000000000000000000F5C /* PDFExamPageSelectionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamPageSelectionViews.swift; sourceTree = "<group>"; };
-		A2000000000000000000116F /* PDFExamPageSelectionLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamPageSelectionLoading.swift; sourceTree = "<group>"; };
-		A20000000000000000001170 /* PDFExamPageSelectionToolbarContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamPageSelectionToolbarContent.swift; sourceTree = "<group>"; };
-		A200000000000000000000E2 /* PDFWorkspaceSupportViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFWorkspaceSupportViews.swift; sourceTree = "<group>"; };
-		A200000000000000000000E3 /* ScratchBoardModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardModels.swift; sourceTree = "<group>"; };
-			A20000000000000000001131 /* ScratchBoardToolModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardToolModels.swift; sourceTree = "<group>"; };
-			A20000000000000000001132 /* ScratchBoardInteractionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardInteractionModels.swift; sourceTree = "<group>"; };
-			A20000000000000000001055 /* ScratchBoardPanelGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardPanelGeometry.swift; sourceTree = "<group>"; };
-			A200000000000000000011B5 /* ScratchBoardViewportLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardViewportLogic.swift; sourceTree = "<group>"; };
-				A200000000000000000000FE0 /* ScratchBoardCanvasOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardCanvasOperations.swift; sourceTree = "<group>"; };
-				A2000000000000000000112D /* ScratchBoardShapeGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardShapeGeometry.swift; sourceTree = "<group>"; };
-				A20000000000000000001130 /* ScratchBoardShapePaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardShapePaths.swift; sourceTree = "<group>"; };
-				A200000000000000000011B6 /* ScratchBoardPreviewPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardPreviewPath.swift; sourceTree = "<group>"; };
-				A200000000000000000000FE1 /* ScratchBoardShapeHitTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardShapeHitTesting.swift; sourceTree = "<group>"; };
-			A200000000000000000000E4 /* ScratchBoardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardViews.swift; sourceTree = "<group>"; };
-			A200000000000000000010D2 /* ScratchBoardPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardPresentation.swift; sourceTree = "<group>"; };
-			A20000000000000000001082 /* ScratchBoardCanvasArea.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardCanvasArea.swift; sourceTree = "<group>"; };
-			A200000000000000000011B7 /* ScratchBoardCanvasChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardCanvasChrome.swift; sourceTree = "<group>"; };
-		A200000000000000000000F1A /* ScratchBoardLayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardLayers.swift; sourceTree = "<group>"; };
-		A200000000000000000010C0 /* ScratchGridLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchGridLayer.swift; sourceTree = "<group>"; };
-		A200000000000000000000FC0 /* ScratchBoardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardRenderer.swift; sourceTree = "<group>"; };
-		A200000000000000000000FF7 /* ScratchBoardAngleRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardAngleRenderer.swift; sourceTree = "<group>"; };
-		A200000000000000000000FF8 /* ScratchBoardAnnotationRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardAnnotationRenderer.swift; sourceTree = "<group>"; };
-		A200000000000000000000FCD /* ScratchBoardInteractionRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardInteractionRenderer.swift; sourceTree = "<group>"; };
-		A200000000000000000000F24 /* ScratchBoardControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardControls.swift; sourceTree = "<group>"; };
-		A20000000000000000001101 /* ScratchBoardTitleBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardTitleBar.swift; sourceTree = "<group>"; };
-		A2000000000000000000101E /* ScratchBoardStatusViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardStatusViews.swift; sourceTree = "<group>"; };
-		A200000000000000000000FC2 /* ScratchBoardToolbarControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardToolbarControls.swift; sourceTree = "<group>"; };
-		A200000000000000000010A4 /* ScratchBoardLineGridMenus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardLineGridMenus.swift; sourceTree = "<group>"; };
-		A200000000000000000010A5 /* ScratchBoardSnapMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardSnapMenu.swift; sourceTree = "<group>"; };
-		A200000000000000000010A6 /* ScratchBoardLetterPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardLetterPalette.swift; sourceTree = "<group>"; };
-		A200000000000000000000F4B /* ScratchBoardGeometryLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardGeometryLogic.swift; sourceTree = "<group>"; };
-		A2000000000000000000119D /* ScratchBoardPointDragEnd.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardPointDragEnd.swift; sourceTree = "<group>"; };
-		A200000000000000000010A7 /* ScratchBoardGestureTracking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardGestureTracking.swift; sourceTree = "<group>"; };
-		A200000000000000000000FDC /* ScratchBoardHistoryLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardHistoryLogic.swift; sourceTree = "<group>"; };
-		A200000000000000000000FDD /* ScratchBoardSnapLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardSnapLogic.swift; sourceTree = "<group>"; };
-		A200000000000000000000F4C /* ScratchBoardPanelLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchBoardPanelLayout.swift; sourceTree = "<group>"; };
-		A20000000000000000000006 /* PDFKitCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitCanvasView.swift; sourceTree = "<group>"; };
-		A200000000000000000010CE /* PDFKitCanvasRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitCanvasRepresentable.swift; sourceTree = "<group>"; };
-		A200000000000000000000F76 /* PDFKitCanvasCoordinatorLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitCanvasCoordinatorLifecycle.swift; sourceTree = "<group>"; };
-		A200000000000000000000F77 /* PDFKitCanvasLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitCanvasLayout.swift; sourceTree = "<group>"; };
-		A2000000000000000000114A /* PDFKitCanvasLayoutScheduling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitCanvasLayoutScheduling.swift; sourceTree = "<group>"; };
-		A2000000000000000000114B /* PDFKitCanvasInteractionConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitCanvasInteractionConfiguration.swift; sourceTree = "<group>"; };
-		A200000000000000000000F78 /* PDFKitCanvasDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitCanvasDrawing.swift; sourceTree = "<group>"; };
-		A200000000000000000000F4F /* PDFKitCanvasToolPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitCanvasToolPicker.swift; sourceTree = "<group>"; };
-		A20000000000000000001039 /* PDFToolPickerVisibilitySupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFToolPickerVisibilitySupport.swift; sourceTree = "<group>"; };
-		A20000000000000000001059 /* PDFCanvasFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFCanvasFactory.swift; sourceTree = "<group>"; };
-		A20000000000000000001060 /* PDFPageViewGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageViewGeometry.swift; sourceTree = "<group>"; };
-		A20000000000000000001061 /* PDFInteractionConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFInteractionConfigurator.swift; sourceTree = "<group>"; };
-		A20000000000000000001062 /* PDFDrawingHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDrawingHostView.swift; sourceTree = "<group>"; };
-		A200000000000000000000F3A /* PDFGradeStampSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFGradeStampSupport.swift; sourceTree = "<group>"; };
-		A2000000000000000000116E /* PDFGradeStampModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFGradeStampModels.swift; sourceTree = "<group>"; };
-		A2000000000000000000111F /* PDFGradeStampLabelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFGradeStampLabelFactory.swift; sourceTree = "<group>"; };
 		A20000000000000000000010 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A20000000000000000000012 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		A20000000000000000000013 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -748,7 +497,6 @@
 		A200000000000000000010BA /* AIResponseJSONSanitizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIResponseJSONSanitizer.swift; sourceTree = "<group>"; };
 		A20000000000000000001199 /* AIResponseJSONValueExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIResponseJSONValueExtractor.swift; sourceTree = "<group>"; };
 		A200000000000000000000FCE /* AIDecodingSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDecodingSupport.swift; sourceTree = "<group>"; };
-		A2000000000000000000110D /* AIExamGradingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIExamGradingModels.swift; sourceTree = "<group>"; };
 		A200000000000000000000FD0 /* AIVocabularyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIVocabularyModels.swift; sourceTree = "<group>"; };
 		A200000000000000000000FD1 /* AIKnowledgeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIKnowledgeModels.swift; sourceTree = "<group>"; };
 		A2000000000000000000117B /* VocabularyAIPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyAIPrompts.swift; sourceTree = "<group>"; };
@@ -769,7 +517,6 @@
 		A200000000000000000000FEF /* AIWritingReviewBlueprintModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewBlueprintModels.swift; sourceTree = "<group>"; };
 		A20000000000000000001100 /* AIWritingReviewCoreSceneModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewCoreSceneModels.swift; sourceTree = "<group>"; };
 		A200000000000000000000FF0 /* AIWritingReviewReconstructionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWritingReviewReconstructionModels.swift; sourceTree = "<group>"; };
-		A200000000000000000000FF1 /* AIExamGradingPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIExamGradingPrompt.swift; sourceTree = "<group>"; };
 			A200000000000000000000FF2 /* DiaryAIPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryAIPrompts.swift; sourceTree = "<group>"; };
 			A200000000000000000000FF3 /* KnowledgeAIPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeAIPrompts.swift; sourceTree = "<group>"; };
 			A20000000000000000001169 /* KnowledgeAIAnalysisSubjectStrategies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeAIAnalysisSubjectStrategies.swift; sourceTree = "<group>"; };
@@ -781,7 +528,6 @@
 		A200000000000000000000FE7 /* AIServiceHTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceHTTPClient.swift; sourceTree = "<group>"; };
 		A200000000000000000000F51 /* AIServiceImageEncoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceImageEncoding.swift; sourceTree = "<group>"; };
 		A200000000000000000000F52 /* AIServiceResponseDecoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceResponseDecoding.swift; sourceTree = "<group>"; };
-		A200000000000000000000FA1 /* AIServiceExamGradingProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceExamGradingProcessing.swift; sourceTree = "<group>"; };
 		A200000000000000000000FA2 /* AIServiceVocabularyProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceVocabularyProcessing.swift; sourceTree = "<group>"; };
 		A200000000000000000000FA3 /* AIServiceWritingProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceWritingProcessing.swift; sourceTree = "<group>"; };
 		A200000000000000000000FA4 /* AIServiceKnowledgeDiaryProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceKnowledgeDiaryProcessing.swift; sourceTree = "<group>"; };
@@ -790,32 +536,6 @@
 		A200000000000000000000F89 /* StatisticsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsModels.swift; sourceTree = "<group>"; };
 		A200000000000000000000F90 /* StatisticsCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsCards.swift; sourceTree = "<group>"; };
 		A2000000000000000000104F /* StatisticsCardChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsCardChrome.swift; sourceTree = "<group>"; };
-		A20000000000000000000022 /* ReviewSubmissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionView.swift; sourceTree = "<group>"; };
-		A200000000000000000010D0 /* ReviewSubmissionFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionFlow.swift; sourceTree = "<group>"; };
-		A200000000000000000011A5 /* ReviewSubmissionGenerationRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionGenerationRequest.swift; sourceTree = "<group>"; };
-		A200000000000000000011A6 /* ReviewSubmissionGenerationFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionGenerationFlow.swift; sourceTree = "<group>"; };
-		A200000000000000000011A2 /* ReviewSubmissionSelectionLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionSelectionLoader.swift; sourceTree = "<group>"; };
-		A200000000000000000000FBE /* ReviewSubmissionSupportViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionSupportViews.swift; sourceTree = "<group>"; };
-		A200000000000000000000FBF /* ReviewSubmissionRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionRenderer.swift; sourceTree = "<group>"; };
-		A20000000000000000001167 /* ReviewSubmissionRenderPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionRenderPlan.swift; sourceTree = "<group>"; };
-		A20000000000000000001168 /* ReviewSubmissionPageDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionPageDrawer.swift; sourceTree = "<group>"; };
-		A2000000000000000000111B /* ReviewSubmissionRenderError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionRenderError.swift; sourceTree = "<group>"; };
-		A200000000000000000010B9 /* ReviewSubmissionRenderLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionRenderLayout.swift; sourceTree = "<group>"; };
-		A20000000000000000001037 /* ReviewSubmissionSelectionSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionSelectionSupport.swift; sourceTree = "<group>"; };
-		A2000000000000000000103F /* ReviewSubmissionGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSubmissionGeometry.swift; sourceTree = "<group>"; };
-		A20000000000000000000023 /* PDFPageExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageExportView.swift; sourceTree = "<group>"; };
-		A2000000000000000000111A /* PDFPageExportTaskFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageExportTaskFlow.swift; sourceTree = "<group>"; };
-		A200000000000000000010C9 /* PDFPageExportContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageExportContentView.swift; sourceTree = "<group>"; };
-		A20000000000000000001072 /* PDFPageExportToolbarContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageExportToolbarContent.swift; sourceTree = "<group>"; };
-		A20000000000000000001065 /* PhotoLibraryImageWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryImageWriter.swift; sourceTree = "<group>"; };
-		A20000000000000000001066 /* PDFPageExportProgressOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageExportProgressOverlay.swift; sourceTree = "<group>"; };
-		A20000000000000000001191 /* PDFPageLongImageSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageLongImageSource.swift; sourceTree = "<group>"; };
-		A200000000000000000011B4 /* PDFPageDrawingRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageDrawingRenderer.swift; sourceTree = "<group>"; };
-		A200000000000000000000FDA /* PDFPageLongImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageLongImageRenderer.swift; sourceTree = "<group>"; };
-		A200000000000000000000FDB /* PDFPageSelectionGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageSelectionGrid.swift; sourceTree = "<group>"; };
-		A20000000000000000001063 /* PDFPageSelectionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageSelectionModels.swift; sourceTree = "<group>"; };
-		A20000000000000000001064 /* PDFPageSelectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageSelectionCell.swift; sourceTree = "<group>"; };
-		A20000000000000000001141 /* PDFPageSelectionCellChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPageSelectionCellChrome.swift; sourceTree = "<group>"; };
 		A200000000000000000000F2 /* VocabularyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyModels.swift; sourceTree = "<group>"; };
 		A20000000000000000001117 /* VocabularyCardDerivedProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyCardDerivedProperties.swift; sourceTree = "<group>"; };
 		A200000000000000000010C4 /* VocabularyCoreEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyCoreEnums.swift; sourceTree = "<group>"; };
@@ -827,10 +547,7 @@
 		A20000000000000000001146 /* VocabularyMemoryPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyMemoryPersistence.swift; sourceTree = "<group>"; };
 		A2000000000000000000100F /* VocabularyStudyPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudyPersistence.swift; sourceTree = "<group>"; };
 		A20000000000000000001010 /* VocabularyReviewPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyReviewPersistence.swift; sourceTree = "<group>"; };
-		A20000000000000000001011 /* VocabularyTestDraftPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestDraftPersistence.swift; sourceTree = "<group>"; };
-		A20000000000000000001111 /* VocabularyTestDraftSessionPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestDraftSessionPersistence.swift; sourceTree = "<group>"; };
 		A2000000000000000000116B /* VocabularyTestDraftDrawingAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestDraftDrawingAccess.swift; sourceTree = "<group>"; };
-		A2000000000000000000116C /* VocabularyTestDraftSessionQueries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestDraftSessionQueries.swift; sourceTree = "<group>"; };
 		A20000000000000000001112 /* VocabularyDeckSettingsPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyDeckSettingsPersistence.swift; sourceTree = "<group>"; };
 		A20000000000000000001012 /* VocabularyDistractorPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyDistractorPersistence.swift; sourceTree = "<group>"; };
 		A20000000000000000001038 /* VocabularyDistractorReplacementSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyDistractorReplacementSupport.swift; sourceTree = "<group>"; };
@@ -856,7 +573,6 @@
 			A200000000000000000000FD5 /* VocabularyAnswerChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyAnswerChecker.swift; sourceTree = "<group>"; };
 		A200000000000000000000FD6 /* VocabularyWeightedMastery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyWeightedMastery.swift; sourceTree = "<group>"; };
 		A200000000000000000000FD7 /* VocabularyTestDraftRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestDraftRuntime.swift; sourceTree = "<group>"; };
-		A200000000000000000000FD8 /* VocabularyTestDraftSnapshots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestDraftSnapshots.swift; sourceTree = "<group>"; };
 		A2000000000000000000111E /* VocabularyTestDraftSnapshotBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestDraftSnapshotBuilder.swift; sourceTree = "<group>"; };
 		A200000000000000000000F4 /* VocabularyTextImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTextImporter.swift; sourceTree = "<group>"; };
 		A20000000000000000001097 /* VocabularyTextImportModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTextImportModels.swift; sourceTree = "<group>"; };
@@ -875,11 +591,6 @@
 		A20000000000000000001171 /* VocabularyHomeOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyHomeOperations.swift; sourceTree = "<group>"; };
 			A200000000000000000010C2 /* VocabularyHomeContentViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyHomeContentViews.swift; sourceTree = "<group>"; };
 			A20000000000000000001231 /* VocabularyFolderViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyFolderViews.swift; sourceTree = "<group>"; };
-			A20000000000000000001232 /* VocabularyArticleRecitation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleRecitation.swift; sourceTree = "<group>"; };
-			A20000000000000000001233 /* VocabularyArticleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleView.swift; sourceTree = "<group>"; };
-			A20000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleSpeechRecognizer.swift; sourceTree = "<group>"; };
-			A20000000000000000001236 /* VocabularyArticleModePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleModePolicy.swift; sourceTree = "<group>"; };
-			A20000000000000000001239 /* VocabularyArticleGenerationFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyArticleGenerationFlow.swift; sourceTree = "<group>"; };
 			D0DEC0DE0000000000000001 /* VocabularyContextPractice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyContextPractice.swift; sourceTree = "<group>"; };
 			D0DEC0DE0000000000000002 /* VocabularyContextAIPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyContextAIPrompts.swift; sourceTree = "<group>"; };
 			D0DEC0DE0000000000000003 /* AIServiceVocabularyContextProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceVocabularyContextProcessing.swift; sourceTree = "<group>"; };
@@ -921,7 +632,6 @@
 		A200000000000000000010C6 /* VocabularyImportFileLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyImportFileLoading.swift; sourceTree = "<group>"; };
 		A200000000000000000000F6 /* VocabularySessionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySessionViews.swift; sourceTree = "<group>"; };
 		A200000000000000000000F9D /* VocabularyTestSessionData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestSessionData.swift; sourceTree = "<group>"; };
-		A200000000000000000000F9E /* VocabularyTestDraftFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestDraftFlow.swift; sourceTree = "<group>"; };
 		A200000000000000000000F9F /* VocabularyTestGradingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestGradingFlow.swift; sourceTree = "<group>"; };
 		A2000000000000000000111D /* VocabularyTestGradingTaskFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestGradingTaskFlow.swift; sourceTree = "<group>"; };
 		A200000000000000000000FA0 /* VocabularyTestSessionCommit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTestSessionCommit.swift; sourceTree = "<group>"; };
@@ -988,7 +698,6 @@
 		A2000000000000000000105B /* DiaryPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryPersistence.swift; sourceTree = "<group>"; };
 		A200000000000000000000F2D /* DiaryViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryViewModels.swift; sourceTree = "<group>"; };
 		A20000000000000000001194 /* ViewTaskSlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewTaskSlot.swift; sourceTree = "<group>"; };
-		A20000000000000000001056 /* DiaryHistoryRowData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryHistoryRowData.swift; sourceTree = "<group>"; };
 		A20000000000000000001057 /* DiaryKnowledgeSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryKnowledgeSnapshot.swift; sourceTree = "<group>"; };
 		A200000000000000000000FB /* DiaryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryViews.swift; sourceTree = "<group>"; };
 		A2000000000000000000116D /* DiaryEntryDetailPhaseViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryEntryDetailPhaseViews.swift; sourceTree = "<group>"; };
@@ -1001,11 +710,9 @@
 		A20000000000000000001123 /* PaperClipModelContainerFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperClipModelContainerFactory.swift; sourceTree = "<group>"; };
 		A20000000000000000001124 /* PaperClipRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperClipRootView.swift; sourceTree = "<group>"; };
 		A20000000000000000001125 /* PaperClipStartup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperClipStartup.swift; sourceTree = "<group>"; };
-		A20000000000000000001126 /* PDFKitCanvasSizeReporting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFKitCanvasSizeReporting.swift; sourceTree = "<group>"; };
 		A20000000000000000001127 /* AIServiceDeepSeekPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceDeepSeekPayloads.swift; sourceTree = "<group>"; };
 		A20000000000000000001128 /* AIServiceErrorPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceErrorPayloads.swift; sourceTree = "<group>"; };
 		A20000000000000000001129 /* AIServiceResponsesPayloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceResponsesPayloads.swift; sourceTree = "<group>"; };
-		A2000000000000000000112A /* PDFExamHistoryStatusStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamHistoryStatusStyle.swift; sourceTree = "<group>"; };
 		A2000000000000000000112B /* HomeDiaryDetailFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDiaryDetailFlow.swift; sourceTree = "<group>"; };
 		A20000000000000000001069 /* DiaryKnowledgeAnalysisViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryKnowledgeAnalysisViews.swift; sourceTree = "<group>"; };
 		A2000000000000000000101F /* DiaryKnowledgeDetailViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryKnowledgeDetailViews.swift; sourceTree = "<group>"; };
@@ -1022,9 +729,6 @@
 		A200000000000000000000FE4 /* DiaryEntryReadSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryEntryReadSections.swift; sourceTree = "<group>"; };
 		A20000000000000000001186 /* DiaryReadSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryReadSection.swift; sourceTree = "<group>"; };
 		A200000000000000000000E6 /* DiarySupportViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiarySupportViews.swift; sourceTree = "<group>"; };
-		A200000000000000000000FB4 /* DiaryHistoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryHistoryViews.swift; sourceTree = "<group>"; };
-		A2000000000000000000117D /* DiaryHistoryRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryHistoryRowView.swift; sourceTree = "<group>"; };
-		A2000000000000000000117E /* DiaryHistoryDetailLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryHistoryDetailLoader.swift; sourceTree = "<group>"; };
 		A200000000000000000000FB5 /* MarkdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownView.swift; sourceTree = "<group>"; };
 		A200000000000000000000F33 /* HomeCalendarViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCalendarViews.swift; sourceTree = "<group>"; };
 		A200000000000000000000FFB /* DiaryCalendarSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiaryCalendarSupport.swift; sourceTree = "<group>"; };
@@ -1094,8 +798,6 @@
 		A200000000000000000010AC /* VocabularyStudySessionSnapshots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionSnapshots.swift; sourceTree = "<group>"; };
 		A200000000000000000011AF /* VocabularyStudySessionFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyStudySessionFormat.swift; sourceTree = "<group>"; };
 		A200000000000000000010AE /* AIServiceModelConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceModelConfiguration.swift; sourceTree = "<group>"; };
-		A200000000000000000010B0 /* PDFExamPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExamPersistence.swift; sourceTree = "<group>"; };
-		A200000000000000000010B1 /* PDFDocumentCascadeDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFDocumentCascadeDeletion.swift; sourceTree = "<group>"; };
 		A20000000000000000000011 /* PaperClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaperClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -1136,13 +838,9 @@
 				A20000000000000000001107 /* ExamHandwritingLayerModel.swift */,
 				A20000000000000000001108 /* ExamGradeMarkModel.swift */,
 				A20000000000000000001240 /* ExamPageSubmissionModel.swift */,
-				A20000000000000000001241 /* PDFExamPageSubmission.swift */,
-				A20000000000000000001242 /* PDFExamPageProgress.swift */,
-				A20000000000000000001243 /* PDFExamResumePolicy.swift */,
 				A200000000000000000000F66 /* MistakeModels.swift */,
 				A2000000000000000000109A /* ExportRecordModel.swift */,
 				A200000000000000000000F67 /* AcademicTaxonomy.swift */,
-				A200000000000000000000F68 /* ExamAttemptStatus.swift */,
 				A200000000000000000000F69 /* MistakePracticeModels.swift */,
 				C9000000000000000000B001 /* MistakeLibraryModels.swift */,
 				C9000000000000000000B002 /* MistakeReviewEngine.swift */,
@@ -1163,33 +861,16 @@
 				C9000000000000000000B011 /* MistakeQuestionRendering.swift */,
 				C9000000000000000000B012 /* MistakeQuestionTextView.swift */,
 				C9000000000000000000B013 /* KaTeX.bundle */,
-				A20000000000000000000003 /* StorageService.swift */,
-				A200000000000000000011A1 /* StorageServiceFileSupport.swift */,
 				A20000000000000000001013 /* AppStorageDirectory.swift */,
 				A200000000000000000011A0 /* StoredFile.swift */,
 				A20000000000000000001041 /* ImageRenderSupport.swift */,
 				A20000000000000000001204 /* DrawingDataSupport.swift */,
-				A20000000000000000001200 /* PDFRenderSupport.swift */,
-				A20000000000000000001205 /* PDFExamGradingSupport.swift */,
-				A20000000000000000001206 /* PDFExamGradingTransaction.swift */,
-				A2000000000000000000120B /* ShareImageRequestFactory.swift */,
 				A2000000000000000000120D /* VocabularyStudySessionTransaction.swift */,
 				A2000000000000000000120E /* VocabularyTestSessionCommitTransaction.swift */,
 				A2000000000000000000120F /* WritingReviewTransaction.swift */,
 				A20000000000000000001014 /* ImageJPEGEncoder.swift */,
 				A2000000000000000000103D /* ImageEncodingPlan.swift */,
 				A2000000000000000000103E /* ImageJPEGProfile.swift */,
-				A20000000000000000001015 /* PDFDrawingRenderSupport.swift */,
-				A20000000000000000001040 /* PDFPageRenderGeometry.swift */,
-				A20000000000000000001030 /* PDFLongImageLayoutSupport.swift */,
-				A200000000000000000010B2 /* PDFLongImageStackLayoutSupport.swift */,
-				A20000000000000000001184 /* PDFPageSelectionSet.swift */,
-				A20000000000000000001031 /* PDFPageExportSelectionSupport.swift */,
-				A20000000000000000001104 /* PDFPageExportRenderInput.swift */,
-				A200000000000000000011A3 /* PDFPageExportRequest.swift */,
-				A200000000000000000011A4 /* PDFCanvasUpdateState.swift */,
-				A20000000000000000001050 /* PDFPageIndexDisplay.swift */,
-				A20000000000000000001051 /* PDFPageDocumentReader.swift */,
 				A20000000000000000001033 /* CanvasSizeReportSupport.swift */,
 				A20000000000000000001034 /* AIServiceErrorMessageSupport.swift */,
 				A20000000000000000001035 /* WritingDraftPersistenceModels.swift */,
@@ -1200,7 +881,6 @@
 				A200000000000000000000F5F /* DebouncedAction.swift */,
 				A20000000000000000001201 /* MainActorScheduler.swift */,
 				A2000000000000000000108B /* SharedAlertModifiers.swift */,
-				A2000000000000000000108C /* SharedFileImportModifiers.swift */,
 				A2000000000000000000108D /* SharedNavigationModifiers.swift */,
 				A2000000000000000000108E /* SharedToolbarModifiers.swift */,
 				A2000000000000000000108F /* OptionalPresentationBinding.swift */,
@@ -1219,88 +899,6 @@
 				A200000000000000000000FB7 /* HomeKnowledgeViews.swift */,
 				A200000000000000000000FB8 /* HomeDiaryDetailView.swift */,
 				A2000000000000000000112B /* HomeDiaryDetailFlow.swift */,
-				A20000000000000000001079 /* PDFDocumentLoader.swift */,
-				A20000000000000000000005 /* PDFWorkspaceView.swift */,
-				A20000000000000000001220 /* PDFWorkspaceSession.swift */,
-				A20000000000000000001221 /* PDFAnswerLayerStore.swift */,
-				A2000000000000000000100A /* PDFWorkspaceCanvasView.swift */,
-				A2000000000000000000100B /* PDFWorkspacePresentation.swift */,
-				A200000000000000000011AE /* PDFWorkspaceConfirmationDialogs.swift */,
-				A2000000000000000000100C /* PDFWorkspaceToolbar.swift */,
-				A20000000000000000001203 /* PDFWorkspaceToolbarSnapshot.swift */,
-				A200000000000000000000F3F /* PDFWorkspaceExamFlow.swift */,
-				A200000000000000000011BB /* PDFWorkspaceExamActivation.swift */,
-				A20000000000000000001000 /* PDFWorkspaceExamHistoryFlow.swift */,
-				A20000000000000000001001 /* PDFWorkspaceExamGradingFlow.swift */,
-				A20000000000000000001136 /* PDFExamAttemptStore.swift */,
-				A200000000000000000000F40 /* PDFWorkspaceDrawingFlow.swift */,
-				A200000000000000000000F30 /* PDFPersistence.swift */,
-				A200000000000000000010B0 /* PDFExamPersistence.swift */,
-				A200000000000000000010B1 /* PDFDocumentCascadeDeletion.swift */,
-				A200000000000000000000FE /* PDFWorkspaceCore.swift */,
-				A200000000000000000000F2A /* PDFPendingDrawingStore.swift */,
-				A200000000000000000000E1 /* PDFExamViews.swift */,
-				A20000000000000000001004 /* PDFExamOverlayViews.swift */,
-				A20000000000000000001005 /* ShareImageLink.swift */,
-				A20000000000000000001006 /* PDFWorkspaceToolbarButtons.swift */,
-				A200000000000000000010C1 /* ExamPageImageRenderer.swift */,
-				A200000000000000000000F5A /* PDFExamHistoryViews.swift */,
-				A2000000000000000000112A /* PDFExamHistoryStatusStyle.swift */,
-				A200000000000000000000F5B /* PDFExamHistorySheet.swift */,
-				A200000000000000000000F5C /* PDFExamPageSelectionViews.swift */,
-				A2000000000000000000116F /* PDFExamPageSelectionLoading.swift */,
-				A20000000000000000001170 /* PDFExamPageSelectionToolbarContent.swift */,
-				A200000000000000000000E2 /* PDFWorkspaceSupportViews.swift */,
-					A200000000000000000000E3 /* ScratchBoardModels.swift */,
-					A20000000000000000001131 /* ScratchBoardToolModels.swift */,
-					A20000000000000000001132 /* ScratchBoardInteractionModels.swift */,
-					A20000000000000000001055 /* ScratchBoardPanelGeometry.swift */,
-					A200000000000000000011B5 /* ScratchBoardViewportLogic.swift */,
-						A200000000000000000000FE0 /* ScratchBoardCanvasOperations.swift */,
-						A2000000000000000000112D /* ScratchBoardShapeGeometry.swift */,
-						A20000000000000000001130 /* ScratchBoardShapePaths.swift */,
-						A200000000000000000011B6 /* ScratchBoardPreviewPath.swift */,
-						A200000000000000000000FE1 /* ScratchBoardShapeHitTesting.swift */,
-					A200000000000000000000E4 /* ScratchBoardViews.swift */,
-					A200000000000000000010D2 /* ScratchBoardPresentation.swift */,
-					A20000000000000000001082 /* ScratchBoardCanvasArea.swift */,
-					A200000000000000000011B7 /* ScratchBoardCanvasChrome.swift */,
-				A200000000000000000000F1A /* ScratchBoardLayers.swift */,
-				A200000000000000000010C0 /* ScratchGridLayer.swift */,
-				A200000000000000000000FC0 /* ScratchBoardRenderer.swift */,
-				A200000000000000000000FF7 /* ScratchBoardAngleRenderer.swift */,
-				A200000000000000000000FF8 /* ScratchBoardAnnotationRenderer.swift */,
-				A200000000000000000000FCD /* ScratchBoardInteractionRenderer.swift */,
-				A200000000000000000000F24 /* ScratchBoardControls.swift */,
-				A20000000000000000001101 /* ScratchBoardTitleBar.swift */,
-				A2000000000000000000101E /* ScratchBoardStatusViews.swift */,
-				A200000000000000000000FC2 /* ScratchBoardToolbarControls.swift */,
-				A200000000000000000010A4 /* ScratchBoardLineGridMenus.swift */,
-				A200000000000000000010A5 /* ScratchBoardSnapMenu.swift */,
-				A200000000000000000010A6 /* ScratchBoardLetterPalette.swift */,
-				A200000000000000000000F4B /* ScratchBoardGeometryLogic.swift */,
-				A2000000000000000000119D /* ScratchBoardPointDragEnd.swift */,
-				A200000000000000000010A7 /* ScratchBoardGestureTracking.swift */,
-				A200000000000000000000FDC /* ScratchBoardHistoryLogic.swift */,
-				A200000000000000000000FDD /* ScratchBoardSnapLogic.swift */,
-				A200000000000000000000F4C /* ScratchBoardPanelLayout.swift */,
-				A20000000000000000000006 /* PDFKitCanvasView.swift */,
-				A200000000000000000010CE /* PDFKitCanvasRepresentable.swift */,
-				A200000000000000000000F76 /* PDFKitCanvasCoordinatorLifecycle.swift */,
-				A200000000000000000000F77 /* PDFKitCanvasLayout.swift */,
-				A2000000000000000000114A /* PDFKitCanvasLayoutScheduling.swift */,
-				A2000000000000000000114B /* PDFKitCanvasInteractionConfiguration.swift */,
-				A20000000000000000001126 /* PDFKitCanvasSizeReporting.swift */,
-				A200000000000000000000F78 /* PDFKitCanvasDrawing.swift */,
-				A200000000000000000000F4F /* PDFKitCanvasToolPicker.swift */,
-				A20000000000000000001039 /* PDFToolPickerVisibilitySupport.swift */,
-				A20000000000000000001059 /* PDFCanvasFactory.swift */,
-				A20000000000000000001060 /* PDFPageViewGeometry.swift */,
-				A20000000000000000001061 /* PDFInteractionConfigurator.swift */,
-				A20000000000000000001062 /* PDFDrawingHostView.swift */,
-				A200000000000000000000F3A /* PDFGradeStampSupport.swift */,
-				A2000000000000000000116E /* PDFGradeStampModels.swift */,
-				A2000000000000000000111F /* PDFGradeStampLabelFactory.swift */,
 				A20000000000000000000010 /* Assets.xcassets */,
 				A20000000000000000000012 /* KeychainService.swift */,
 				A20000000000000000000013 /* SettingsView.swift */,
@@ -1321,7 +919,6 @@
 				A200000000000000000010BA /* AIResponseJSONSanitizer.swift */,
 				A20000000000000000001199 /* AIResponseJSONValueExtractor.swift */,
 				A200000000000000000000FCE /* AIDecodingSupport.swift */,
-				A2000000000000000000110D /* AIExamGradingModels.swift */,
 				A200000000000000000000FD0 /* AIVocabularyModels.swift */,
 				A200000000000000000000FD1 /* AIKnowledgeModels.swift */,
 				A2000000000000000000117B /* VocabularyAIPrompts.swift */,
@@ -1345,7 +942,6 @@
 				A200000000000000000000FEF /* AIWritingReviewBlueprintModels.swift */,
 				A20000000000000000001100 /* AIWritingReviewCoreSceneModels.swift */,
 				A200000000000000000000FF0 /* AIWritingReviewReconstructionModels.swift */,
-				A200000000000000000000FF1 /* AIExamGradingPrompt.swift */,
 					A200000000000000000000FF2 /* DiaryAIPrompts.swift */,
 					A200000000000000000000FF3 /* KnowledgeAIPrompts.swift */,
 					A20000000000000000001169 /* KnowledgeAIAnalysisSubjectStrategies.swift */,
@@ -1358,7 +954,6 @@
 				A200000000000000000000FE7 /* AIServiceHTTPClient.swift */,
 				A200000000000000000000F51 /* AIServiceImageEncoding.swift */,
 				A200000000000000000000F52 /* AIServiceResponseDecoding.swift */,
-				A200000000000000000000FA1 /* AIServiceExamGradingProcessing.swift */,
 				A200000000000000000000FA2 /* AIServiceVocabularyProcessing.swift */,
 				A200000000000000000000FA3 /* AIServiceWritingProcessing.swift */,
 				A200000000000000000000FA4 /* AIServiceKnowledgeDiaryProcessing.swift */,
@@ -1367,34 +962,6 @@
 				A200000000000000000000F89 /* StatisticsModels.swift */,
 				A200000000000000000000F90 /* StatisticsCards.swift */,
 				A2000000000000000000104F /* StatisticsCardChrome.swift */,
-				A20000000000000000000022 /* ReviewSubmissionView.swift */,
-				A200000000000000000010D0 /* ReviewSubmissionFlow.swift */,
-				A200000000000000000011A5 /* ReviewSubmissionGenerationRequest.swift */,
-				A200000000000000000011A6 /* ReviewSubmissionGenerationFlow.swift */,
-				A200000000000000000011A2 /* ReviewSubmissionSelectionLoader.swift */,
-				A200000000000000000000FBE /* ReviewSubmissionSupportViews.swift */,
-				A200000000000000000000FBF /* ReviewSubmissionRenderer.swift */,
-				A20000000000000000001167 /* ReviewSubmissionRenderPlan.swift */,
-				A20000000000000000001168 /* ReviewSubmissionPageDrawer.swift */,
-				A2000000000000000000111B /* ReviewSubmissionRenderError.swift */,
-				A200000000000000000010B9 /* ReviewSubmissionRenderLayout.swift */,
-				A20000000000000000001037 /* ReviewSubmissionSelectionSupport.swift */,
-				A2000000000000000000103F /* ReviewSubmissionGeometry.swift */,
-				A20000000000000000000023 /* PDFPageExportView.swift */,
-				A2000000000000000000111A /* PDFPageExportTaskFlow.swift */,
-				A200000000000000000010C9 /* PDFPageExportContentView.swift */,
-				A20000000000000000001094 /* PDFPageExportFlow.swift */,
-				A20000000000000000001095 /* PDFPageExportAlerts.swift */,
-				A20000000000000000001072 /* PDFPageExportToolbarContent.swift */,
-				A20000000000000000001065 /* PhotoLibraryImageWriter.swift */,
-				A20000000000000000001066 /* PDFPageExportProgressOverlay.swift */,
-				A20000000000000000001191 /* PDFPageLongImageSource.swift */,
-				A200000000000000000011B4 /* PDFPageDrawingRenderer.swift */,
-				A200000000000000000000FDA /* PDFPageLongImageRenderer.swift */,
-				A200000000000000000000FDB /* PDFPageSelectionGrid.swift */,
-				A20000000000000000001063 /* PDFPageSelectionModels.swift */,
-				A20000000000000000001064 /* PDFPageSelectionCell.swift */,
-				A20000000000000000001141 /* PDFPageSelectionCellChrome.swift */,
 				A200000000000000000000F2 /* VocabularyModels.swift */,
 				A20000000000000000001117 /* VocabularyCardDerivedProperties.swift */,
 				A200000000000000000010C4 /* VocabularyCoreEnums.swift */,
@@ -1418,10 +985,7 @@
 				A20000000000000000001146 /* VocabularyMemoryPersistence.swift */,
 				A2000000000000000000100F /* VocabularyStudyPersistence.swift */,
 				A20000000000000000001010 /* VocabularyReviewPersistence.swift */,
-				A20000000000000000001011 /* VocabularyTestDraftPersistence.swift */,
-				A20000000000000000001111 /* VocabularyTestDraftSessionPersistence.swift */,
 				A2000000000000000000116B /* VocabularyTestDraftDrawingAccess.swift */,
-				A2000000000000000000116C /* VocabularyTestDraftSessionQueries.swift */,
 				A20000000000000000001112 /* VocabularyDeckSettingsPersistence.swift */,
 				A20000000000000000001012 /* VocabularyDistractorPersistence.swift */,
 				A20000000000000000001038 /* VocabularyDistractorReplacementSupport.swift */,
@@ -1447,7 +1011,6 @@
 					A200000000000000000000FD5 /* VocabularyAnswerChecker.swift */,
 				A200000000000000000000FD6 /* VocabularyWeightedMastery.swift */,
 				A200000000000000000000FD7 /* VocabularyTestDraftRuntime.swift */,
-				A200000000000000000000FD8 /* VocabularyTestDraftSnapshots.swift */,
 				A2000000000000000000111E /* VocabularyTestDraftSnapshotBuilder.swift */,
 				A200000000000000000000F4 /* VocabularyTextImporter.swift */,
 				A20000000000000000001097 /* VocabularyTextImportModels.swift */,
@@ -1466,11 +1029,6 @@
 				A20000000000000000001171 /* VocabularyHomeOperations.swift */,
 				A200000000000000000010C2 /* VocabularyHomeContentViews.swift */,
 				A20000000000000000001231 /* VocabularyFolderViews.swift */,
-				A20000000000000000001232 /* VocabularyArticleRecitation.swift */,
-				A20000000000000000001233 /* VocabularyArticleView.swift */,
-				A20000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift */,
-				A20000000000000000001236 /* VocabularyArticleModePolicy.swift */,
-				A20000000000000000001239 /* VocabularyArticleGenerationFlow.swift */,
 				D0DEC0DE0000000000000001 /* VocabularyContextPractice.swift */,
 				D0DEC0DE0000000000000002 /* VocabularyContextAIPrompts.swift */,
 				D0DEC0DE0000000000000003 /* AIServiceVocabularyContextProcessing.swift */,
@@ -1502,7 +1060,6 @@
 				A200000000000000000000F6 /* VocabularySessionViews.swift */,
 				A20000000000000000001202 /* VocabularySessionDataLoading.swift */,
 				A200000000000000000000F9D /* VocabularyTestSessionData.swift */,
-				A200000000000000000000F9E /* VocabularyTestDraftFlow.swift */,
 				A200000000000000000000F9F /* VocabularyTestGradingFlow.swift */,
 				A2000000000000000000111D /* VocabularyTestGradingTaskFlow.swift */,
 				A200000000000000000000FA0 /* VocabularyTestSessionCommit.swift */,
@@ -1571,7 +1128,6 @@
 				A2000000000000000000105B /* DiaryPersistence.swift */,
 				A200000000000000000000F2D /* DiaryViewModels.swift */,
 				A20000000000000000001194 /* ViewTaskSlot.swift */,
-				A20000000000000000001056 /* DiaryHistoryRowData.swift */,
 				A20000000000000000001057 /* DiaryKnowledgeSnapshot.swift */,
 				A200000000000000000000FB /* DiaryViews.swift */,
 				A2000000000000000000116D /* DiaryEntryDetailPhaseViews.swift */,
@@ -1594,9 +1150,6 @@
 				A200000000000000000000FE4 /* DiaryEntryReadSections.swift */,
 				A20000000000000000001186 /* DiaryReadSection.swift */,
 				A200000000000000000000E6 /* DiarySupportViews.swift */,
-				A200000000000000000000FB4 /* DiaryHistoryViews.swift */,
-				A2000000000000000000117D /* DiaryHistoryRowView.swift */,
-				A2000000000000000000117E /* DiaryHistoryDetailLoader.swift */,
 				A200000000000000000000FB5 /* MarkdownView.swift */,
 				A200000000000000000000F33 /* HomeCalendarViews.swift */,
 				A200000000000000000000FFB /* DiaryCalendarSupport.swift */,
@@ -1766,13 +1319,9 @@
 				A10000000000000000001107 /* ExamHandwritingLayerModel.swift in Sources */,
 				A10000000000000000001108 /* ExamGradeMarkModel.swift in Sources */,
 				A10000000000000000001240 /* ExamPageSubmissionModel.swift in Sources */,
-				A10000000000000000001241 /* PDFExamPageSubmission.swift in Sources */,
-				A10000000000000000001242 /* PDFExamPageProgress.swift in Sources */,
-				A10000000000000000001243 /* PDFExamResumePolicy.swift in Sources */,
 				A100000000000000000000F66 /* MistakeModels.swift in Sources */,
 				A1000000000000000000109A /* ExportRecordModel.swift in Sources */,
 				A100000000000000000000F67 /* AcademicTaxonomy.swift in Sources */,
-				A100000000000000000000F68 /* ExamAttemptStatus.swift in Sources */,
 				A100000000000000000000F69 /* MistakePracticeModels.swift in Sources */,
 				C9000000000000000000A001 /* MistakeLibraryModels.swift in Sources */,
 				C9000000000000000000A002 /* MistakeReviewEngine.swift in Sources */,
@@ -1792,33 +1341,16 @@
 				C9000000000000000000A010 /* MistakeScannerAccessPolicy.swift in Sources */,
 				C9000000000000000000A011 /* MistakeQuestionRendering.swift in Sources */,
 				C9000000000000000000A012 /* MistakeQuestionTextView.swift in Sources */,
-				A10000000000000000000003 /* StorageService.swift in Sources */,
-				A100000000000000000011A1 /* StorageServiceFileSupport.swift in Sources */,
 				A10000000000000000001013 /* AppStorageDirectory.swift in Sources */,
 				A100000000000000000011A0 /* StoredFile.swift in Sources */,
 				A10000000000000000001041 /* ImageRenderSupport.swift in Sources */,
 				A10000000000000000001204 /* DrawingDataSupport.swift in Sources */,
-				A10000000000000000001200 /* PDFRenderSupport.swift in Sources */,
-				A10000000000000000001205 /* PDFExamGradingSupport.swift in Sources */,
-				A10000000000000000001206 /* PDFExamGradingTransaction.swift in Sources */,
-				A1000000000000000000120B /* ShareImageRequestFactory.swift in Sources */,
 				A1000000000000000000120D /* VocabularyStudySessionTransaction.swift in Sources */,
 				A1000000000000000000120E /* VocabularyTestSessionCommitTransaction.swift in Sources */,
 				A1000000000000000000120F /* WritingReviewTransaction.swift in Sources */,
 				A10000000000000000001014 /* ImageJPEGEncoder.swift in Sources */,
 				A1000000000000000000103D /* ImageEncodingPlan.swift in Sources */,
 				A1000000000000000000103E /* ImageJPEGProfile.swift in Sources */,
-				A10000000000000000001015 /* PDFDrawingRenderSupport.swift in Sources */,
-				A10000000000000000001040 /* PDFPageRenderGeometry.swift in Sources */,
-				A10000000000000000001030 /* PDFLongImageLayoutSupport.swift in Sources */,
-				A100000000000000000010B2 /* PDFLongImageStackLayoutSupport.swift in Sources */,
-				A10000000000000000001184 /* PDFPageSelectionSet.swift in Sources */,
-				A10000000000000000001031 /* PDFPageExportSelectionSupport.swift in Sources */,
-				A10000000000000000001104 /* PDFPageExportRenderInput.swift in Sources */,
-				A100000000000000000011A3 /* PDFPageExportRequest.swift in Sources */,
-				A100000000000000000011A4 /* PDFCanvasUpdateState.swift in Sources */,
-				A10000000000000000001050 /* PDFPageIndexDisplay.swift in Sources */,
-				A10000000000000000001051 /* PDFPageDocumentReader.swift in Sources */,
 				A10000000000000000001033 /* CanvasSizeReportSupport.swift in Sources */,
 				A10000000000000000001034 /* AIServiceErrorMessageSupport.swift in Sources */,
 				A10000000000000000001035 /* WritingDraftPersistenceModels.swift in Sources */,
@@ -1829,7 +1361,6 @@
 				A100000000000000000000F5F /* DebouncedAction.swift in Sources */,
 				A10000000000000000001201 /* MainActorScheduler.swift in Sources */,
 				A1000000000000000000108B /* SharedAlertModifiers.swift in Sources */,
-				A1000000000000000000108C /* SharedFileImportModifiers.swift in Sources */,
 				A1000000000000000000108D /* SharedNavigationModifiers.swift in Sources */,
 				A1000000000000000000108E /* SharedToolbarModifiers.swift in Sources */,
 				A1000000000000000000108F /* OptionalPresentationBinding.swift in Sources */,
@@ -1848,88 +1379,6 @@
 				A100000000000000000000FB7 /* HomeKnowledgeViews.swift in Sources */,
 				A100000000000000000000FB8 /* HomeDiaryDetailView.swift in Sources */,
 				A1000000000000000000112B /* HomeDiaryDetailFlow.swift in Sources */,
-				A10000000000000000001079 /* PDFDocumentLoader.swift in Sources */,
-				A10000000000000000000005 /* PDFWorkspaceView.swift in Sources */,
-				A10000000000000000001220 /* PDFWorkspaceSession.swift in Sources */,
-				A10000000000000000001221 /* PDFAnswerLayerStore.swift in Sources */,
-				A1000000000000000000100A /* PDFWorkspaceCanvasView.swift in Sources */,
-				A1000000000000000000100B /* PDFWorkspacePresentation.swift in Sources */,
-				A100000000000000000011AE /* PDFWorkspaceConfirmationDialogs.swift in Sources */,
-				A1000000000000000000100C /* PDFWorkspaceToolbar.swift in Sources */,
-				A10000000000000000001203 /* PDFWorkspaceToolbarSnapshot.swift in Sources */,
-				A100000000000000000000F3F /* PDFWorkspaceExamFlow.swift in Sources */,
-				A100000000000000000011BB /* PDFWorkspaceExamActivation.swift in Sources */,
-				A10000000000000000001000 /* PDFWorkspaceExamHistoryFlow.swift in Sources */,
-				A10000000000000000001001 /* PDFWorkspaceExamGradingFlow.swift in Sources */,
-				A10000000000000000001136 /* PDFExamAttemptStore.swift in Sources */,
-				A100000000000000000000F40 /* PDFWorkspaceDrawingFlow.swift in Sources */,
-				A100000000000000000000F30 /* PDFPersistence.swift in Sources */,
-				A100000000000000000010B0 /* PDFExamPersistence.swift in Sources */,
-				A100000000000000000010B1 /* PDFDocumentCascadeDeletion.swift in Sources */,
-				A100000000000000000000FE /* PDFWorkspaceCore.swift in Sources */,
-				A100000000000000000000F2A /* PDFPendingDrawingStore.swift in Sources */,
-				A100000000000000000000E1 /* PDFExamViews.swift in Sources */,
-				A10000000000000000001004 /* PDFExamOverlayViews.swift in Sources */,
-				A10000000000000000001005 /* ShareImageLink.swift in Sources */,
-				A10000000000000000001006 /* PDFWorkspaceToolbarButtons.swift in Sources */,
-				A100000000000000000010C1 /* ExamPageImageRenderer.swift in Sources */,
-				A100000000000000000000F5A /* PDFExamHistoryViews.swift in Sources */,
-				A1000000000000000000112A /* PDFExamHistoryStatusStyle.swift in Sources */,
-				A100000000000000000000F5B /* PDFExamHistorySheet.swift in Sources */,
-				A100000000000000000000F5C /* PDFExamPageSelectionViews.swift in Sources */,
-				A1000000000000000000116F /* PDFExamPageSelectionLoading.swift in Sources */,
-				A10000000000000000001170 /* PDFExamPageSelectionToolbarContent.swift in Sources */,
-				A100000000000000000000E2 /* PDFWorkspaceSupportViews.swift in Sources */,
-					A100000000000000000000E3 /* ScratchBoardModels.swift in Sources */,
-					A10000000000000000001131 /* ScratchBoardToolModels.swift in Sources */,
-					A10000000000000000001132 /* ScratchBoardInteractionModels.swift in Sources */,
-					A10000000000000000001055 /* ScratchBoardPanelGeometry.swift in Sources */,
-					A100000000000000000011B5 /* ScratchBoardViewportLogic.swift in Sources */,
-						A100000000000000000000FE0 /* ScratchBoardCanvasOperations.swift in Sources */,
-						A1000000000000000000112D /* ScratchBoardShapeGeometry.swift in Sources */,
-						A10000000000000000001130 /* ScratchBoardShapePaths.swift in Sources */,
-						A100000000000000000011B6 /* ScratchBoardPreviewPath.swift in Sources */,
-						A100000000000000000000FE1 /* ScratchBoardShapeHitTesting.swift in Sources */,
-					A100000000000000000000E4 /* ScratchBoardViews.swift in Sources */,
-					A100000000000000000010D2 /* ScratchBoardPresentation.swift in Sources */,
-					A10000000000000000001082 /* ScratchBoardCanvasArea.swift in Sources */,
-					A100000000000000000011B7 /* ScratchBoardCanvasChrome.swift in Sources */,
-				A100000000000000000000F1A /* ScratchBoardLayers.swift in Sources */,
-				A100000000000000000010C0 /* ScratchGridLayer.swift in Sources */,
-				A100000000000000000000FC0 /* ScratchBoardRenderer.swift in Sources */,
-				A100000000000000000000FF7 /* ScratchBoardAngleRenderer.swift in Sources */,
-				A100000000000000000000FF8 /* ScratchBoardAnnotationRenderer.swift in Sources */,
-				A100000000000000000000FCD /* ScratchBoardInteractionRenderer.swift in Sources */,
-				A100000000000000000000F24 /* ScratchBoardControls.swift in Sources */,
-				A10000000000000000001101 /* ScratchBoardTitleBar.swift in Sources */,
-				A1000000000000000000101E /* ScratchBoardStatusViews.swift in Sources */,
-				A100000000000000000000FC2 /* ScratchBoardToolbarControls.swift in Sources */,
-				A100000000000000000010A4 /* ScratchBoardLineGridMenus.swift in Sources */,
-				A100000000000000000010A5 /* ScratchBoardSnapMenu.swift in Sources */,
-				A100000000000000000010A6 /* ScratchBoardLetterPalette.swift in Sources */,
-				A100000000000000000000F4B /* ScratchBoardGeometryLogic.swift in Sources */,
-				A1000000000000000000119D /* ScratchBoardPointDragEnd.swift in Sources */,
-				A100000000000000000010A7 /* ScratchBoardGestureTracking.swift in Sources */,
-				A100000000000000000000FDC /* ScratchBoardHistoryLogic.swift in Sources */,
-				A100000000000000000000FDD /* ScratchBoardSnapLogic.swift in Sources */,
-				A100000000000000000000F4C /* ScratchBoardPanelLayout.swift in Sources */,
-				A10000000000000000000006 /* PDFKitCanvasView.swift in Sources */,
-				A100000000000000000010CE /* PDFKitCanvasRepresentable.swift in Sources */,
-				A100000000000000000000F76 /* PDFKitCanvasCoordinatorLifecycle.swift in Sources */,
-				A100000000000000000000F77 /* PDFKitCanvasLayout.swift in Sources */,
-				A1000000000000000000114A /* PDFKitCanvasLayoutScheduling.swift in Sources */,
-				A1000000000000000000114B /* PDFKitCanvasInteractionConfiguration.swift in Sources */,
-				A10000000000000000001126 /* PDFKitCanvasSizeReporting.swift in Sources */,
-				A100000000000000000000F78 /* PDFKitCanvasDrawing.swift in Sources */,
-				A100000000000000000000F4F /* PDFKitCanvasToolPicker.swift in Sources */,
-				A10000000000000000001039 /* PDFToolPickerVisibilitySupport.swift in Sources */,
-				A10000000000000000001059 /* PDFCanvasFactory.swift in Sources */,
-				A10000000000000000001060 /* PDFPageViewGeometry.swift in Sources */,
-				A10000000000000000001061 /* PDFInteractionConfigurator.swift in Sources */,
-				A10000000000000000001062 /* PDFDrawingHostView.swift in Sources */,
-				A100000000000000000000F3A /* PDFGradeStampSupport.swift in Sources */,
-				A1000000000000000000116E /* PDFGradeStampModels.swift in Sources */,
-				A1000000000000000000111F /* PDFGradeStampLabelFactory.swift in Sources */,
 				A10000000000000000000011 /* KeychainService.swift in Sources */,
 				A10000000000000000000012 /* SettingsView.swift in Sources */,
 				A100000000000000000000F32 /* SettingsSupportViews.swift in Sources */,
@@ -1949,7 +1398,6 @@
 				A100000000000000000010BA /* AIResponseJSONSanitizer.swift in Sources */,
 				A10000000000000000001199 /* AIResponseJSONValueExtractor.swift in Sources */,
 				A100000000000000000000FCE /* AIDecodingSupport.swift in Sources */,
-				A1000000000000000000110D /* AIExamGradingModels.swift in Sources */,
 				A100000000000000000000FD0 /* AIVocabularyModels.swift in Sources */,
 				A100000000000000000000FD1 /* AIKnowledgeModels.swift in Sources */,
 				A1000000000000000000117B /* VocabularyAIPrompts.swift in Sources */,
@@ -1973,7 +1421,6 @@
 				A100000000000000000000FEF /* AIWritingReviewBlueprintModels.swift in Sources */,
 				A10000000000000000001100 /* AIWritingReviewCoreSceneModels.swift in Sources */,
 				A100000000000000000000FF0 /* AIWritingReviewReconstructionModels.swift in Sources */,
-				A100000000000000000000FF1 /* AIExamGradingPrompt.swift in Sources */,
 					A100000000000000000000FF2 /* DiaryAIPrompts.swift in Sources */,
 					A100000000000000000000FF3 /* KnowledgeAIPrompts.swift in Sources */,
 					A10000000000000000001169 /* KnowledgeAIAnalysisSubjectStrategies.swift in Sources */,
@@ -1986,7 +1433,6 @@
 				A100000000000000000000FE7 /* AIServiceHTTPClient.swift in Sources */,
 				A100000000000000000000F51 /* AIServiceImageEncoding.swift in Sources */,
 				A100000000000000000000F52 /* AIServiceResponseDecoding.swift in Sources */,
-				A100000000000000000000FA1 /* AIServiceExamGradingProcessing.swift in Sources */,
 				A100000000000000000000FA2 /* AIServiceVocabularyProcessing.swift in Sources */,
 				A100000000000000000000FA3 /* AIServiceWritingProcessing.swift in Sources */,
 				A100000000000000000000FA4 /* AIServiceKnowledgeDiaryProcessing.swift in Sources */,
@@ -1995,34 +1441,6 @@
 				A100000000000000000000F89 /* StatisticsModels.swift in Sources */,
 				A100000000000000000000F90 /* StatisticsCards.swift in Sources */,
 				A1000000000000000000104F /* StatisticsCardChrome.swift in Sources */,
-				A1000000000000000000001B /* ReviewSubmissionView.swift in Sources */,
-				A100000000000000000010D0 /* ReviewSubmissionFlow.swift in Sources */,
-				A100000000000000000011A5 /* ReviewSubmissionGenerationRequest.swift in Sources */,
-				A100000000000000000011A6 /* ReviewSubmissionGenerationFlow.swift in Sources */,
-				A100000000000000000011A2 /* ReviewSubmissionSelectionLoader.swift in Sources */,
-				A100000000000000000000FBE /* ReviewSubmissionSupportViews.swift in Sources */,
-				A100000000000000000000FBF /* ReviewSubmissionRenderer.swift in Sources */,
-				A10000000000000000001167 /* ReviewSubmissionRenderPlan.swift in Sources */,
-				A10000000000000000001168 /* ReviewSubmissionPageDrawer.swift in Sources */,
-				A1000000000000000000111B /* ReviewSubmissionRenderError.swift in Sources */,
-				A100000000000000000010B9 /* ReviewSubmissionRenderLayout.swift in Sources */,
-				A10000000000000000001037 /* ReviewSubmissionSelectionSupport.swift in Sources */,
-				A1000000000000000000103F /* ReviewSubmissionGeometry.swift in Sources */,
-				A1000000000000000000001C /* PDFPageExportView.swift in Sources */,
-				A1000000000000000000111A /* PDFPageExportTaskFlow.swift in Sources */,
-				A100000000000000000010C9 /* PDFPageExportContentView.swift in Sources */,
-				A10000000000000000001094 /* PDFPageExportFlow.swift in Sources */,
-				A10000000000000000001095 /* PDFPageExportAlerts.swift in Sources */,
-				A10000000000000000001072 /* PDFPageExportToolbarContent.swift in Sources */,
-				A10000000000000000001065 /* PhotoLibraryImageWriter.swift in Sources */,
-				A10000000000000000001066 /* PDFPageExportProgressOverlay.swift in Sources */,
-				A10000000000000000001191 /* PDFPageLongImageSource.swift in Sources */,
-				A100000000000000000011B4 /* PDFPageDrawingRenderer.swift in Sources */,
-				A100000000000000000000FDA /* PDFPageLongImageRenderer.swift in Sources */,
-				A100000000000000000000FDB /* PDFPageSelectionGrid.swift in Sources */,
-				A10000000000000000001063 /* PDFPageSelectionModels.swift in Sources */,
-				A10000000000000000001064 /* PDFPageSelectionCell.swift in Sources */,
-				A10000000000000000001141 /* PDFPageSelectionCellChrome.swift in Sources */,
 				A100000000000000000000F2 /* VocabularyModels.swift in Sources */,
 				A10000000000000000001117 /* VocabularyCardDerivedProperties.swift in Sources */,
 				A100000000000000000010C4 /* VocabularyCoreEnums.swift in Sources */,
@@ -2046,10 +1464,7 @@
 				A10000000000000000001146 /* VocabularyMemoryPersistence.swift in Sources */,
 				A1000000000000000000100F /* VocabularyStudyPersistence.swift in Sources */,
 				A10000000000000000001010 /* VocabularyReviewPersistence.swift in Sources */,
-				A10000000000000000001011 /* VocabularyTestDraftPersistence.swift in Sources */,
-				A10000000000000000001111 /* VocabularyTestDraftSessionPersistence.swift in Sources */,
 				A1000000000000000000116B /* VocabularyTestDraftDrawingAccess.swift in Sources */,
-				A1000000000000000000116C /* VocabularyTestDraftSessionQueries.swift in Sources */,
 				A10000000000000000001112 /* VocabularyDeckSettingsPersistence.swift in Sources */,
 				A10000000000000000001012 /* VocabularyDistractorPersistence.swift in Sources */,
 				A10000000000000000001038 /* VocabularyDistractorReplacementSupport.swift in Sources */,
@@ -2075,7 +1490,6 @@
 					A100000000000000000000FD5 /* VocabularyAnswerChecker.swift in Sources */,
 				A100000000000000000000FD6 /* VocabularyWeightedMastery.swift in Sources */,
 				A100000000000000000000FD7 /* VocabularyTestDraftRuntime.swift in Sources */,
-				A100000000000000000000FD8 /* VocabularyTestDraftSnapshots.swift in Sources */,
 				A1000000000000000000111E /* VocabularyTestDraftSnapshotBuilder.swift in Sources */,
 				A100000000000000000000F4 /* VocabularyTextImporter.swift in Sources */,
 				A10000000000000000001097 /* VocabularyTextImportModels.swift in Sources */,
@@ -2094,11 +1508,6 @@
 				A10000000000000000001171 /* VocabularyHomeOperations.swift in Sources */,
 				A100000000000000000010C2 /* VocabularyHomeContentViews.swift in Sources */,
 				A10000000000000000001231 /* VocabularyFolderViews.swift in Sources */,
-				A10000000000000000001232 /* VocabularyArticleRecitation.swift in Sources */,
-				A10000000000000000001233 /* VocabularyArticleView.swift in Sources */,
-				A10000000000000000001234 /* VocabularyArticleSpeechRecognizer.swift in Sources */,
-				A10000000000000000001236 /* VocabularyArticleModePolicy.swift in Sources */,
-				A10000000000000000001239 /* VocabularyArticleGenerationFlow.swift in Sources */,
 				C0DEC0DE0000000000000001 /* VocabularyContextPractice.swift in Sources */,
 				C0DEC0DE0000000000000002 /* VocabularyContextAIPrompts.swift in Sources */,
 				C0DEC0DE0000000000000003 /* AIServiceVocabularyContextProcessing.swift in Sources */,
@@ -2130,7 +1539,6 @@
 				A100000000000000000000F6 /* VocabularySessionViews.swift in Sources */,
 				A10000000000000000001202 /* VocabularySessionDataLoading.swift in Sources */,
 				A100000000000000000000F9D /* VocabularyTestSessionData.swift in Sources */,
-				A100000000000000000000F9E /* VocabularyTestDraftFlow.swift in Sources */,
 				A100000000000000000000F9F /* VocabularyTestGradingFlow.swift in Sources */,
 				A1000000000000000000111D /* VocabularyTestGradingTaskFlow.swift in Sources */,
 				A100000000000000000000FA0 /* VocabularyTestSessionCommit.swift in Sources */,
@@ -2195,7 +1603,6 @@
 				A1000000000000000000105B /* DiaryPersistence.swift in Sources */,
 				A100000000000000000000F2D /* DiaryViewModels.swift in Sources */,
 				A10000000000000000001194 /* ViewTaskSlot.swift in Sources */,
-				A10000000000000000001056 /* DiaryHistoryRowData.swift in Sources */,
 				A10000000000000000001057 /* DiaryKnowledgeSnapshot.swift in Sources */,
 				A100000000000000000000FB /* DiaryViews.swift in Sources */,
 				A1000000000000000000116D /* DiaryEntryDetailPhaseViews.swift in Sources */,
@@ -2218,9 +1625,6 @@
 				A100000000000000000000FE4 /* DiaryEntryReadSections.swift in Sources */,
 				A10000000000000000001186 /* DiaryReadSection.swift in Sources */,
 				A100000000000000000000E6 /* DiarySupportViews.swift in Sources */,
-				A100000000000000000000FB4 /* DiaryHistoryViews.swift in Sources */,
-				A1000000000000000000117D /* DiaryHistoryRowView.swift in Sources */,
-				A1000000000000000000117E /* DiaryHistoryDetailLoader.swift in Sources */,
 				A100000000000000000000FB5 /* MarkdownView.swift in Sources */,
 				A100000000000000000000F33 /* HomeCalendarViews.swift in Sources */,
 				A100000000000000000000FFB /* DiaryCalendarSupport.swift in Sources */,
@@ -2405,9 +1809,6 @@
 				INFOPLIST_KEY_CFBundleDisplayName = PaperClip;
 				INFOPLIST_KEY_NSCameraUsageDescription = "PaperClip 需要相机权限，用于扫描录入纸面错题。";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "PaperClip 需要麦克风权限，用于词生文背诵检测。";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "PaperClip 需要写入照片权限，以便将 PDF 页面长图保存到相册。";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "PaperClip 需要语音识别权限，用于将背诵语音转写并检测文章匹配情况。";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -2440,9 +1841,6 @@
 				INFOPLIST_KEY_CFBundleDisplayName = PaperClip;
 				INFOPLIST_KEY_NSCameraUsageDescription = "PaperClip 需要相机权限，用于扫描录入纸面错题。";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "PaperClip 需要麦克风权限，用于词生文背诵检测。";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "PaperClip 需要写入照片权限，以便将 PDF 页面长图保存到相册。";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "PaperClip 需要语音识别权限，用于将背诵语音转写并检测文章匹配情况。";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

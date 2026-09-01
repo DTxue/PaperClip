@@ -1,5 +1,41 @@
 import Foundation
 
+enum VocabularyContextGradePreset: String, CaseIterable, Identifiable {
+    case juniorOneTwo
+    case juniorThree
+    case seniorOneTwo
+    case seniorThree
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .juniorOneTwo: "初一–初二"
+        case .juniorThree: "初三"
+        case .seniorOneTwo: "高一–高二"
+        case .seniorThree: "高三"
+        }
+    }
+
+    var learnerDescription: String {
+        switch self {
+        case .juniorOneTwo: "Chinese Grade 7–8 learners"
+        case .juniorThree: "Chinese Grade 9 learners"
+        case .seniorOneTwo: "Chinese Grade 10–11 learners"
+        case .seniorThree: "Chinese Grade 12 learners"
+        }
+    }
+
+    var maximumSentenceWords: Int {
+        switch self {
+        case .juniorOneTwo: 14
+        case .juniorThree: 16
+        case .seniorOneTwo: 20
+        case .seniorThree: 22
+        }
+    }
+}
+
 struct VocabularyContextCardInput: Equatable, Sendable {
     let cardID: UUID
     let term: String

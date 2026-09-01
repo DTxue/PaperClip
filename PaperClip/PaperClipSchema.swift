@@ -5,20 +5,20 @@ extension PaperClipSchemaV1: VersionedSchema {
     static let versionIdentifier = Schema.Version(1, 0, 0)
 
     static let models: [any PersistentModel.Type] = [
-        PDFDocumentItem.self,
-        HandwritingLayer.self,
-        ExamAttempt.self,
-        ExamPageSubmission.self,
-        ExamHandwritingLayer.self,
-        ExamGradeMark.self,
+        PaperClipSchemaV1.PDFDocumentItem.self,
+        PaperClipSchemaV1.HandwritingLayer.self,
+        PaperClipSchemaV1.ExamAttempt.self,
+        PaperClipSchemaV1.ExamPageSubmission.self,
+        PaperClipSchemaV1.ExamHandwritingLayer.self,
+        PaperClipSchemaV1.ExamGradeMark.self,
         MistakeCard.self,
         ExportRecord.self,
         MistakePracticeLayer.self,
         VocabularyFolder.self,
         VocabularyDeck.self,
         VocabularyCard.self,
-        VocabularyGeneratedArticle.self,
-        VocabularyArticleRecitationHistory.self,
+        PaperClipSchemaV1.VocabularyGeneratedArticle.self,
+        PaperClipSchemaV1.VocabularyArticleRecitationHistory.self,
         VocabularyMemoryState.self,
         VocabularyReviewLog.self,
         VocabularyStudySession.self,
@@ -38,17 +38,17 @@ extension PaperClipSchemaV2: VersionedSchema {
     static let versionIdentifier = Schema.Version(2, 0, 0)
 
     static let models: [any PersistentModel.Type] = [
-        PDFDocumentItem.self,
-        HandwritingLayer.self,
-        ExamAttempt.self,
-        ExamPageSubmission.self,
-        ExamHandwritingLayer.self,
-        ExamGradeMark.self,
+        PaperClipSchemaV1.PDFDocumentItem.self,
+        PaperClipSchemaV1.HandwritingLayer.self,
+        PaperClipSchemaV1.ExamAttempt.self,
+        PaperClipSchemaV1.ExamPageSubmission.self,
+        PaperClipSchemaV1.ExamHandwritingLayer.self,
+        PaperClipSchemaV1.ExamGradeMark.self,
         VocabularyFolder.self,
         VocabularyDeck.self,
         VocabularyCard.self,
-        VocabularyGeneratedArticle.self,
-        VocabularyArticleRecitationHistory.self,
+        PaperClipSchemaV1.VocabularyGeneratedArticle.self,
+        PaperClipSchemaV1.VocabularyArticleRecitationHistory.self,
         VocabularyMemoryState.self,
         VocabularyReviewLog.self,
         VocabularyStudySession.self,
@@ -71,17 +71,42 @@ extension PaperClipSchemaV3: VersionedSchema {
     static let versionIdentifier = Schema.Version(3, 0, 0)
 
     static let models: [any PersistentModel.Type] = [
-        PDFDocumentItem.self,
-        HandwritingLayer.self,
-        ExamAttempt.self,
-        ExamPageSubmission.self,
-        ExamHandwritingLayer.self,
-        ExamGradeMark.self,
+        PaperClipSchemaV1.PDFDocumentItem.self,
+        PaperClipSchemaV1.HandwritingLayer.self,
+        PaperClipSchemaV1.ExamAttempt.self,
+        PaperClipSchemaV1.ExamPageSubmission.self,
+        PaperClipSchemaV1.ExamHandwritingLayer.self,
+        PaperClipSchemaV1.ExamGradeMark.self,
         VocabularyFolder.self,
         VocabularyDeck.self,
         VocabularyCard.self,
-        VocabularyGeneratedArticle.self,
-        VocabularyArticleRecitationHistory.self,
+        PaperClipSchemaV1.VocabularyGeneratedArticle.self,
+        PaperClipSchemaV1.VocabularyArticleRecitationHistory.self,
+        VocabularyMemoryState.self,
+        VocabularyReviewLog.self,
+        VocabularyStudySession.self,
+        VocabularyTestDraft.self,
+        VocabularyHandwritingAttempt.self,
+        VocabularyImportBatch.self,
+        VocabularyDistractorCache.self,
+        DiaryEntry.self,
+        KnowledgeItem.self,
+        WritingPrompt.self,
+        WritingDraft.self,
+        WritingReview.self,
+        MistakeLibraryItem.self,
+        PaperClipSchemaV2.MistakeAttachment.self,
+        PaperClipSchemaV2.MistakeReviewAttempt.self
+    ]
+}
+
+extension PaperClipSchemaV4: VersionedSchema {
+    static let versionIdentifier = Schema.Version(4, 0, 0)
+
+    static let models: [any PersistentModel.Type] = [
+        VocabularyFolder.self,
+        VocabularyDeck.self,
+        VocabularyCard.self,
         VocabularyMemoryState.self,
         VocabularyReviewLog.self,
         VocabularyStudySession.self,
@@ -104,7 +129,8 @@ enum PaperClipMigrationPlan: SchemaMigrationPlan {
     static let schemas: [any VersionedSchema.Type] = [
         PaperClipSchemaV1.self,
         PaperClipSchemaV2.self,
-        PaperClipSchemaV3.self
+        PaperClipSchemaV3.self,
+        PaperClipSchemaV4.self
     ]
 
     static let stages: [MigrationStage] = [
@@ -128,6 +154,38 @@ enum PaperClipMigrationPlan: SchemaMigrationPlan {
         .lightweight(
             fromVersion: PaperClipSchemaV2.self,
             toVersion: PaperClipSchemaV3.self
+        ),
+        .custom(
+            fromVersion: PaperClipSchemaV3.self,
+            toVersion: PaperClipSchemaV4.self,
+            willMigrate: { context in
+                for model in try context.fetch(FetchDescriptor<PaperClipSchemaV1.ExamGradeMark>()) {
+                    context.delete(model)
+                }
+                for model in try context.fetch(FetchDescriptor<PaperClipSchemaV1.ExamHandwritingLayer>()) {
+                    context.delete(model)
+                }
+                for model in try context.fetch(FetchDescriptor<PaperClipSchemaV1.ExamPageSubmission>()) {
+                    context.delete(model)
+                }
+                for model in try context.fetch(FetchDescriptor<PaperClipSchemaV1.ExamAttempt>()) {
+                    context.delete(model)
+                }
+                for model in try context.fetch(FetchDescriptor<PaperClipSchemaV1.HandwritingLayer>()) {
+                    context.delete(model)
+                }
+                for model in try context.fetch(FetchDescriptor<PaperClipSchemaV1.PDFDocumentItem>()) {
+                    context.delete(model)
+                }
+                for model in try context.fetch(FetchDescriptor<PaperClipSchemaV1.VocabularyArticleRecitationHistory>()) {
+                    context.delete(model)
+                }
+                for model in try context.fetch(FetchDescriptor<PaperClipSchemaV1.VocabularyGeneratedArticle>()) {
+                    context.delete(model)
+                }
+                try context.save()
+            },
+            didMigrate: nil
         )
     ]
 }
@@ -161,7 +219,7 @@ enum PaperClipStore {
         at url: URL?,
         isStoredInMemoryOnly: Bool
     ) throws -> ModelContainer {
-        let schema = Schema(versionedSchema: PaperClipSchemaV3.self)
+        let schema = Schema(versionedSchema: PaperClipSchemaV4.self)
         let configuration: ModelConfiguration
         if let url {
             configuration = ModelConfiguration(

@@ -16,9 +16,6 @@ enum AppStorageDirectory {
         return url
     }()
 
-    static let pdfs = directory(named: "PDFs")
-    static let examPDFs = directory(named: "ExamPDFs")
-    static let examArchives = directory(named: "ExamArchives")
     static let mistakeAttachments = directory(named: "MistakeAttachments")
 
     static var legacyMistakeDataURLs: [URL] {

@@ -78,7 +78,6 @@ extension VocabularyTestView {
     var body: some View {
         let snapshot = VocabularyTestViewSnapshot(
             deckCards: allCards,
-            deckDraft: latestDraft,
             batches: batches
         )
 
@@ -156,10 +155,8 @@ extension VocabularyTestView {
             fetchSessionData()
         }
         .onDisappear {
-            draftSaveAction.cancel()
             dismissAnswerAdvanceUndo()
             cancelGradingTasks()
-            saveDraft()
         }
     }
 
@@ -194,10 +191,6 @@ extension VocabularyTestView {
             currentAnswerHasInk: DrawingDataSupport.hasInk(currentDrawing),
             storedDrawingCount: batches[target.batchIndex].drawings.count
         )
-    }
-
-    var showsExamExitButton: Bool {
-        sessionMode == .exam && !batches.isEmpty
     }
 
 }
