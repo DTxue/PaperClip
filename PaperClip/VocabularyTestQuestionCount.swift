@@ -110,10 +110,9 @@ enum VocabularyEnglishDefinitionQuestionCount {
 
 enum VocabularyTestMode: String, CaseIterable, Identifiable {
     case regular = "常规"
-    case exam = "考试"
     case debug = "调试"
 
-    static let setupModes: [VocabularyTestMode] = [.regular, .debug]
+    static var setupModes: [VocabularyTestMode] { allCases }
     static let debugQuestionCount = 5
 
     var id: String { rawValue }
@@ -144,6 +143,13 @@ enum VocabularyTestMode: String, CaseIterable, Identifiable {
     }
 }
 
+enum VocabularyTestQuestionSelectionMode: String, CaseIterable, Identifiable {
+    case ordered = "按顺序"
+    case random = "随机"
+
+    var id: String { rawValue }
+}
+
 enum VocabularyTestQuestionCount {
     static let minimumQuestionCount = 10
 
@@ -164,10 +170,6 @@ enum VocabularyTestQuestionCount {
     static func selectableRange(maximumQuestionCount: Int) -> ClosedRange<Int> {
         let maximumQuestionCount = clamped(maximumQuestionCount)
         return minimum(maximumQuestionCount: maximumQuestionCount)...maximumQuestionCount
-    }
-
-    static func maximum(inBatchCardCounts cardCounts: [Int]) -> Int {
-        clamped(cardCounts.reduce(0, +))
     }
 
     static func allowsSlider(maximumQuestionCount: Int) -> Bool {

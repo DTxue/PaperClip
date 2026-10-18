@@ -45,15 +45,6 @@ struct AIRequestConfiguration: Equatable {
         thinking == "enabled"
     }
 
-    static func diary(model: AIAnswerModel) -> AIRequestConfiguration {
-        AIRequestConfiguration(
-            model: model,
-            thinking: model == .deepSeek ? "enabled" : "disabled",
-            maxOutputTokens: model == .deepSeek ? 4_096 : 2_048,
-            modelName: "\(model.shortTitle)日记"
-        )
-    }
-
     static func knowledge(model: AIAnswerModel, taskName: String) -> AIRequestConfiguration {
         AIRequestConfiguration(
             model: model,

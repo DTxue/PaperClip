@@ -10,14 +10,6 @@ enum VocabularyTestBatchProjection {
         return itemByIndex
     }
 
-    static func failedBatchIndices(in batches: [VocabularyTestBatch]) -> [Int] {
-        var failedIndices: [Int] = []
-        for batchIndex in batches.indices where batches[batchIndex].status == .failed {
-            failedIndices.append(batchIndex)
-        }
-        return failedIndices
-    }
-
     static func gradedQuestions(from batches: [VocabularyTestBatch]) -> [VocabularyGradedQuestion] {
         var questions: [VocabularyGradedQuestion] = []
         for batch in batches {

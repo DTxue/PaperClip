@@ -8,11 +8,13 @@ struct VocabularyTestQuestionSelectorTests {
         testLatestAgainLogRanksAheadOfLatestGoodLog()
         testPriorityUsesLatestReviewLog()
         testRandomQuestionsUseShuffledOrderAndLimit()
+        testOrderedQuestionsKeepInclusiveDeckRange()
         testCustomQuestionsKeepOnlySelectedCardsInDeckOrder()
         testAnsweringActionTitles()
         testEmptyAnswerRequiresConfirmation()
+        testEarlyFinishSubmitsCurrentAnswerAndFillsRemainingAnswers()
         testAdvanceUndoTargetsOnlyTheImmediatelyPreviousAnswer()
-        print("VocabularyTestQuestionSelectorTests: 9 passed")
+        print("VocabularyTestQuestionSelectorTests: 10 passed")
     }
 
     private static func testRecentReviewLogLimitBounds() {
@@ -120,32 +122,71 @@ struct VocabularyTestQuestionSelectorTests {
         expect(selected.map(\.term) == ["first", "third"])
     }
 
+    private static func testOrderedQuestionsKeepInclusiveDeckRange() {
+        let deckID = UUID()
+        let cards = [
+            makeCard(deckID: deckID, term: "first"),
+            makeCard(deckID: deckID, term: "second"),
+            makeCard(deckID: deckID, term: "third"),
+            makeCard(deckID: deckID, term: "fourth")
+        ]
+
+        expect(
+            VocabularyTestQuestionSelector.orderedQuestions(
+                from: cards,
+                startQuestion: 2,
+                endQuestion: 3
+            ).map(\.term) == ["second", "third"]
+        )
+        expect(
+            VocabularyTestQuestionSelector.orderedQuestions(
+                from: cards,
+                startQuestion: 3,
+                endQuestion: 99
+            ).map(\.term) == ["third", "fourth"]
+        )
+        expect(
+            VocabularyTestQuestionRange.normalized(
+                startQuestion: 8,
+                endQuestion: 2,
+                maximumQuestionCount: 4
+            ) == 2...4
+        )
+        expect(
+            VocabularyTestQuestionRange.validated(
+                startQuestion: 5,
+                questionCount: 3,
+                maximumQuestionCount: 10
+            ) == 5...7
+        )
+        expect(
+            VocabularyTestQuestionRange.validated(
+                startQuestion: 8,
+                questionCount: 4,
+                maximumQuestionCount: 10
+            ) == nil
+        )
+    }
+
     private static func testAnsweringActionTitles() {
-        expect(VocabularyAnsweringActionTitle.title(
-            isExam: false,
-            isLastInBatch: false,
-            isLastBatch: false
-        ) == "下一题")
-        expect(VocabularyAnsweringActionTitle.title(
-            isExam: false,
-            isLastInBatch: true,
-            isLastBatch: true
-        ) == "提交答卷")
-        expect(VocabularyAnsweringActionTitle.title(
-            isExam: true,
-            isLastInBatch: true,
-            isLastBatch: false
-        ) == "提交并继续")
-        expect(VocabularyAnsweringActionTitle.title(
-            isExam: true,
-            isLastInBatch: true,
-            isLastBatch: true
-        ) == "提交全卷")
+        expect(VocabularyAnsweringActionTitle.title(isLastInBatch: false) == "下一题")
+        expect(VocabularyAnsweringActionTitle.title(isLastInBatch: true) == "提交答卷")
     }
 
     private static func testEmptyAnswerRequiresConfirmation() {
         expect(VocabularyAnswerAdvancePolicy.requiresConfirmation(hasInk: false))
         expect(!VocabularyAnswerAdvancePolicy.requiresConfirmation(hasInk: true))
+    }
+
+    private static func testEarlyFinishSubmitsCurrentAnswerAndFillsRemainingAnswers() {
+        let answers = VocabularyTestEarlyFinishPolicy.completedAnswers(
+            submittedAnswers: ["answer-1", "answer-2"],
+            currentAnswer: "answer-3",
+            totalQuestionCount: 5,
+            blankAnswer: "blank"
+        )
+
+        expect(answers == ["answer-1", "answer-2", "answer-3", "blank", "blank"])
     }
 
     private static func testAdvanceUndoTargetsOnlyTheImmediatelyPreviousAnswer() {

@@ -69,50 +69,11 @@ extension AIService {
         return generated
     }
 
-    static func gradeVocabularyTest(
-        cards: [(term: String, definition: String)],
-        handwritingImages: [UIImage?]
-    ) async throws -> VocabularyGradingResult {
-        let count = min(cards.count, handwritingImages.count)
-        guard count > 0 else {
-            return VocabularyGradingResult(items: [])
-        }
-
-        var contentItems: [ResponsesRequest.Content] = []
-        contentItems.reserveCapacity(count * 2 + 1)
-        for i in 0 ..< count {
-            let card = cards[i]
-            let hasAnswer = handwritingImages[i] != nil
-            contentItems.append(.text(
-                VocabularyAIPrompts.gradingQuestionText(
-                    index: i,
-                    term: card.term,
-                    definition: card.definition,
-                    hasAnswer: hasAnswer
-                )
-            ))
-            if let image = handwritingImages[i] {
-                contentItems.append(try imageContent(from: image))
-            }
-        }
-        contentItems.append(.text(VocabularyAIPrompts.gradingInstruction(count: count)))
-
-        let configuration = AIRequestConfiguration.doubao(
-            modelName: "豆包批改",
-            maxOutputTokens: VocabularyGradingOutputBudget.maxTokens(questionCount: count)
-        )
-        return try await requestDecoded(
-            VocabularyGradingResult.self,
-            content: contentItems,
-            configuration: configuration
-        )
-    }
-
     static func recognizeVocabularyHandwriting(
-        prompts: [String],
-        handwritingImages: [UIImage?]
+        handwritingImages: [UIImage?],
+        isChinese: Bool
     ) async throws -> VocabularyGradingResult {
-        let count = min(prompts.count, handwritingImages.count)
+        let count = handwritingImages.count
         guard count > 0 else {
             return VocabularyGradingResult(items: [])
         }
@@ -123,7 +84,6 @@ extension AIService {
             contentItems.append(.text(
                 VocabularyAIPrompts.handwritingRecognitionQuestionText(
                     index: i,
-                    prompt: prompts[i],
                     hasAnswer: handwritingImages[i] != nil
                 )
             ))
@@ -131,9 +91,10 @@ extension AIService {
                 contentItems.append(try imageContent(from: image))
             }
         }
-        contentItems.append(.text(
-            VocabularyAIPrompts.handwritingRecognitionInstruction(count: count)
-        ))
+        contentItems.append(.text(VocabularyAIPrompts.handwritingRecognitionInstruction(
+            count: count,
+            isChinese: isChinese
+        )))
 
         let configuration = AIRequestConfiguration.doubao(
             modelName: "豆包手写识别",
@@ -144,5 +105,28 @@ extension AIService {
             content: contentItems,
             configuration: configuration
         )
+    }
+
+    static func recognizeChineseHandwrittenCharacter(image: UIImage) async throws -> String {
+        let content: [ResponsesRequest.Content] = [
+            .text("识别这张单格图片中的一个手写汉字或标点。"),
+            try imageContent(from: image),
+            .text(VocabularyAIPrompts.chineseCharacterRecognitionInstruction())
+        ]
+        let configuration = AIRequestConfiguration.doubao(
+            modelName: "豆包单字手写识别",
+            maxOutputTokens: VocabularyGradingOutputBudget.maxTokens(questionCount: 1)
+        )
+        let result = try await requestDecoded(
+            VocabularyGradingResult.self,
+            content: content,
+            configuration: configuration
+        )
+        guard result.items.count == 1,
+              let recognized = result.items.first?.recognizedText else {
+            return "�"
+        }
+        let character = recognized.trimmingCharacters(in: .whitespacesAndNewlines)
+        return character.count == 1 ? character : "�"
     }
 }

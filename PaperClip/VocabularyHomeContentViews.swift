@@ -2,8 +2,7 @@ import SwiftUI
 
 struct VocabularyHomeOverview: View {
     let folderCount: Int
-    let wordDeckCount: Int
-    let sentenceDeckCount: Int
+    let deckCounts: [(String, Int)]
     let snapshot: VocabularyHomeSnapshot
 
     var body: some View {
@@ -17,18 +16,14 @@ struct VocabularyHomeOverview: View {
                     icon: "folder.fill",
                     color: Color.yellow
                 )
-                VocabularyMetricTile(
-                    value: "\(wordDeckCount)",
-                    label: "词集",
-                    icon: VocabularyDeckKind.word.systemImage,
-                    color: Color.accentColor
-                )
-                VocabularyMetricTile(
-                    value: "\(sentenceDeckCount)",
-                    label: "句集",
-                    icon: VocabularyDeckKind.sentence.systemImage,
-                    color: Color.blue
-                )
+                ForEach(deckCounts, id: \.0) { item in
+                    VocabularyMetricTile(
+                        value: "\(item.1)",
+                        label: item.0,
+                        icon: "books.vertical.fill",
+                        color: Color.accentColor
+                    )
+                }
                 VocabularyMetricTile(
                     value: "\(snapshot.totalCardCount)",
                     label: "学习条目",
@@ -49,6 +44,7 @@ struct VocabularyHomeOverview: View {
 struct VocabularyHomeFolderGrid: View {
     let folders: [VocabularyFolderRowData]
     let decks: [VocabularyDeckRowData]
+    let kinds: [VocabularyDeckKind]
     let snapshot: VocabularyHomeSnapshot
     let onRenameFolder: (VocabularyFolderRowData) -> Void
     let onMoveDeck: (VocabularyDeckRowData) -> Void
@@ -89,7 +85,7 @@ struct VocabularyHomeFolderGrid: View {
                 }
             }
 
-            ForEach(VocabularyDeckKind.allCases) { kind in
+            ForEach(kinds) { kind in
                 VocabularyHomeDeckGrid(
                     title: folders.isEmpty ? "我的\(kind.collectionName)" : "未归档\(kind.collectionName)",
                     kind: kind,
@@ -191,7 +187,7 @@ struct VocabularyFolderDeckListView: View {
                     )
                     .frame(maxWidth: .infinity, minHeight: 320)
                 } else {
-                    ForEach(VocabularyDeckKind.allCases) { kind in
+                    ForEach(VocabularyDeckKind.allCases.filter { kind in decks.contains { $0.kind == kind } }) { kind in
                         let matchingDecks = decks.filter { $0.kind == kind }
                         if !matchingDecks.isEmpty {
                             VocabularyHomeDeckGrid(

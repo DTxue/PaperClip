@@ -1,27 +1,63 @@
 import Foundation
 
-enum VocabularyAnswerMatchPolicy {
+enum VocabularyAnswerMatchPolicy: Equatable {
     case spelling
+    case chineseDictation
     case englishDefinition
 
     func normalized(_ value: String) -> String {
-        let trimmed = value
-            .trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
-            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
-
         switch self {
+        case .chineseDictation:
+            let punctuationNormalized = value
+                .replacingOccurrences(of: "……", with: "…")
+                .replacingOccurrences(of: "...", with: "…")
+            return punctuationNormalized.reduce(into: "") { normalized, character in
+                guard !character.isWhitespace else { return }
+                if let equivalent = Self.chinesePunctuationEquivalents[character] {
+                    normalized.append(equivalent)
+                } else {
+                    normalized.append(character)
+                }
+            }
         case .spelling:
-            return trimmed.folding(
+            let folded = value.folding(
                 options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive],
                 locale: Locale(identifier: "en_US_POSIX")
             )
+            return folded.reduce(into: "") { normalized, character in
+                if character.isLetter || character.isNumber {
+                    normalized.append(character)
+                } else if Self.apostrophes.contains(character) {
+                    normalized.append("'")
+                }
+            }
         case .englishDefinition:
+            let trimmed = value
+                .trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
+                .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
             return trimmed.lowercased(with: Locale(identifier: "en_US_POSIX"))
         }
     }
+
+    private static let apostrophes: Set<Character> = ["'", "’", "‘", "ʼ", "＇"]
+
+    private static let chinesePunctuationEquivalents: [Character: Character] = [
+        "，": ",", "﹐": ",",
+        "。": ".", "．": ".", "﹒": ".",
+        "？": "?", "﹖": "?", "！": "!", "﹗": "!",
+        "：": ":", "﹕": ":", "；": ";", "﹔": ";",
+        "（": "(", "）": ")",
+        "【": "[", "】": "]",
+        "“": "\"", "”": "\"", "「": "\"", "」": "\"",
+        "《": "\"", "》": "\"", "〈": "\"", "〉": "\"",
+        "‘": "'", "’": "'", "＇": "'",
+        "…": "…"
+    ]
 }
 
 enum VocabularyGradingPolicy {
+    static let suspectedPunctuationCommentPrefix = "疑似标点识别差异（不计错）"
+
     static func validated(
         _ result: VocabularyGradingResult,
         expectedAnswers: [String],
@@ -60,8 +96,8 @@ enum VocabularyGradingPolicy {
         expectedAnswer: String,
         matchPolicy: VocabularyAnswerMatchPolicy
     ) -> VocabularyGradingItem {
-        let recognizedText = item.recognizedText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !recognizedText.isEmpty else {
+        let recognizedText = item.recognizedText
+        guard !recognizedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return VocabularyGradingItem(
                 index: item.index,
                 isCorrect: false,
@@ -70,36 +106,188 @@ enum VocabularyGradingPolicy {
             )
         }
 
-        let isCorrect = matchPolicy.normalized(recognizedText) == matchPolicy.normalized(expectedAnswer)
+        let normalizedRecognized = matchPolicy.normalized(recognizedText)
+        let normalizedExpected = matchPolicy.normalized(expectedAnswer)
+        let matches = normalizedRecognized == normalizedExpected
+        let chineseEdits = matchPolicy == .chineseDictation && !matches
+            ? chineseCharacterEdits(
+                recognized: Array(normalizedRecognized),
+                expected: Array(normalizedExpected)
+            )
+            : []
+        let isPunctuationOnlyDifference = matchPolicy == .chineseDictation
+            && !chineseEdits.isEmpty
+            && chineseEdits.allSatisfy(\.isPunctuationRelated)
+        let isCorrect = matches || isPunctuationOnlyDifference
+        let comment: String
+        if matches {
+            comment = "正确"
+        } else if matchPolicy == .chineseDictation {
+            comment = chineseMismatchComment(chineseEdits)
+        } else {
+            comment = mismatchComment(
+                recognizedText: recognizedText,
+                expectedAnswer: expectedAnswer,
+                matchPolicy: matchPolicy
+            )
+        }
         return VocabularyGradingItem(
             index: item.index,
             isCorrect: isCorrect,
-            comment: isCorrect
-                ? "正确"
-                : mismatchComment(
-                    item.comment,
-                    expectedAnswer: expectedAnswer,
-                    matchPolicy: matchPolicy
-                ),
+            comment: comment,
             recognizedText: recognizedText
         )
     }
 
     private static func mismatchComment(
-        _ aiComment: String,
+        recognizedText: String,
         expectedAnswer: String,
         matchPolicy: VocabularyAnswerMatchPolicy
     ) -> String {
-        if matchPolicy == .englishDefinition {
+        guard matchPolicy == .chineseDictation else {
             return "答案应为 \(expectedAnswer)"
         }
-        let comment = aiComment.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !comment.isEmpty,
-           VocabularyAnswerMatchPolicy.spelling.normalized(comment)
-            != VocabularyAnswerMatchPolicy.spelling.normalized("正确") {
-            return comment
+
+        let recognized = Array(matchPolicy.normalized(recognizedText))
+        let expected = Array(matchPolicy.normalized(expectedAnswer))
+        let edits = chineseCharacterEdits(recognized: recognized, expected: expected)
+        guard !edits.isEmpty else { return "答案应为 \(expectedAnswer)" }
+        return edits.map(\.description).joined(separator: "\n")
+    }
+
+    private enum ChineseCharacterEdit {
+        case substitution(position: Int, recognized: Character, expected: Character)
+        case missing(position: Int, expected: Character)
+        case extra(position: Int, recognized: Character)
+
+        var description: String {
+            switch self {
+            case let .substitution(position, recognized, expected):
+                "第\(position)处：识别为“\(recognized)”，应为“\(expected)”"
+            case let .missing(position, expected):
+                "第\(position)处漏写，应为“\(expected)”"
+            case let .extra(position, recognized):
+                "第\(position)处多出“\(recognized)”"
+            }
         }
-        return "答案应为 \(expectedAnswer)"
+
+        var isPunctuationRelated: Bool {
+            switch self {
+            case let .substitution(_, recognized, expected):
+                recognized.isPunctuationMark || expected.isPunctuationMark
+            case let .missing(_, expected):
+                expected.isPunctuationMark
+            case let .extra(_, recognized):
+                recognized.isPunctuationMark
+            }
+        }
+
+        var suspectedPunctuationDescription: String {
+            switch self {
+            case let .substitution(position, recognized, expected):
+                "疑似第\(position)处标点识别差异：识别为“\(recognized)”，参考为“\(expected)”"
+            case let .missing(position, expected):
+                "疑似第\(position)处标点未识别：参考为“\(expected)”"
+            case let .extra(position, recognized):
+                "疑似第\(position)处多识别标点“\(recognized)”"
+            }
+        }
+    }
+
+    private static func chineseMismatchComment(_ edits: [ChineseCharacterEdit]) -> String {
+        guard !edits.isEmpty else { return "识别结果与答案不一致" }
+        let descriptions = edits.map { edit in
+            edit.isPunctuationRelated ? edit.suspectedPunctuationDescription : edit.description
+        }
+        if edits.allSatisfy(\.isPunctuationRelated) {
+            return ([suspectedPunctuationCommentPrefix] + descriptions).joined(separator: "\n")
+        }
+        return descriptions.joined(separator: "\n")
+    }
+
+    private static func chineseCharacterEdits(
+        recognized: [Character],
+        expected: [Character]
+    ) -> [ChineseCharacterEdit] {
+        let recognizedCount = recognized.count
+        let expectedCount = expected.count
+        var distance = Array(
+            repeating: Array(repeating: 0, count: expectedCount + 1),
+            count: recognizedCount + 1
+        )
+
+        for recognizedIndex in 0...recognizedCount {
+            distance[recognizedIndex][0] = recognizedIndex
+        }
+        for expectedIndex in 0...expectedCount {
+            distance[0][expectedIndex] = expectedIndex
+        }
+
+        if recognizedCount > 0, expectedCount > 0 {
+            for recognizedIndex in 1...recognizedCount {
+                for expectedIndex in 1...expectedCount {
+                    if recognized[recognizedIndex - 1] == expected[expectedIndex - 1] {
+                        distance[recognizedIndex][expectedIndex] = distance[recognizedIndex - 1][expectedIndex - 1]
+                    } else {
+                        distance[recognizedIndex][expectedIndex] = min(
+                            distance[recognizedIndex - 1][expectedIndex - 1] + 1,
+                            min(
+                                distance[recognizedIndex - 1][expectedIndex] + 1,
+                                distance[recognizedIndex][expectedIndex - 1] + 1
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        var edits: [ChineseCharacterEdit] = []
+        var recognizedIndex = recognizedCount
+        var expectedIndex = expectedCount
+        while recognizedIndex > 0 || expectedIndex > 0 {
+            if recognizedIndex > 0,
+               expectedIndex > 0,
+               recognized[recognizedIndex - 1] == expected[expectedIndex - 1],
+               distance[recognizedIndex][expectedIndex] == distance[recognizedIndex - 1][expectedIndex - 1] {
+                recognizedIndex -= 1
+                expectedIndex -= 1
+                continue
+            }
+
+            if recognizedIndex > 0,
+               expectedIndex > 0,
+               distance[recognizedIndex][expectedIndex] == distance[recognizedIndex - 1][expectedIndex - 1] + 1 {
+                edits.append(.substitution(
+                    position: expectedIndex,
+                    recognized: recognized[recognizedIndex - 1],
+                    expected: expected[expectedIndex - 1]
+                ))
+                recognizedIndex -= 1
+                expectedIndex -= 1
+            } else if recognizedIndex > 0,
+                      distance[recognizedIndex][expectedIndex] == distance[recognizedIndex - 1][expectedIndex] + 1 {
+                edits.append(.extra(
+                    position: expectedIndex + 1,
+                    recognized: recognized[recognizedIndex - 1]
+                ))
+                recognizedIndex -= 1
+            } else if expectedIndex > 0 {
+                edits.append(.missing(
+                    position: expectedIndex,
+                    expected: expected[expectedIndex - 1]
+                ))
+                expectedIndex -= 1
+            }
+        }
+
+        return edits.reversed()
+    }
+}
+
+private extension Character {
+    var isPunctuationMark: Bool {
+        !unicodeScalars.isEmpty
+            && unicodeScalars.allSatisfy(CharacterSet.punctuationCharacters.contains)
     }
 }
 

@@ -1,14 +1,13 @@
 import Foundation
 
 @main
-struct VocabularyFlashcardReviewItemFactoryTests {
+struct VocabularyStudySessionItemFactoryTests {
     static func main() {
         testPromptAndAnswerFollowDirection()
-        testReviewItemUsesRatingOutcome()
         testWordBankItemUsesPlacedWords()
-        testHandwritingItemHidesRecognizedTextForCorrectAnswer()
+        testHandwritingItemPreservesRecognizedTextForCorrectAnswer()
         testEnglishDefinitionHandwritingStoresReferenceAndRecognition()
-        print("VocabularyFlashcardReviewItemFactoryTests: 15 passed")
+        print("VocabularyStudySessionItemFactoryTests: passed")
     }
 
     private static func testPromptAndAnswerFollowDirection() {
@@ -28,27 +27,6 @@ struct VocabularyFlashcardReviewItemFactoryTests {
         )
     }
 
-    private static func testReviewItemUsesRatingOutcome() {
-        let card = makeCard()
-
-        let againItem = VocabularyStudySessionItemFactory.makeFlashcardReview(
-            card: card,
-            direction: .termToDefinition,
-            rating: .again
-        )
-        expect(!againItem.isCorrect)
-        expect(againItem.comment == VocabularyReviewRating.again.title)
-
-        let goodItem = VocabularyStudySessionItemFactory.makeFlashcardReview(
-            card: card,
-            direction: .definitionToTerm,
-            rating: .good
-        )
-        expect(goodItem.isCorrect)
-        expect(goodItem.prompt == "光合作用")
-        expect(goodItem.expectedAnswer == "photosynthesis")
-    }
-
     private static func testWordBankItemUsesPlacedWords() {
         let item = VocabularyStudySessionItemFactory.makeWordBankAnswer(
             card: makeCard(),
@@ -62,14 +40,14 @@ struct VocabularyFlashcardReviewItemFactoryTests {
         expect(item.comment == "拼句错误")
     }
 
-    private static func testHandwritingItemHidesRecognizedTextForCorrectAnswer() {
+    private static func testHandwritingItemPreservesRecognizedTextForCorrectAnswer() {
         let correctItem = VocabularyStudySessionItemFactory.makeHandwritingTestAnswer(
             card: makeCard(),
             isCorrect: true,
             recognizedText: "photosyntesis",
             comment: "可接受"
         )
-        expect(correctItem.recognizedText.isEmpty)
+        expect(correctItem.recognizedText == "photosyntesis")
 
         let wrongItem = VocabularyStudySessionItemFactory.makeHandwritingTestAnswer(
             card: makeCard(),
@@ -88,8 +66,7 @@ struct VocabularyFlashcardReviewItemFactoryTests {
             expectedAnswer: "the way plants use light to make food",
             isCorrect: true,
             recognizedText: "The way plants use light to make food.",
-            comment: "正确",
-            keepsRecognizedTextForCorrectAnswer: true
+            comment: "正确"
         )
 
         expect(item.prompt == "photosynthesis")

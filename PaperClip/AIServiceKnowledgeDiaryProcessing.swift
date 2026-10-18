@@ -42,24 +42,4 @@ extension AIService {
         return AIAnswerModel(rawValue: raw) ?? .doubao
     }
 
-    static func processDiaryLearned(_ text: String) async throws -> String {
-        try await requestDiaryResponse(DiaryAIPrompts.learned(text))
-    }
-
-    static func processDiaryConfused(_ text: String) async throws -> String {
-        try await requestDiaryResponse(DiaryAIPrompts.confused(text))
-    }
-
-    static func processDiaryInspired(_ text: String) async throws -> String {
-        try await requestDiaryResponse(DiaryAIPrompts.inspired(text))
-    }
-
-    private static func requestDiaryResponse(_ prompt: String) async throws -> String {
-        let diaryModel = resolvedDiaryModel()
-        let configuration = AIRequestConfiguration.diary(model: diaryModel)
-        return try await requestText(
-            prompt,
-            configuration: configuration
-        )
-    }
 }

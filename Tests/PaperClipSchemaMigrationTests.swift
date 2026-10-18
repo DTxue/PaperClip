@@ -10,22 +10,7 @@ enum PaperClipSchemaMigrationTests {
 
         let container = try PaperClipStore.makeContainer(at: storeURL)
         try verifyEveryV1Model(in: container.mainContext)
-        verifyRetiredModelsAreAbsentFromV5()
-        let newMistakes = try container.mainContext.fetch(FetchDescriptor<MistakeLibraryItem>())
-        let newAttachments = try container.mainContext.fetch(FetchDescriptor<MistakeAttachment>())
-        let newAttempts = try container.mainContext.fetch(FetchDescriptor<MistakeReviewAttempt>())
-        expect(
-            newMistakes.isEmpty,
-            "independent mistake library starts empty"
-        )
-        expect(
-            newAttachments.isEmpty,
-            "migration does not retain legacy card images as new attachments"
-        )
-        expect(
-            newAttempts.isEmpty,
-            "migration does not retain legacy practice records as new attempts"
-        )
+        verifyRetiredModelsAreAbsentFromV6()
         let externalDataDirectory = storeURL.deletingLastPathComponent()
             .appendingPathComponent(".default_SUPPORT", isDirectory: true)
             .appendingPathComponent("_EXTERNAL_DATA", isDirectory: true)
@@ -38,14 +23,68 @@ enum PaperClipSchemaMigrationTests {
             "migration removes retired mistake, PDF/exam, and writing sidecars"
         )
 
-        try verifyV2ToV5Migration()
+        try verifyV2ToV6Migration()
+        try verifyV6CompatibilityRoundTrip()
 
-        print("PaperClipSchemaMigrationTests: active V1 data preserved; retired entities removed; V5 ready")
+        print("PaperClipSchemaMigrationTests: active V1 data preserved; retired entities removed; V6 ready")
     }
 
-    private static func verifyV2ToV5Migration() throws {
+    private static func verifyV6CompatibilityRoundTrip() throws {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("PaperClipV2ToV3Tests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("PaperClipV6Compatibility-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let storeURL = directory.appendingPathComponent("default.store")
+        let deckID = UUID()
+        let drawing = externalFixtureData(marker: 0x31)
+
+        do {
+            let container = try PaperClipStore.makeContainer(at: storeURL)
+            let context = container.mainContext
+            let diary = DiaryEntry(date: .now)
+            diary.learned = "现行日记"
+            diary.aiLearned = "历史学习整理"
+            diary.aiConfused = "历史困惑整理"
+            diary.aiInspired = "历史灵感整理"
+            diary.aiState = "done"
+            context.insert(diary)
+            let knowledge = KnowledgeItem(summary: "现行知识点", source: "learned", entry: diary)
+            knowledge.aiExamPattern = "历史考点分析"
+            context.insert(knowledge)
+            context.insert(VocabularyDeck(id: deckID, title: "保留草稿的词集"))
+            context.insert(VocabularyTestDraft(
+                deckID: deckID,
+                mode: "考试",
+                payload: VocabularyTestDraftSavePayload(
+                    batchSize: 5,
+                    currentBatchIndex: 0,
+                    currentQuestionIndex: 1,
+                    currentDrawingData: drawing,
+                    didFinishAnswering: false,
+                    startedAt: .now,
+                    batches: []
+                )
+            ))
+            try context.save()
+        }
+
+        let reopened = try PaperClipStore.makeContainer(at: storeURL)
+        let diary = try only(DiaryEntry.self, in: reopened.mainContext)
+        expect(diary.learned == "现行日记", "reopening V6 preserves current diary content")
+        expect(diary.aiLearned == "历史学习整理", "cleanup preserves hidden learned analysis")
+        expect(diary.aiConfused == "历史困惑整理", "cleanup preserves hidden confused analysis")
+        expect(diary.aiInspired == "历史灵感整理" && diary.aiState == "done", "cleanup preserves legacy diary result state")
+        let knowledge = try only(KnowledgeItem.self, in: reopened.mainContext)
+        expect(knowledge.aiExamPattern == "历史考点分析", "cleanup preserves hidden knowledge data")
+        expect(knowledge.diaryEntry?.id == diary.id, "reopening V6 preserves the knowledge relationship")
+        let draft = try only(VocabularyTestDraft.self, in: reopened.mainContext)
+        expect(draft.deckID == deckID && draft.mode == "考试", "retired mode values remain readable in stored drafts")
+        expect(draft.currentQuestionIndex == 1 && draft.currentDrawingData == drawing, "relocated compatibility model preserves external drawing data")
+    }
+
+    private static func verifyV2ToV6Migration() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("PaperClipV2ToV6Tests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         let storeURL = directory.appendingPathComponent("default.store")
@@ -67,12 +106,8 @@ enum PaperClipSchemaMigrationTests {
         }
 
         let migratedContainer = try PaperClipStore.makeContainer(at: storeURL)
-        let migrated = try only(MistakeLibraryItem.self, in: migratedContainer.mainContext)
-        expect(migrated.questionText == "V2 物理错题", "V5 keeps V2 mistake text")
-        expect(migrated.correctAnswer == "旧答案", "V5 keeps hidden legacy answer data")
-        expect(migrated.explanation == "旧解析", "V5 keeps hidden legacy explanation data")
-        expect(migrated.grade == Grade.grade7.rawValue, "V5 backfills the default grade")
-        expect(migrated.semester == Semester.first.rawValue, "V5 backfills the default semester")
+        try verifyRetiredModelsAreAbsentFromV6()
+        _ = migratedContainer.mainContext
     }
 
     private static func copiedLegacyStoreURL() throws -> URL {
@@ -156,8 +191,8 @@ enum PaperClipSchemaMigrationTests {
 
     }
 
-    private static func verifyRetiredModelsAreAbsentFromV5() {
-        let currentModelIDs = Set(PaperClipSchemaV5.models.map(ObjectIdentifier.init))
+    private static func verifyRetiredModelsAreAbsentFromV6() {
+        let currentModelIDs = Set(PaperClipSchemaV6.models.map(ObjectIdentifier.init))
         let retiredModelIDs = [
             ObjectIdentifier(PaperClipSchemaV1.PDFDocumentItem.self),
             ObjectIdentifier(PaperClipSchemaV1.HandwritingLayer.self),
@@ -169,11 +204,14 @@ enum PaperClipSchemaMigrationTests {
             ObjectIdentifier(PaperClipSchemaV1.VocabularyArticleRecitationHistory.self),
             ObjectIdentifier(PaperClipSchemaV1.WritingPrompt.self),
             ObjectIdentifier(PaperClipSchemaV1.WritingDraft.self),
-            ObjectIdentifier(PaperClipSchemaV1.WritingReview.self)
+            ObjectIdentifier(PaperClipSchemaV1.WritingReview.self),
+            ObjectIdentifier(MistakeLibraryItem.self),
+            ObjectIdentifier(MistakeAttachment.self),
+            ObjectIdentifier(MistakeReviewAttempt.self)
         ]
         expect(
             retiredModelIDs.allSatisfy { !currentModelIDs.contains($0) },
-            "V5 excludes every retired PDF/exam, vocabulary-article, and writing entity"
+            "V6 excludes every retired entity, including all mistake-library models"
         )
     }
 

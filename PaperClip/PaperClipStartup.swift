@@ -15,20 +15,13 @@ enum PaperClipStartup {
 
         do {
             guard LegacyMistakeDataCleanup.canRemoveLegacyFiles() else {
-                assertionFailure("旧错题文件未清理：未找到可验证的清理前备份。")
+                assertionFailure("错题数据未清理：未找到可验证的清理前备份。")
                 return
             }
             try LegacyMistakeDataCleanup.removeLegacyFiles()
-            let referencedAttachmentNames = Set(
-                try container.mainContext.fetch(FetchDescriptor<MistakeAttachment>())
-                    .map(\.fileName)
-            )
-            try MistakeAttachmentStore.recoverInterruptedDeletions(
-                referencedFileNames: referencedAttachmentNames
-            )
             LegacyMistakeDataCleanup.markCompleted()
         } catch {
-            assertionFailure("旧错题文件清理失败：\(error.localizedDescription)")
+            assertionFailure("错题文件清理失败：\(error.localizedDescription)")
         }
 
         VocabularyMaintenance.backfillMemoryStateDeckIDs(in: container)

@@ -35,19 +35,4 @@ enum HandwritingRenderGeometry {
         )
     }
 
-    static func fullCanvasSpec(
-        canvasSize: CGSize,
-        scale: CGFloat = defaultDrawingScale
-    ) -> HandwritingRenderSpec? {
-        guard canvasSize.width > 0,
-              canvasSize.height > 0,
-              scale > 0
-        else { return nil }
-
-        return HandwritingRenderSpec(
-            sourceRect: CGRect(origin: .zero, size: canvasSize),
-            outputSize: canvasSize,
-            drawingScale: scale
-        )
-    }
 }

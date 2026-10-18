@@ -28,7 +28,7 @@ NavigationSplitView(columnVisibility: .constant(.all)) {
 ### 选中样式
 
 - **导航类侧边栏**（选项互斥，如设置页）：使用 `List(data, selection: $binding)`，由系统自动渲染高亮背景
-- **筛选类侧边栏**（多维度独立筛选，如试卷页）：使用自定义行 + `.listRowBackground(isActive ? Color.accentColor.opacity(0.12) : Color.clear)`，文字用 `Color.accentColor` + `.semibold`，右侧加 `checkmark` 图标
+- **筛选类侧边栏**（多维度独立筛选，如知识库学科筛选）：使用自定义行 + `.listRowBackground(isActive ? Color.accentColor.opacity(0.12) : Color.clear)`，文字用 `Color.accentColor` + `.semibold`，右侧加 `checkmark` 图标
 - 两种场景均不得自制高亮组件替代上述方案
 
 ### 禁止事项
@@ -76,7 +76,7 @@ NavigationSplitView(columnVisibility: .constant(.all)) {
 | 空状态 | `ContentUnavailableView` |
 | 表单控件 | `Form`、`Picker`、`Slider`、`Toggle`、`TextField` |
 | 日期/颜色 | `DatePicker`、`ColorPicker` |
-| PDF 显示 | PDFKit |
+| 文档扫描 | VisionKit |
 | 手写/画笔/橡皮 | `PKCanvasView`、`PKToolPicker` |
 | 数据持久化 | SwiftData |
 | 图标 | SF Symbols |
@@ -99,17 +99,19 @@ NavigationSplitView(columnVisibility: .constant(.all)) {
 
 以下业务能力暂无系统等价方案，可保留自定义代码，但内部仍须使用系统基础组件：
 
-- 跟随 PDF 页面坐标、独立持久化且不修改原 PDF 的答题图层
-- 可移动、可调整尺寸的浮动草稿板容器
+- 相册／扫描图片上的单题框选，不修改输入原图
+- 错题与词汇测验的 PencilKit 桥接、作答状态及笔迹快照
+- 使用系统 WebKit 与本地 KaTeX 的只读公式排版
 
 即使属于允许自定义范围，也应继续使用系统基础能力：
 
-- 答题与草稿板使用 `PKCanvasView`
+- 手写答题使用 `PKCanvasView`
 - 画笔工具使用 `PKToolPicker`
-- PDF 显示和坐标转换使用 PDFKit
 - 分享使用 `ShareLink`
 - 文件导入使用 `fileImporter`
 - 状态提示、菜单和确认使用 SwiftUI 系统组件
+
+PDF 工作区、独立考试、词生文、作文和旧整篇日记 AI 整理已下线。升级所需模型与迁移保存在 `PaperClip/Persistence/Compatibility`，保持旧存储身份；历史数据和源 PDF 的保护要求不因功能下线而取消。
 
 ## 新增自定义实现的准入条件
 
@@ -149,7 +151,7 @@ NavigationSplitView(columnVisibility: .constant(.all)) {
 
 - [ ] iPad 真机或模拟器布局
 - [ ] Apple Pencil 与手指输入分流
-- [ ] PDF 滚动和缩放
+- [ ] 图片框选与文档扫描
 - [ ] 深色模式
 - [ ] 横竖屏 / 窗口尺寸变化
 - [ ] VoiceOver 标签

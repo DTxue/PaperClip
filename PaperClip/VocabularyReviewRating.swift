@@ -27,10 +27,6 @@ enum VocabularyReviewRating: Int, CaseIterable, Identifiable {
         }
     }
 
-    var isPassingRecall: Bool {
-        self != .again
-    }
-
     var swipeDirection: CGFloat {
         switch self {
         case .again, .hard: -1

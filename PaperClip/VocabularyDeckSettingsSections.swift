@@ -1,5 +1,15 @@
 import SwiftUI
 
+enum VocabularyChineseRecognitionPreference {
+    static func storageKey(deckID: UUID) -> String {
+        "vocabulary.deck.\(deckID.uuidString).chineseGridRecognition"
+    }
+
+    static func localRecognitionStorageKey(deckID: UUID) -> String {
+        "vocabulary.deck.\(deckID.uuidString).chineseLocalRecognition"
+    }
+}
+
 struct VocabularyDeckSettingsSnapshot {
     let cards: [VocabularyCard]
     let freshCacheCount: Int

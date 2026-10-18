@@ -29,10 +29,20 @@ struct VocabularyDeckSettingsView: View {
     @AppStorage("distractor.weight.synonym") var weightSynonym: Int = 2
     @AppStorage("distractor.weight.confused") var weightConfused: Int = 2
     @AppStorage("distractor.weight.derivation") var weightDerivation: Int = 1
+    @AppStorage private var usesChineseCharacterByCharacterRecognition: Bool
+    @AppStorage private var usesLocalChineseRecognition: Bool
 
     init(deck: VocabularyDeck) {
         self.deck = deck
         _titleDraft = State(initialValue: deck.title)
+        _usesChineseCharacterByCharacterRecognition = AppStorage(
+            wrappedValue: false,
+            VocabularyChineseRecognitionPreference.storageKey(deckID: deck.id)
+        )
+        _usesLocalChineseRecognition = AppStorage(
+            wrappedValue: true,
+            VocabularyChineseRecognitionPreference.localRecognitionStorageKey(deckID: deck.id)
+        )
     }
 
     var body: some View {
@@ -101,6 +111,17 @@ struct VocabularyDeckSettingsView: View {
                         startRegeneratingAll(snapshot)
                     }
                 )
+            } else if deck.kind == .sentence {
+                VocabularyDeckSentenceDistractorConfigSection(totalCount: $totalCount)
+            } else if deck.kind == .dictationChinese {
+                Section {
+                    Toggle("本地识别", isOn: $usesLocalChineseRecognition)
+                    Toggle("逐字识别", isOn: $usesChineseCharacterByCharacterRecognition)
+                } header: {
+                    Text("中文默写识别")
+                } footer: {
+                    Text("开启“本地识别”时，笔迹只在设备上处理；关闭时会将答案图片发送给 AI 识别。开启“逐字识别”后，每格单独识别且不参考整句；关闭后识别整张答案图。")
+                }
             }
 
             VocabularyDeckDangerSection(kind: deck.kind) {

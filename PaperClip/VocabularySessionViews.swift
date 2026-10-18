@@ -7,12 +7,18 @@ struct VocabularyTestView: View {
     let handwritingTestKind: VocabularyHandwritingTestKind
 
     @Environment(\.modelContext) var modelContext
+    @AppStorage var usesChineseCharacterByCharacterRecognition: Bool
+    @AppStorage var usesLocalChineseRecognition: Bool
 
     @State var allCards: [VocabularyCard] = []
     @State var states: [VocabularyMemoryState] = []
     @State var selectedMode: VocabularyTestMode = .regular
+    @State var selectedQuestionSelectionMode: VocabularyTestQuestionSelectionMode = .random
     @State var englishDefinitionTestMode: VocabularyEnglishDefinitionTestMode = .random
     @State var selectedEnglishDefinitionCardIDs: Set<UUID> = []
+    @State var orderedStartQuestionText = "1"
+    @State var orderedQuestionCountText = "1"
+    @State var activeTestSelectionDescription: String?
     @State var sessionMode: VocabularyTestMode?
     @State var questionCount = 5
     @State var batches: [VocabularyTestBatch] = []
@@ -24,12 +30,12 @@ struct VocabularyTestView: View {
     @State var enlargedImage: IdentifiableImage? = nil
     @State var startedAt = Date.now
     @State var didRecordSession = false
-    @State var didFinishAnswering = false
     @State var draftDrawingDataCache = VocabularyDraftDrawingDataCache()
     @State var gradingTaskStore = VocabularyTestGradingTaskStore()
     @State var answerAdvanceUndoTarget: VocabularyAnswerAdvanceUndoTarget?
     @State var answerAdvanceUndoDismissAction = DebouncedAction()
     @State var isConfirmingEmptyAnswer = false
+    @State var isConfirmingTestExit = false
     @State var alert: AppAlert?
 
     init(
@@ -38,6 +44,14 @@ struct VocabularyTestView: View {
     ) {
         self.deck = deck
         self.handwritingTestKind = handwritingTestKind
+        _usesChineseCharacterByCharacterRecognition = AppStorage(
+            wrappedValue: false,
+            VocabularyChineseRecognitionPreference.storageKey(deckID: deck.id)
+        )
+        _usesLocalChineseRecognition = AppStorage(
+            wrappedValue: true,
+            VocabularyChineseRecognitionPreference.localRecognitionStorageKey(deckID: deck.id)
+        )
     }
 }
 

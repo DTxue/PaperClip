@@ -9,10 +9,6 @@ enum AIService {
         "ep-20260620182757-zwqg9"
     ]
 
-    static var isDeepSeekConfigured: Bool {
-        !resolvedDeepSeekInferenceID().isEmpty
-    }
-
     static func migratedDoubaoInferenceID(_ value: String?) -> String {
         AIModelRouting.migratedDoubaoInferenceID(
             value,

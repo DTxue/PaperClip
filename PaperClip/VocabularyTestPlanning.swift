@@ -31,7 +31,7 @@ enum VocabularyTestSessionPlanner {
                 deckCards: deckCards,
                 states: states,
                 recentLogs: recentLogs,
-                limit: mode == .exam ? deckCards.count : questionCount
+                limit: questionCount
             )
         case .random:
             questionCount = VocabularyTestSessionQuestionCountPolicy.englishDefinitionRandom.resolvedQuestionCount(
@@ -43,6 +43,23 @@ enum VocabularyTestSessionPlanner {
                 from: deckCards,
                 limit: questionCount
             )
+        case .randomStandard:
+            questionCount = VocabularyTestSessionQuestionCountPolicy.standard.resolvedQuestionCount(
+                requestedQuestionCount: requestedQuestionCount,
+                maximumQuestionCount: maximumQuestionCount,
+                mode: mode
+            )
+            selectedCards = VocabularyTestQuestionSelector.randomQuestions(
+                from: deckCards,
+                limit: questionCount
+            )
+        case let .orderedRange(startQuestion, endQuestion):
+            selectedCards = VocabularyTestQuestionSelector.orderedQuestions(
+                from: deckCards,
+                startQuestion: startQuestion,
+                endQuestion: endQuestion
+            )
+            questionCount = selectedCards.count
         case let .custom(cardIDs):
             selectedCards = VocabularyTestQuestionSelector.customQuestions(
                 from: deckCards,
@@ -57,10 +74,9 @@ enum VocabularyTestSessionPlanner {
         }
         return VocabularyTestSessionPlan(
             mode: mode,
-            batches: VocabularyTestBatchBuilder.makeBatches(
-                from: selectedCards,
-                batchSize: questionCount
-            ),
+            batches: selectedCards.isEmpty ? [] : [
+                VocabularyTestBatch(id: 0, startIndex: 0, cards: selectedCards)
+            ],
             questionCount: questionCount
         )
     }

@@ -68,11 +68,6 @@ run_swift_test ImageEncodingPlanTests \
     PaperClip/ImageEncodingPlan.swift \
     Tests/ImageEncodingPlanTests.swift
 
-run_swift_test StoredFileTests \
-    PaperClip/AppStorageDirectory.swift \
-    PaperClip/StoredFile.swift \
-    Tests/StoredFileTests.swift
-
 run_swift_test PaperClipDataBackupServiceTests \
     PaperClip/AppStorageDirectory.swift \
     Tests/PaperClipDataBackupServiceTests.swift \
@@ -82,12 +77,6 @@ run_swift_test LegacyMistakeDataCleanupTests \
     PaperClip/AppStorageDirectory.swift \
     PaperClip/LegacyMistakeDataCleanup.swift \
     Tests/LegacyMistakeDataCleanupTests.swift \
-    -lsqlite3
-
-run_swift_test MistakeAttachmentStoreTests \
-    PaperClip/AppStorageDirectory.swift \
-    PaperClip/MistakeAttachmentStore.swift \
-    Tests/MistakeAttachmentStoreTests.swift \
     -lsqlite3
 
 LEGACY_STORE_FIXTURE_DIR="$BUILD_DIR/paperclip-legacy-store"
@@ -106,20 +95,23 @@ tar -xzf "$LEGACY_STORE_FIXTURE_ARCHIVE" -C "$LEGACY_STORE_FIXTURE_DIR"
 export PAPERCLIP_LEGACY_STORE_DIR="$LEGACY_STORE_FIXTURE_DIR"
 
 run_swift_test PaperClipSchemaMigrationTests \
+    PaperClip/Persistence/Compatibility/MistakeLibraryV2Model.swift \
+    PaperClip/Persistence/Compatibility/PaperClipLegacySchemas.swift \
+    PaperClip/Persistence/Compatibility/PaperClipMigrationPlan.swift \
+    PaperClip/Persistence/Compatibility/VocabularyArticleModels.swift \
     PaperClip/AppStorageDirectory.swift \
-    PaperClip/StoredFile.swift \
     PaperClip/AcademicTaxonomy.swift \
-    PaperClip/PDFDocumentModels.swift \
-    PaperClip/HandwritingLayerModel.swift \
-    PaperClip/ExamModels.swift \
-    PaperClip/ExamPageSubmissionModel.swift \
-    PaperClip/ExamHandwritingLayerModel.swift \
-    PaperClip/ExamGradeMarkModel.swift \
+    PaperClip/Persistence/Compatibility/PDFDocumentModels.swift \
+    PaperClip/Persistence/Compatibility/HandwritingLayerModel.swift \
+    PaperClip/Persistence/Compatibility/ExamModels.swift \
+    PaperClip/Persistence/Compatibility/ExamPageSubmissionModel.swift \
+    PaperClip/Persistence/Compatibility/ExamHandwritingLayerModel.swift \
+    PaperClip/Persistence/Compatibility/ExamGradeMarkModel.swift \
     PaperClip/ModelContextHelpers.swift \
-    PaperClip/MistakeModels.swift \
-    PaperClip/ExportRecordModel.swift \
-    PaperClip/MistakePracticeModels.swift \
-    PaperClip/MistakeLibraryModels.swift \
+    PaperClip/Persistence/Compatibility/MistakeModels.swift \
+    PaperClip/Persistence/Compatibility/ExportRecordModel.swift \
+    PaperClip/Persistence/Compatibility/MistakePracticeModels.swift \
+    PaperClip/Persistence/Compatibility/MistakeLibrarySchemaModels.swift \
     PaperClip/VocabularyCoreEnums.swift \
     PaperClip/VocabularyReviewRating.swift \
     PaperClip/VocabularyJSONStorage.swift \
@@ -133,22 +125,19 @@ run_swift_test PaperClipSchemaMigrationTests \
     PaperClip/VocabularyMemoryModels.swift \
     PaperClip/VocabularyReviewModels.swift \
     PaperClip/VocabularyStudyModels.swift \
-    PaperClip/VocabularyTestPersistenceModels.swift \
+    PaperClip/Persistence/Compatibility/VocabularyTestPersistenceModels.swift \
     PaperClip/VocabularyHandwritingAttempt.swift \
     PaperClip/VocabularyImportModels.swift \
     PaperClip/VocabularyDistractorCache.swift \
     PaperClip/DiaryEntryContentPresence.swift \
     PaperClip/DiaryModels.swift \
-    PaperClip/WritingPromptModel.swift \
-    PaperClip/WritingDraftModel.swift \
-    PaperClip/WritingReviewModel.swift \
+    PaperClip/Persistence/Compatibility/WritingPromptModel.swift \
+    PaperClip/Persistence/Compatibility/WritingDraftModel.swift \
+    PaperClip/Persistence/Compatibility/WritingReviewModel.swift \
     PaperClip/PaperClipSchema.swift \
     Tests/PaperClipSchemaMigrationTests.swift \
     -lsqlite3
 
-run_swift_test CanvasSizeReportSupportTests \
-    PaperClip/CanvasSizeReportSupport.swift \
-    Tests/CanvasSizeReportSupportTests.swift
 
 run_swift_test DrawingDataSupportTests \
     PaperClip/DrawingDataSupport.swift \
@@ -176,6 +165,7 @@ run_swift_test DiaryCalendarSupportTests \
     Tests/DiaryCalendarSupportTests.swift
 
 run_swift_test DiaryKnowledgeSnapshotTests \
+    PaperClip/DiaryViewModels.swift \
     PaperClip/AppStorageDirectory.swift \
     PaperClip/AIKnowledgeModels.swift \
     PaperClip/ModelContextHelpers.swift \
@@ -184,42 +174,6 @@ run_swift_test DiaryKnowledgeSnapshotTests \
     PaperClip/KnowledgeItemAnalysisSupport.swift \
     PaperClip/DiaryKnowledgeSnapshot.swift \
     Tests/DiaryKnowledgeSnapshotTests.swift
-
-run_swift_test MistakeReviewEngineTests \
-    PaperClip/AcademicTaxonomy.swift \
-    PaperClip/MistakeLibraryModels.swift \
-    PaperClip/MistakeReviewEngine.swift \
-    Tests/MistakeReviewEngineTests.swift
-
-run_swift_test MistakeLibrarySupportTests \
-    PaperClip/AcademicTaxonomy.swift \
-    PaperClip/MistakeLibraryModels.swift \
-    PaperClip/MistakeLibrarySupport.swift \
-    Tests/MistakeLibrarySupportTests.swift
-
-run_swift_test MistakeCropGeometryTests \
-    PaperClip/MistakeCropGeometry.swift \
-    Tests/MistakeCropGeometryTests.swift
-
-run_swift_test AIMistakeRecognitionModelsTests \
-    PaperClip/AIMistakeRecognitionModels.swift \
-    Tests/AIMistakeRecognitionModelsTests.swift
-
-run_swift_test MistakePresentationSupportTests \
-    PaperClip/MistakeScannerAccessPolicy.swift \
-    PaperClip/MistakeQuestionRendering.swift \
-    Tests/MistakePresentationSupportTests.swift
-
-run_swift_test MistakeLibraryPersistenceTests \
-    PaperClip/AppStorageDirectory.swift \
-    PaperClip/StoredFile.swift \
-    PaperClip/AcademicTaxonomy.swift \
-    PaperClip/MistakeLibraryModels.swift \
-    PaperClip/MistakeReviewEngine.swift \
-    PaperClip/MistakeAttachmentStore.swift \
-    PaperClip/MistakeLibraryPersistence.swift \
-    Tests/MistakeLibraryPersistenceTests.swift \
-    -lsqlite3
 
 run_swift_test KnowledgeAIPromptsTests \
     PaperClip/AIKnowledgeModels.swift \
@@ -402,7 +356,7 @@ run_swift_test VocabularyStudySessionSnapshotsTests \
     PaperClip/VocabularyStudySessionFormat.swift \
     Tests/VocabularyStudySessionSnapshotsTests.swift
 
-run_swift_test VocabularyFlashcardReviewItemFactoryTests \
+run_swift_test VocabularyStudySessionItemFactoryTests \
     PaperClip/VocabularyModels.swift \
     PaperClip/VocabularyCardDerivedProperties.swift \
     PaperClip/VocabularyCoreEnums.swift \
@@ -413,8 +367,8 @@ run_swift_test VocabularyFlashcardReviewItemFactoryTests \
     PaperClip/VocabularyStudySessionItem.swift \
     PaperClip/VocabularyStudyModels.swift \
     PaperClip/VocabularyStudySessionDraft.swift \
-    PaperClip/VocabularyFlashcardReviewItemFactory.swift \
-    Tests/VocabularyFlashcardReviewItemFactoryTests.swift
+    PaperClip/VocabularyStudySessionItemFactory.swift \
+    Tests/VocabularyStudySessionItemFactoryTests.swift
 
 run_swift_test VocabularyPersistenceTests \
     PaperClip/AIResponseJSONValueExtractor.swift \
@@ -443,7 +397,7 @@ run_swift_test VocabularyPersistenceTests \
     PaperClip/VocabularyStudySessionItem.swift \
     PaperClip/VocabularyStudyModels.swift \
     PaperClip/VocabularyStudySessionDraft.swift \
-    PaperClip/VocabularyTestPersistenceModels.swift \
+    PaperClip/Persistence/Compatibility/VocabularyTestPersistenceModels.swift \
     PaperClip/VocabularyHandwritingAttempt.swift \
     PaperClip/VocabularyDistractorCache.swift \
     PaperClip/VocabularyImportModels.swift \
@@ -464,11 +418,8 @@ run_swift_test VocabularyTextImporterTests \
     PaperClip/VocabularyTextImportModels.swift \
     PaperClip/VocabularyTextFileLoader.swift \
     PaperClip/VocabularyTextImporter.swift \
-    PaperClip/VocabularyTextFormatDetector.swift \
-    PaperClip/VocabularyTextParserSupport.swift \
     PaperClip/VocabularyDelimitedTextParser.swift \
     PaperClip/VocabularyPairedLineTextParser.swift \
-    PaperClip/VocabularyJSONTextParser.swift \
     PaperClip/VocabularyTextRowBuilder.swift \
     PaperClip/StringRegexSplitting.swift \
     Tests/VocabularyTextImporterTests.swift
@@ -486,7 +437,3 @@ run_swift_test StatisticsSnapshotTests \
     PaperClip/VocabularyStudySessionTransaction.swift \
     PaperClip/StatisticsModels.swift \
     Tests/StatisticsSnapshotTests.swift
-
-run_swift_test VisibleElementDiffTests \
-    PaperClip/VisibleElementDiff.swift \
-    Tests/VisibleElementDiffTests.swift

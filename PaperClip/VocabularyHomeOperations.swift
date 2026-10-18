@@ -14,7 +14,7 @@ extension VocabularyHomeView {
             folders = []
             decks = []
             snapshot = .empty
-            alert = AppAlert(title: "无法读取 ENG 内容", error: error)
+            alert = AppAlert(title: "无法读取\(board.title)内容", error: error)
         }
     }
 
@@ -28,7 +28,7 @@ extension VocabularyHomeView {
                 propertiesToFetch: VocabularyMemoryState.futureDuePropertiesToFetch
             )
             snapshot = VocabularyHomeSnapshot(
-                deckIDs: decks.map(\.id),
+                deckIDs: boardDecks.map(\.id),
                 fetchedCards: cards,
                 fetchedFutureStates: futureStates
             )

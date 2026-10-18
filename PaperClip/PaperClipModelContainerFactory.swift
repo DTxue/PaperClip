@@ -15,8 +15,8 @@ enum PaperClipModelContainerFactory {
                 isPersistent: true,
                 startupError: cleanupBackupURL.map { _ in
                     AppAlert(
-                        title: "旧错题清理备份已生成",
-                        message: "旧版错题数据清理前已完成整库备份。可在“设置 → 数据备份”中分享并长期保存。"
+                        title: "错题退役备份已生成",
+                        message: "错题数据清理前已完成整库备份。可在“设置 → 数据备份”中分享并长期保存。"
                     )
                 }
             )

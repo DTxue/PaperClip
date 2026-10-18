@@ -1,6 +1,33 @@
 import PencilKit
 
 extension VocabularyTestView {
+    func finishTestEarly() {
+        guard batches.indices.contains(currentBatchIndex),
+              batches[currentBatchIndex].status == .answering else { return }
+
+        dismissAnswerAdvanceUndo()
+        isConfirmingEmptyAnswer = false
+        isConfirmingTestExit = false
+
+        let submittedDrawing = answerCanvasSession.snapshot(fallback: currentDrawing)
+        currentDrawing = submittedDrawing
+        let drawingIndex = batches[currentBatchIndex].drawings.count
+        draftDrawingDataCache.set(
+            DrawingDataSupport.data(from: submittedDrawing),
+            for: VocabularyDraftDrawingKey(
+                batchID: batches[currentBatchIndex].id,
+                drawingIndex: drawingIndex
+            )
+        )
+        batches[currentBatchIndex].drawings = VocabularyTestEarlyFinishPolicy.completedAnswers(
+            submittedAnswers: batches[currentBatchIndex].drawings,
+            currentAnswer: submittedDrawing,
+            totalQuestionCount: batches[currentBatchIndex].cards.count,
+            blankAnswer: PKDrawing()
+        )
+        submitCurrentBatch()
+    }
+
     func advanceQuestion() {
         guard batches.indices.contains(currentBatchIndex) else { return }
         dismissAnswerAdvanceUndo()
@@ -36,18 +63,6 @@ extension VocabularyTestView {
     }
 
     func submitCurrentBatch() {
-        let submittedIndex = currentBatchIndex
-        if sessionMode == .exam {
-            startBatchGrading(batchIndex: submittedIndex, automaticRetry: true)
-            if currentBatchIndex + 1 < batches.count {
-                currentBatchIndex += 1
-                currentIndex = 0
-                replaceCurrentDrawing(with: PKDrawing())
-            } else {
-                didFinishAnswering = true
-            }
-        } else {
-            startBatchGrading(batchIndex: submittedIndex, automaticRetry: false)
-        }
+        startBatchGrading(batchIndex: currentBatchIndex)
     }
 }

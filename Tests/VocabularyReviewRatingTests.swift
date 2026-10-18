@@ -9,11 +9,6 @@ func assert(_ condition: @autoclosure () -> Bool, _ message: String) {
 @main
 struct VocabularyReviewRatingTests {
     static func main() {
-        assert(!VocabularyReviewRating.again.isPassingRecall, "again should not pass recall")
-        assert(VocabularyReviewRating.hard.isPassingRecall, "hard should pass recall")
-        assert(VocabularyReviewRating.good.isPassingRecall, "good should pass recall")
-        assert(VocabularyReviewRating.easy.isPassingRecall, "easy should pass recall")
-
         assert(VocabularyReviewRating.again.swipeDirection == -1, "again swipes left")
         assert(VocabularyReviewRating.hard.swipeDirection == -1, "hard exits left")
         assert(VocabularyReviewRating.good.swipeDirection == 1, "good exits right")
@@ -121,7 +116,7 @@ struct VocabularyReviewRatingTests {
         assertAlmostEqual(far.colorProgress, 1, "color progress is capped")
         assertAlmostEqual(far.cardOpacity, 0, "far swiped card fades out")
 
-        print("VocabularyReviewRatingTests: 27 passed")
+        print("VocabularyReviewRatingTests: passed")
     }
 
     private static func assertAlmostEqual(

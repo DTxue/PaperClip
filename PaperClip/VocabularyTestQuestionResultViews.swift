@@ -13,6 +13,10 @@ struct VocabularyTestQuestionResultRow: View {
         item?.isCorrect == true
     }
 
+    private var isSuspectedPunctuation: Bool {
+        item?.comment.hasPrefix(VocabularyGradingPolicy.suspectedPunctuationCommentPrefix) == true
+    }
+
     var body: some View {
         HStack(alignment: .center, spacing: 16) {
             resultText
@@ -26,11 +30,13 @@ struct VocabularyTestQuestionResultRow: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top) {
                 Label(
-                    isCorrect ? "正确" : "错误",
-                    systemImage: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill"
+                    isSuspectedPunctuation ? "疑似标点" : (isCorrect ? "正确" : "错误"),
+                    systemImage: isSuspectedPunctuation
+                        ? "questionmark.circle.fill"
+                        : (isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
                 )
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(isCorrect ? Color.green : Color.red)
+                .foregroundStyle(isSuspectedPunctuation ? Color.orange : (isCorrect ? Color.green : Color.red))
 
                 Spacer()
 
@@ -57,13 +63,12 @@ struct VocabularyTestQuestionResultRow: View {
             if let comment = item?.comment, !comment.isEmpty, comment != "正确" {
                 Text(comment)
                     .font(.body)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(isSuspectedPunctuation ? Color.orange : Color.red)
             }
 
-            if (handwritingTestKind == .englishDefinition || item?.isCorrect == false),
-               let recognized = item?.recognizedText,
+            if let recognized = item?.recognizedText,
                !recognized.isEmpty {
-                Text("\(handwritingTestKind == .englishDefinition ? "识别结果" : "AI 识别")：\(recognized)")
+                Text("识别结果：\(recognized)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

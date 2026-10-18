@@ -68,15 +68,6 @@ extension View {
         singleButtonToolbar(title, placement: .confirmationAction, action: action)
     }
 
-    /// 只读 sheet 的标准关闭按钮。使用系统 cancellationAction 位置，
-    /// 避免只负责关闭的页面重复声明同一段 toolbar。
-    func closeToolbar(
-        title: String = "关闭",
-        action: @escaping () -> Void
-    ) -> some View {
-        singleButtonToolbar(title, placement: .cancellationAction, action: action)
-    }
-
     /// 编辑/选择类 sheet 的标准取消按钮，使用系统 cancellationAction 位置。
     func cancelToolbar(
         title: String = "取消",

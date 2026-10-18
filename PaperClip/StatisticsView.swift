@@ -35,7 +35,7 @@ struct StatisticsView: View {
             .frame(maxWidth: .infinity)
         }
         .scrollIndicators(.visible)
-        .navigationTitle("今日 ENG 统计")
+        .navigationTitle("今日英语统计")
         .navigationBarTitleDisplayMode(.large)
     }
 

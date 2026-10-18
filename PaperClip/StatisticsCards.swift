@@ -3,7 +3,7 @@ import SwiftUI
 extension StatisticsView {
     // MARK: - Vocabulary Summary Card
     func vocabularySummaryCard(_ summary: StatisticsVocabularySummary) -> some View {
-        StatCard(title: "今日 ENG 统计", icon: "character.book.closed") {
+        StatCard(title: "今日英语统计", icon: "character.book.closed") {
             if summary.hasSessions {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(summary.rows) { row in
@@ -15,9 +15,9 @@ extension StatisticsView {
                 }
             } else {
                 StatisticsCardEmptyState(
-                    title: "暂无 ENG 数据",
+                    title: "暂无英语数据",
                     systemImage: "character.book.closed",
-                    description: "今天完成 ENG 英语单词学习或测试后，这里会按词集显示学习时间和测试表现。"
+                    description: "今天完成英语单词学习或测试后，这里会按词集显示学习时间和测试表现。"
                 )
             }
         }

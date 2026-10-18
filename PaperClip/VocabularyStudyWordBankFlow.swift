@@ -13,11 +13,13 @@ extension VocabularyStudyView {
     }
 
     func buildWordBank(for card: VocabularyCard) {
-        if deck.kind == .sentence {
+        if deck.kind.usesSentenceTiles {
             correctTiles = VocabularyWordBankBuilder.sentenceTiles(card.term)
+            let distractors = deck.kind == .sentence ? sentenceDistractorTiles(excluding: card) : []
             wordBankTiles = VocabularyWordBankBuilder.build(
                 correctTiles: correctTiles,
-                distractorTiles: []
+                distractorTiles: distractors,
+                maximumDistractorCount: deck.kind == .sentence ? totalCount : 0
             ).shuffled()
             return
         }
@@ -41,6 +43,18 @@ extension VocabularyStudyView {
             correctTiles: correctTiles,
             distractorTiles: distractorTiles
         ).shuffled()
+    }
+
+    private func sentenceDistractorTiles(excluding card: VocabularyCard) -> [String] {
+        let correct = Set(VocabularyWordBankBuilder.sentenceTiles(card.term))
+        var seen = correct
+        let candidates: [String] = allCards
+            .filter { $0.id != card.id }
+            .flatMap { VocabularyWordBankBuilder.sentenceTiles($0.term) }
+            .filter { tile in
+                !tile.isEmpty && seen.insert(tile).inserted
+            }
+        return Array(candidates.shuffled().prefix(max(0, totalCount)))
     }
 
     func fetchDistractorCache(for card: VocabularyCard) -> VocabularyDistractorCache? {

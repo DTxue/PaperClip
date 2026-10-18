@@ -47,6 +47,9 @@ private struct VocabularyStudySessionDetailView: View {
         List {
             Section("本次记录") {
                 LabeledContent("模式", value: session.kind)
+                if let selectionDescription = session.testSelectionDescription {
+                    LabeledContent("选题范围", value: selectionDescription)
+                }
                 LabeledContent("时间") {
                     Text(session.endedAt, format: .dateTime.year().month().day().hour().minute())
                 }

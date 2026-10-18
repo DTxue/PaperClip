@@ -21,6 +21,8 @@ struct VocabularyStudyView: View {
     @State var didRecordSession = false
     @State var alert: AppAlert?
 
+    @AppStorage("distractor.totalCount") var totalCount: Int = 8
+
     var current: VocabularyCard? {
         queue.indices.contains(index) ? queue[index] : nil
     }

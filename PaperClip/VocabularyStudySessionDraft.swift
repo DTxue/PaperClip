@@ -6,19 +6,22 @@ struct VocabularyStudySessionDraft {
     let startedAt: Date
     let endedAt: Date
     let items: [VocabularyStudySessionItem]
+    let testSelectionDescription: String?
 
     init(
         deckID: UUID,
         kind: String,
         startedAt: Date,
         endedAt: Date = .now,
-        items: [VocabularyStudySessionItem]
+        items: [VocabularyStudySessionItem],
+        testSelectionDescription: String? = nil
     ) {
         self.deckID = deckID
         self.kind = kind
         self.startedAt = startedAt
         self.endedAt = endedAt
         self.items = items
+        self.testSelectionDescription = testSelectionDescription
     }
 
     var isRecordable: Bool {
@@ -32,7 +35,8 @@ struct VocabularyStudySessionDraft {
             kind: kind,
             startedAt: startedAt,
             endedAt: endedAt,
-            items: items
+            items: items,
+            testSelectionDescription: testSelectionDescription
         )
     }
 }

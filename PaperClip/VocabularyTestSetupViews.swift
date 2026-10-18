@@ -54,17 +54,91 @@ extension VocabularyTestView {
                             Text(mode.rawValue).tag(mode)
                         }
                     }
-                    .pickerStyle(.segmented)
+                    .pickerStyle(.inline)
                 } else {
                     Picker("测验模式", selection: $selectedMode) {
                         ForEach(VocabularyTestMode.setupModes) { mode in
                             Text(mode.rawValue).tag(mode)
                         }
                     }
-                    .pickerStyle(.segmented)
+                    .pickerStyle(.inline)
 
                     if selectedMode == .debug {
                         Text("固定 5 题，仅测试手写与 AI 批阅，不记录历史或学习进度。")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            if !isEnglishDefinitionTest, selectedMode != .debug {
+                Section("出题方式") {
+                    Picker("出题方式", selection: $selectedQuestionSelectionMode) {
+                        ForEach(VocabularyTestQuestionSelectionMode.allCases) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.inline)
+
+                    if selectedQuestionSelectionMode == .ordered {
+                        let maximum = max(1, snapshot.deckCards.count)
+                        let start = min(
+                            max(1, Int(orderedStartQuestionText) ?? 1),
+                            maximum
+                        )
+                        let availableCount = max(1, maximum - start + 1)
+                        HStack(spacing: 6) {
+                            Text("从第")
+                            TextField("1", text: $orderedStartQuestionText)
+                                .keyboardType(.numberPad)
+                                .textFieldStyle(.roundedBorder)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 52)
+                            Stepper(
+                                "",
+                                value: orderedStartQuestionValueBinding(
+                                    maximumQuestionCount: maximum
+                                ),
+                                in: 1...maximum
+                            )
+                            .labelsHidden()
+                            .fixedSize()
+                            Text("题开始，测验")
+                            TextField("1", text: $orderedQuestionCountText)
+                                .keyboardType(.numberPad)
+                                .textFieldStyle(.roundedBorder)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 52)
+                            Stepper(
+                                "",
+                                value: orderedQuestionCountValueBinding(
+                                    maximumQuestionCount: availableCount
+                                ),
+                                in: 1...availableCount
+                            )
+                            .labelsHidden()
+                            .fixedSize()
+                            Text("题")
+                        }
+
+                        if let start = Int(orderedStartQuestionText),
+                           let questionCount = Int(orderedQuestionCountText),
+                           let range = VocabularyTestQuestionRange.validated(
+                               startQuestion: start,
+                               questionCount: questionCount,
+                               maximumQuestionCount: snapshot.deckCards.count
+                           ) {
+                            LabeledContent("实际范围") {
+                                Text("第 \(range.lowerBound)–\(range.upperBound) 题")
+                                    .monospacedDigit()
+                            }
+                        } else {
+                            Text("范围超出当前 \(snapshot.deckCards.count) 题，请检查起始题号和测验题数。")
+                                .font(.footnote)
+                                .foregroundStyle(.red)
+                        }
+
+                        Text("按 \(deck.kind.collectionName)当前顺序出题，从起始题开始测验指定题数。")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -130,6 +204,14 @@ extension VocabularyTestView {
                             .monospacedDigit()
                     }
                     .accessibilityValue("5 题")
+                } else if selectedQuestionSelectionMode == .ordered {
+                    LabeledContent("题目数量") {
+                        Text("\(Int(orderedQuestionCountText) ?? 0) 题")
+                            .monospacedDigit()
+                    }
+                    Text("顺序出题不受常规测验最少 10 题限制，以输入的测验题数为准。")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 } else {
                     Stepper(
                         value: questionCountStepperValue(
@@ -164,26 +246,18 @@ extension VocabularyTestView {
             }
 
             Section {
-                HStack {
-                    Spacer()
-                    Button {
-                        startTest()
-                    } label: {
-                        Label(
-                            isDebugMode ? "开始调试" : "开始测验",
-                            systemImage: isDebugMode ? "ladybug.fill" : "play.fill"
-                        )
-                            .font(.headline)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 8)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .buttonBorderShape(.capsule)
-                    .controlSize(.large)
-                    .disabled(!canStart)
-                    Spacer()
+                Button {
+                    startTest()
+                } label: {
+                    Label(
+                        isDebugMode ? "开始调试" : "开始测验",
+                        systemImage: isDebugMode ? "ladybug.fill" : "play.fill"
+                    )
+                    .frame(maxWidth: .infinity, minHeight: 44)
                 }
-                .listRowBackground(Color.clear)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .disabled(!canStart)
             } footer: {
                 if isEnglishDefinitionTest,
                    snapshot.deckCards.count < VocabularyEnglishDefinitionQuestionCount.minimum {
@@ -198,18 +272,15 @@ extension VocabularyTestView {
                     Text("调试模式需要\(deck.kind.collectionName)中至少有 5 个\(deck.kind.itemName)。")
                 } else if selectedMode == .debug {
                     Text("调试结果只在当前页面显示，退出后不会出现在历史记录中。")
+                } else if deck.kind == .dictationChinese {
+                    Text("使用 Apple Pencil 手写默写内容，系统将通过本地文字识别逐字比较；无法辨认的字可能会判错。")
                 } else {
-                    Text("使用 Apple Pencil 手写英文答案，完成后由 AI 统一批改。题量最少为 10 题；\(deck.kind.collectionName)不足 10 题时使用全部题目。")
+                    Text("使用 Apple Pencil 手写英文答案，完成后由 AI 统一批改。随机出题时题量最少为 10 题；\(deck.kind.collectionName)不足 10 题时使用全部题目。")
                 }
             }
         }
-        .onAppear {
-            synchronizeSetupState(
-                maximumQuestionCount: snapshot.maximumQuestionCount,
-                availableCardIDs: availableCardIDs
-            )
-        }
-        .onChange(of: availableCardIDs) {
+        .controlSize(.large)
+        .task(id: availableCardIDs) {
             synchronizeSetupState(
                 maximumQuestionCount: snapshot.maximumQuestionCount,
                 availableCardIDs: availableCardIDs
@@ -221,18 +292,29 @@ extension VocabularyTestView {
         maximumQuestionCount: Int,
         availableCardIDs: Set<UUID>
     ) {
-        selectedEnglishDefinitionCardIDs.formIntersection(availableCardIDs)
+        let availableSelections = selectedEnglishDefinitionCardIDs
+            .intersection(availableCardIDs)
+        if selectedEnglishDefinitionCardIDs != availableSelections {
+            selectedEnglishDefinitionCardIDs = availableSelections
+        }
         if handwritingTestKind == .englishDefinition {
-            questionCount = VocabularyEnglishDefinitionQuestionCount.clamped(
+            let correctedQuestionCount = VocabularyEnglishDefinitionQuestionCount.clamped(
                 questionCount,
                 maximumQuestionCount: availableCardIDs.count
             )
+            if questionCount != correctedQuestionCount {
+                questionCount = correctedQuestionCount
+            }
         } else {
-            questionCount = VocabularyTestQuestionCount.clamped(
+            let correctedQuestionCount = VocabularyTestQuestionCount.clamped(
                 questionCount,
                 maximumQuestionCount: maximumQuestionCount
             )
+            if questionCount != correctedQuestionCount {
+                questionCount = correctedQuestionCount
+            }
         }
+
     }
 }
 

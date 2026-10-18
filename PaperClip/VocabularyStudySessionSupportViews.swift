@@ -4,14 +4,20 @@ struct VocabularyStudySessionItemRow: View {
     let item: VocabularyStudySessionItem
     let showsRecognizedText: Bool
 
+    private var isSuspectedPunctuation: Bool {
+        item.comment.hasPrefix(VocabularyGradingPolicy.suspectedPunctuationCommentPrefix)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Label(
-                item.isCorrect ? "正确" : "错误",
-                systemImage: item.isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill"
+                isSuspectedPunctuation ? "疑似标点" : (item.isCorrect ? "正确" : "错误"),
+                systemImage: isSuspectedPunctuation
+                    ? "questionmark.circle.fill"
+                    : (item.isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
             )
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(item.isCorrect ? Color.green : Color.red)
+            .foregroundStyle(isSuspectedPunctuation ? Color.orange : (item.isCorrect ? Color.green : Color.red))
 
             Text(item.prompt)
                 .font(.subheadline)
@@ -28,7 +34,7 @@ struct VocabularyStudySessionItemRow: View {
             if !item.comment.isEmpty, item.comment != "正确" {
                 Text(item.comment)
                     .font(.subheadline)
-                    .foregroundStyle(item.isCorrect ? Color.secondary : Color.red)
+                    .foregroundStyle(isSuspectedPunctuation ? Color.orange : (item.isCorrect ? Color.secondary : Color.red))
             }
         }
         .padding(.vertical, 6)

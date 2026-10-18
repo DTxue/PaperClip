@@ -7,7 +7,7 @@ struct VocabularyStudySessionSnapshotsTests {
         testScopeTitleHandlesEmptyAndNonPositiveLimits()
         testItemGroupsPreserveCorrectAndIncorrectOrder()
         testDurationFormattingClampsNegativeSeconds()
-        print("VocabularyStudySessionSnapshotsTests: 11 passed")
+        print("VocabularyStudySessionSnapshotsTests: passed")
     }
 
     private static func testSummaryAggregatesDurationAndAccuracy() {
@@ -47,7 +47,6 @@ struct VocabularyStudySessionSnapshotsTests {
         expect(VocabularyStudySessionFormat.duration(-4) == "0秒")
         expect(VocabularyStudySessionFormat.duration(65) == "1分5秒")
         expect(VocabularyStudySessionFormat.duration(3_660) == "1小时1分")
-        expect(VocabularyStudySessionFormat.clockDuration(30_735) == "08:32:15")
     }
 
     private static func makeItem(prompt: String, isCorrect: Bool) -> VocabularyStudySessionItem {

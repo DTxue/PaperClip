@@ -4,7 +4,6 @@ import UIKit
 enum VocabularyTestBatchStatus: String, Equatable {
     case answering
     case grading
-    case retrying
     case graded
     case failed
 }
@@ -16,13 +15,9 @@ struct VocabularyTestBatch: Identifiable {
     var drawings: [PKDrawing] = []
     var renderedImages: [UIImage?] = []
     var status: VocabularyTestBatchStatus = .answering
-    var gradingAttempts = 0
     var result: VocabularyGradingResult?
     var errorMessage: String?
 
-    var endIndex: Int {
-        startIndex + cards.count - 1
-    }
 }
 
 struct VocabularyGradedQuestion: Identifiable {
@@ -38,9 +33,6 @@ struct VocabularyGradedQuestion: Identifiable {
 struct VocabularyTestViewSnapshot {
     let deckCards: [VocabularyCard]
     let gradedQuestions: [VocabularyGradedQuestion]
-    let gradedBatchCount: Int
-    let failedBatchIndices: [Int]
-    let hasPendingGrading: Bool
     let maximumQuestionCount: Int
 
     init(
@@ -49,28 +41,7 @@ struct VocabularyTestViewSnapshot {
     ) {
         self.deckCards = deckCards
 
-        var questions: [VocabularyGradedQuestion] = []
-        var gradedCount = 0
-        var failedIndices: [Int] = []
-        var pending = false
-        for batchIndex in batches.indices {
-            let batch = batches[batchIndex]
-            switch batch.status {
-            case .graded:
-                gradedCount += 1
-            case .failed:
-                failedIndices.append(batchIndex)
-            case .grading, .retrying:
-                pending = true
-            case .answering:
-                break
-            }
-            questions.append(contentsOf: VocabularyTestBatchProjection.makeGradedQuestions(from: batch))
-        }
-        gradedQuestions = questions
-        gradedBatchCount = gradedCount
-        failedBatchIndices = failedIndices
-        hasPendingGrading = pending
+        gradedQuestions = VocabularyTestBatchProjection.gradedQuestions(from: batches)
         maximumQuestionCount = VocabularyTestQuestionCount.clamped(deckCards.count)
     }
 }

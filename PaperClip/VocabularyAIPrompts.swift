@@ -72,48 +72,47 @@ enum VocabularyAIPrompts {
         """
     }
 
-    static func gradingQuestionText(
-        index: Int,
-        term: String,
-        definition: String,
-        hasAnswer: Bool
-    ) -> String {
-        var text = "第\(index + 1)题\n中文含义：\(definition)\n正确英文：\(term)"
-        if !hasAnswer { text += "\n（未作答）" }
-        return text
-    }
-
-    static func gradingInstruction(count: Int) -> String {
-        """
-        请批改以上 \(count) 题手写答案。
-        判断标准：手写内容与正确英文拼写一致（忽略大小写，不允许拼写错误或遗漏字母）。未作答的题直接判为错误。
-        recognizedText 字段必须写 AI 识别出的学生手写英文；每一道已作答题都不得为空，未作答填空字符串。
-        comment 字段只写结论，不超过15字，不要写推理过程。
-        必须返回恰好 \(count) 个 items，index 必须从 1 到 \(count) 连续完整。
-        仅输出合法 JSON，不含 Markdown 代码块：
-        {"items":[{"index":1,"isCorrect":true,"recognizedText":"answer","comment":"正确"},{"index":2,"isCorrect":false,"recognizedText":"XXX","comment":"应为 XXX"}]}
-        """
-    }
-
     static func handwritingRecognitionQuestionText(
         index: Int,
-        prompt: String,
         hasAnswer: Bool
     ) -> String {
-        var text = "第\(index + 1)题\n题面：\(prompt)"
+        var text = "第\(index + 1)题"
         if !hasAnswer { text += "\n（未作答）" }
         return text
     }
 
-    static func handwritingRecognitionInstruction(count: Int) -> String {
-        """
-        请只识别以上 \(count) 题图片中的学生手写英文，不要批改、纠正、补全或改写。
-        题面只用于区分题目，不是答案；请勿把题面抄入 recognizedText。
-        已作答题的 recognizedText 必须忠实记录图片中的文字，未作答填空字符串。
+    static func handwritingRecognitionInstruction(count: Int, isChinese: Bool) -> String {
+        let languageInstruction: String
+        if isChinese {
+            languageInstruction = """
+            请识别图片中的学生手写中文，并逐字如实转写。
+            严禁参考常用语、成语、诗词名句、课文、名言、答案或上下文纠错、补全、替换或润色。
+            即使内容看起来明显有误，也只能照笔迹记录；看不清时输出替代字符“�”，不得猜测。
+            """
+        } else {
+            languageInstruction = "请识别图片中的学生手写英文。"
+        }
+        return """
+        第一原则：只识别以上 \(count) 题图片中的学生笔迹，并如实转写图片中实际可见的内容。
+        \(languageInstruction)
+        不要批改、纠正、补全、改写或猜测用户原本想写的答案，也不要利用语言知识修正笔迹。
+        必须保留识别到的字符、顺序和标点；不得擅自添加或删除字符。
+        已作答题的 recognizedText 必须忠实记录图片中的文字；整题无法可靠识别时填空字符串，不要猜测。未作答也填空字符串。
         isCorrect 固定返回 false，comment 固定返回空字符串；正确性将在本地与参考答案比较。
         必须返回恰好 \(count) 个 items，index 必须从 1 到 \(count) 连续完整。
         仅输出合法 JSON，不含 Markdown 代码块：
         {"items":[{"index":1,"isCorrect":false,"recognizedText":"student handwriting","comment":""}]}
+        """
+    }
+
+    static func chineseCharacterRecognitionInstruction() -> String {
+        """
+        本请求只识别当前图片中的一个方格和一个字符。
+        只根据当前字形识别一个汉字或标点，禁止结合其他格、词语、整句、答案或上下文判断。
+        不得按常用语、成语、诗词、课文或名言纠错、补全、替换或润色。即使结果不通顺，也必须照笔迹识别。
+        recognizedText 必须恰好是一个字符；无法可靠辨认时填“�”。isCorrect 固定为 false，comment 固定为空字符串。
+        仅输出一个 item，index 为 1，且只输出合法 JSON：
+        {"items":[{"index":1,"isCorrect":false,"recognizedText":"","comment":""}]}
         """
     }
 

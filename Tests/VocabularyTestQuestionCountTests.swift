@@ -6,7 +6,6 @@ struct VocabularyTestQuestionCountTests {
         testClampedQuestionCountBounds()
         testMinimumQuestionCountUsesTenOrAvailableTotal()
         testClampedQuestionCountRespectsMinimum()
-        testBatchCardCountsAreSummedBeforeClamping()
         testSliderRequiresNonDegenerateRange()
         testSelectableRangeSupportsDiscreteAdjustment()
         testDebugModeUsesExactlyFiveQuestions()
@@ -18,7 +17,7 @@ struct VocabularyTestQuestionCountTests {
         testEnglishDefinitionQuestionCountUsesFixedMinimum()
         testSessionSelectionStrategiesResolveTheirOwnQuestionCounts()
         testSpellingHandwritingKeepsExistingPromptAndAnswer()
-        print("VocabularyTestQuestionCountTests: 71 passed")
+        print("VocabularyTestQuestionCountTests: passed")
     }
 
     private static func testClampedQuestionCountBounds() {
@@ -27,11 +26,6 @@ struct VocabularyTestQuestionCountTests {
         expect(VocabularyTestQuestionCount.clamped(1) == 1)
         expect(VocabularyTestQuestionCount.clamped(7) == 7)
         expect(VocabularyTestQuestionCount.clamped(100) == 100)
-    }
-
-    private static func testBatchCardCountsAreSummedBeforeClamping() {
-        expect(VocabularyTestQuestionCount.maximum(inBatchCardCounts: []) == 1)
-        expect(VocabularyTestQuestionCount.maximum(inBatchCardCounts: [2, 3, 6]) == 11)
     }
 
     private static func testMinimumQuestionCountUsesTenOrAvailableTotal() {
@@ -93,7 +87,6 @@ struct VocabularyTestQuestionCountTests {
 
     private static func testDebugModeDoesNotRecordHistory() {
         expect(VocabularyTestMode.regular.recordsHistory)
-        expect(VocabularyTestMode.exam.recordsHistory)
         expect(!VocabularyTestMode.debug.recordsHistory)
     }
 

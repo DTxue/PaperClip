@@ -24,6 +24,20 @@ struct VocabularyDeckDistractorConfigSection: View {
     }
 }
 
+struct VocabularyDeckSentenceDistractorConfigSection: View {
+    @Binding var totalCount: Int
+
+    var body: some View {
+        Section {
+            Stepper("干扰词数量：\(totalCount)", value: $totalCount, in: 4...12)
+        } header: {
+            Text("干扰词配置")
+        } footer: {
+            Text("学习和测验的拼句题会从本句集的其他句子中抽取词语作为干扰项；正确词块不会重复加入。")
+        }
+    }
+}
+
 struct VocabularyDeckDistractorLibrarySection: View {
     let snapshot: VocabularyDeckSettingsSnapshot
     let isGenerating: Bool

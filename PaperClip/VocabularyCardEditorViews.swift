@@ -38,7 +38,7 @@ struct VocabularyCardEditorLoader: View {
 
 struct VocabularyCardEditorView: View {
     let deck: VocabularyDeck
-    let card: VocabularyCard?
+    let card: VocabularyCard
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -46,7 +46,7 @@ struct VocabularyCardEditorView: View {
     @State private var draft: VocabularyCardEditDraft
     @State private var alert: AppAlert?
 
-    init(deck: VocabularyDeck, card: VocabularyCard? = nil) {
+    init(deck: VocabularyDeck, card: VocabularyCard) {
         self.deck = deck
         self.card = card
         _draft = State(initialValue: VocabularyCardEditDraft(card: card))
@@ -56,7 +56,7 @@ struct VocabularyCardEditorView: View {
         Form {
             VocabularyCardEditorFormSections(draft: $draft, kind: deck.kind)
         }
-        .navigationTitle(card == nil ? "新增\(deck.kind.itemName)" : "编辑\(deck.kind.itemName)")
+        .navigationTitle("编辑\(deck.kind.itemName)")
         .navigationBarTitleDisplayMode(.inline)
         .editSheetToolbar(
             isConfirmDisabled: !draft.canSave,
@@ -69,20 +69,13 @@ struct VocabularyCardEditorView: View {
     private func save() {
         let snapshot = draft.snapshot
 
-        let target: VocabularyCard
-        if let card {
-            guard VocabularyCardEditSnapshot(card: card) != snapshot else {
-                dismiss()
-                return
-            }
-            target = card
-        } else {
-            target = VocabularyCard(deckID: deck.id, term: "", definition: "")
-            modelContext.insert(target)
+        guard VocabularyCardEditSnapshot(card: card) != snapshot else {
+            dismiss()
+            return
         }
 
-        snapshot.apply(to: target)
-        target.updatedAt = .now
+        snapshot.apply(to: card)
+        card.updatedAt = .now
         deck.updatedAt = .now
         do {
             try modelContext.saveOrRollbackIfNeeded()

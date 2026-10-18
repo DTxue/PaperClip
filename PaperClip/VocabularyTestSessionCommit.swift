@@ -1,22 +1,12 @@
 extension VocabularyTestView {
     func finishSessionIfReady() {
         guard !didRecordSession else { return }
-        guard let sessionMode else { return }
-
-        if sessionMode != .exam {
-            if batches.first?.status == .graded {
-                if sessionMode.recordsHistory {
-                    commitToScheduler(kind: handwritingTestKind.sessionKind)
-                } else {
-                    didRecordSession = true
-                }
-            }
-            return
+        guard let sessionMode, batches.first?.status == .graded else { return }
+        if sessionMode.recordsHistory {
+            commitToScheduler(kind: handwritingTestKind.sessionKind)
+        } else {
+            didRecordSession = true
         }
-
-        guard didFinishAnswering, !batches.isEmpty else { return }
-        guard batches.allSatisfy({ $0.status == .graded }) else { return }
-        commitToScheduler(kind: handwritingTestKind.sessionKind)
     }
 
     func commitToScheduler(kind: String) {
@@ -31,6 +21,7 @@ extension VocabularyTestView {
                 batches: batches,
                 handwritingTestKind: handwritingTestKind,
                 kind: kind,
+                testSelectionDescription: activeTestSelectionDescription,
                 startedAt: startedAt,
                 modelContext: modelContext
             ) { batch, drawingIndex in

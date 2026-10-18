@@ -22,6 +22,8 @@ struct VocabularyTestDraftSavePayload {
     let batches: [VocabularyTestDraftBatchSnapshot]
 }
 
+// Dormant draft records remain in V1–V5 for existing stores and explicit deck deletion.
+// Current quizzes do not create or restore these records.
 extension PaperClipSchemaV1 {
 @Model
 final class VocabularyTestDraft {
@@ -67,30 +69,6 @@ final class VocabularyTestDraft {
             from: batchesJSON,
             fallback: []
         )
-    }
-
-    @discardableResult
-    func update(payload: VocabularyTestDraftSavePayload) -> Bool {
-        let nextBatchesJSON = VocabularyJSONStorage.encode(payload.batches)
-        let hasChanges = self.batchSize != payload.batchSize
-            || self.currentBatchIndex != payload.currentBatchIndex
-            || self.currentQuestionIndex != payload.currentQuestionIndex
-            || self.currentDrawingData != payload.currentDrawingData
-            || self.didFinishAnswering != payload.didFinishAnswering
-            || self.startedAt != payload.startedAt
-            || self.batchesJSON != nextBatchesJSON
-
-        guard hasChanges else { return false }
-
-        self.batchSize = payload.batchSize
-        self.currentBatchIndex = payload.currentBatchIndex
-        self.currentQuestionIndex = payload.currentQuestionIndex
-        self.currentDrawingData = payload.currentDrawingData
-        self.didFinishAnswering = payload.didFinishAnswering
-        self.startedAt = payload.startedAt
-        self.updatedAt = .now
-        self.batchesJSON = nextBatchesJSON
-        return true
     }
 
 }

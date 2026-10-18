@@ -79,14 +79,6 @@ enum VocabularyTextRowBuilder {
         )
     }
 
-    static func invalidRow(index: Int, term: String, error: String) -> VocabularyImportRow {
-        makeRow(
-            id: index,
-            term: term.trimmingCharacters(in: .whitespacesAndNewlines),
-            definition: "",
-            error: error
-        )
-    }
 }
 
 private extension Array {

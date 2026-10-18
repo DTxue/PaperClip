@@ -2,7 +2,6 @@ import SwiftUI
 
 struct DiaryEntryReadSections: View {
     let entry: DiaryEntry
-    let includeAI: Bool
 
     var body: some View {
         let contentPresence = entry.contentPresence
@@ -18,8 +17,7 @@ struct DiaryEntryReadSections: View {
                     icon: "book.fill",
                     color: .blue,
                     title: "今天学了什么",
-                    original: entry.learned,
-                    ai: includeAI ? entry.aiLearned : nil
+                    original: entry.learned
                 )
             }
             if contentPresence.hasConfused {
@@ -27,8 +25,7 @@ struct DiaryEntryReadSections: View {
                     icon: "questionmark.circle.fill",
                     color: .orange,
                     title: "今天哪些地方没搞懂",
-                    original: entry.confused,
-                    ai: includeAI ? entry.aiConfused : nil
+                    original: entry.confused
                 )
             }
             if contentPresence.hasNoted {
@@ -44,8 +41,7 @@ struct DiaryEntryReadSections: View {
                     icon: "lightbulb.fill",
                     color: .yellow,
                     title: "今天有什么灵光一闪的想法",
-                    original: entry.inspired,
-                    ai: includeAI ? entry.aiInspired : nil
+                    original: entry.inspired
                 )
             }
         }

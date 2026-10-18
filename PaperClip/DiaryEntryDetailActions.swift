@@ -34,19 +34,15 @@ extension DiaryEntryDetailPane {
             return
         }
 
-        let aiContentChanged = editContent.aiContentDiffers(from: entry)
+        let knowledgeContentChanged = editContent.knowledgeContentDiffers(from: entry)
 
         editContent.apply(to: entry)
         entry.updatedAt = .now
 
-        if aiContentChanged {
+        if knowledgeContentChanged {
             for item in entry.items {
                 modelContext.delete(item)
             }
-            entry.aiState = "pending"
-            entry.aiLearned = ""
-            entry.aiConfused = ""
-            entry.aiInspired = ""
         }
 
         guard saveDiaryChanges(alertTitle: "无法保存日记") else { return }

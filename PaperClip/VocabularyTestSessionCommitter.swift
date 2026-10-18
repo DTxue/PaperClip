@@ -8,6 +8,7 @@ enum VocabularyTestSessionCommitter {
         batches: [VocabularyTestBatch],
         handwritingTestKind: VocabularyHandwritingTestKind,
         kind: String,
+        testSelectionDescription: String?,
         startedAt: Date,
         modelContext: ModelContext,
         drawingData: (VocabularyTestBatch, Int) -> Data
@@ -60,9 +61,7 @@ enum VocabularyTestSessionCommitter {
                         ),
                         isCorrect: isCorrect,
                         recognizedText: gradingItem?.recognizedText ?? gradingItem?.comment ?? "",
-                        comment: gradingItem?.comment ?? "",
-                        keepsRecognizedTextForCorrectAnswer:
-                            handwritingTestKind == .englishDefinition
+                        comment: gradingItem?.comment ?? ""
                     )
                 )
             }
@@ -73,7 +72,8 @@ enum VocabularyTestSessionCommitter {
             kind: kind,
             startedAt: startedAt,
             endedAt: endedAt,
-            items: sessionItems
+            items: sessionItems,
+            testSelectionDescription: testSelectionDescription
         ).makeSession() else { return false }
         modelContext.insert(session)
         return true

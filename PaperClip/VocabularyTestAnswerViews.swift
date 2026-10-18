@@ -1,6 +1,32 @@
 import SwiftUI
 
 extension VocabularyTestView {
+    func orderedStartQuestionValueBinding(maximumQuestionCount: Int) -> Binding<Int> {
+        Binding(
+            get: {
+                let maximum = max(1, maximumQuestionCount)
+                return min(max(1, Int(orderedStartQuestionText) ?? 1), maximum)
+            },
+            set: {
+                let maximum = max(1, maximumQuestionCount)
+                orderedStartQuestionText = String(min(max(1, $0), maximum))
+            }
+        )
+    }
+
+    func orderedQuestionCountValueBinding(maximumQuestionCount: Int) -> Binding<Int> {
+        Binding(
+            get: {
+                let maximum = max(1, maximumQuestionCount)
+                return min(max(1, Int(orderedQuestionCountText) ?? 1), maximum)
+            },
+            set: {
+                let maximum = max(1, maximumQuestionCount)
+                orderedQuestionCountText = String(min(max(1, $0), maximum))
+            }
+        )
+    }
+
     func questionCountStepperValue(maximumQuestionCount: Int) -> Binding<Int> {
         Binding(
             get: {
@@ -84,33 +110,20 @@ extension VocabularyTestView {
         Group {
             if batches.isEmpty {
                 setupView(snapshot)
-            } else if sessionMode != .exam {
-                regularSessionView(snapshot)
-            } else if !didFinishAnswering {
-                answeringView(snapshot)
-            } else if snapshot.hasPendingGrading {
-                VocabularyTestExamFinalizingView(
-                    gradedBatchCount: snapshot.gradedBatchCount,
-                    batchCount: batches.count
-                )
-            } else if !snapshot.failedBatchIndices.isEmpty {
-                VocabularyTestFailureView(
-                    failedBatchIndices: snapshot.failedBatchIndices,
-                    batches: batches,
-                    retryAll: retryFailedBatches,
-                    retryBatch: { startBatchGrading(batchIndex: $0, automaticRetry: false) }
-                )
             } else {
-                VocabularyTestResultsView(
-                    title: handwritingTestKind.completionTitle,
-                    handwritingTestKind: handwritingTestKind,
-                    questions: snapshot.gradedQuestions,
-                    enlargedImage: $enlargedImage
-                )
+                regularSessionView(snapshot)
             }
         }
         .navigationTitle(handwritingTestKind.navigationTitle)
+        .navigationBarBackButtonHidden(isTestNavigationLocked)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                if activeBatch?.status == .answering {
+                    Button("返回", systemImage: "chevron.left") {
+                        isConfirmingTestExit = true
+                    }
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 if showsAnswerAdvanceAction {
                     if isLastQuestionInActiveBatch {
@@ -126,6 +139,18 @@ extension VocabularyTestView {
                     }
                 }
             }
+        }
+        .confirmationDialog(
+            "结束本次测验？",
+            isPresented: $isConfirmingTestExit,
+            titleVisibility: .visible
+        ) {
+            Button("结束并批阅", role: .destructive) {
+                finishTestEarly()
+            }
+            Button("继续测验", role: .cancel) {}
+        } message: {
+            Text("已作答内容将提交，所有未作答题目将按错误计入结果。")
         }
         .confirmationDialog(
             "当前题尚未作答",
@@ -161,9 +186,12 @@ extension VocabularyTestView {
     }
 
     var showsAnswerAdvanceAction: Bool {
-        !didFinishAnswering
-            && currentCard != nil
+        currentCard != nil
             && activeBatch?.status == .answering
+    }
+
+    var isTestNavigationLocked: Bool {
+        activeBatch?.status == .answering || activeBatch?.status == .grading
     }
 
     var isLastQuestionInActiveBatch: Bool {
@@ -171,11 +199,7 @@ extension VocabularyTestView {
     }
 
     var answerAdvanceActionTitle: String {
-        VocabularyAnsweringActionTitle.title(
-            isExam: sessionMode == .exam,
-            isLastInBatch: isLastQuestionInActiveBatch,
-            isLastBatch: currentBatchIndex + 1 == batches.count
-        )
+        VocabularyAnsweringActionTitle.title(isLastInBatch: isLastQuestionInActiveBatch)
     }
 
     var emptyAnswerConfirmationActionTitle: String {

@@ -22,8 +22,8 @@ struct DiaryEntryContentPresence: Equatable {
         hasLearned || hasConfused || hasNoted || hasInspired
     }
 
-    var hasAIProcessableContent: Bool {
-        hasLearned || hasConfused || hasInspired
+    var hasKnowledgeSourceContent: Bool {
+        hasLearned || hasConfused
     }
 
     private static func hasMeaningfulText(_ text: String) -> Bool {

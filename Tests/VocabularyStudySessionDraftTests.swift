@@ -5,7 +5,8 @@ enum VocabularyStudySessionDraftTests {
     static func main() {
         testEmptyDraftIsNotRecordable()
         testMakesSessionFromItems()
-        print("VocabularyStudySessionDraftTests: 2 passed")
+        testSelectionDescriptionRoundTripsAndKeepsLegacyItems()
+        print("VocabularyStudySessionDraftTests: 3 passed")
     }
 
     private static func testEmptyDraftIsNotRecordable() {
@@ -50,6 +51,31 @@ enum VocabularyStudySessionDraftTests {
         expect(session?.duration == 60)
         expect(session?.totalCount == 1)
         expect(session?.correctCount == 1)
+    }
+
+    private static func testSelectionDescriptionRoundTripsAndKeepsLegacyItems() {
+        let item = VocabularyStudySessionItem(
+            cardID: UUID(),
+            prompt: "meaning",
+            expectedAnswer: "term",
+            isCorrect: true
+        )
+        let session = VocabularyStudySession(
+            deckID: UUID(),
+            kind: "测验",
+            startedAt: .now,
+            items: [item],
+            testSelectionDescription: "按顺序 · 第 5–12 题"
+        )
+
+        expect(session.items.count == 1)
+        expect(session.items.first?.id == item.id)
+        expect(session.testSelectionDescription == "按顺序 · 第 5–12 题")
+
+        session.itemsJSON = VocabularyJSONStorage.encode([item])
+        expect(session.items.count == 1)
+        expect(session.items.first?.id == item.id)
+        expect(session.testSelectionDescription == nil)
     }
 
     private static func expect(

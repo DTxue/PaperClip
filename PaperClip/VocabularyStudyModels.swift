@@ -2,6 +2,11 @@ import Foundation
 import SwiftData
 
 extension PaperClipSchemaV1 {
+private struct VocabularyStudySessionPayload: Codable {
+    let items: [VocabularyStudySessionItem]
+    let testSelectionDescription: String?
+}
+
 @Model
 final class VocabularyStudySession {
     static var deletionPropertiesToFetch: [PartialKeyPath<VocabularyStudySession>] {
@@ -27,7 +32,8 @@ final class VocabularyStudySession {
         duration: Double,
         totalCount: Int,
         correctCount: Int,
-        items: [VocabularyStudySessionItem]
+        items: [VocabularyStudySessionItem],
+        testSelectionDescription: String? = nil
     ) {
         self.id = id
         self.deckID = deckID
@@ -37,7 +43,12 @@ final class VocabularyStudySession {
         self.duration = duration
         self.totalCount = totalCount
         self.correctCount = correctCount
-        self.itemsJSON = VocabularyJSONStorage.encode(items)
+        self.itemsJSON = VocabularyJSONStorage.encode(
+            VocabularyStudySessionPayload(
+                items: items,
+                testSelectionDescription: testSelectionDescription
+            )
+        )
     }
 
     convenience init(
@@ -45,7 +56,8 @@ final class VocabularyStudySession {
         kind: String,
         startedAt: Date,
         endedAt: Date = .now,
-        items: [VocabularyStudySessionItem]
+        items: [VocabularyStudySessionItem],
+        testSelectionDescription: String? = nil
     ) {
         let metrics = VocabularyStudySessionMetrics(correctness: items.map(\.isCorrect))
         self.init(
@@ -56,12 +68,30 @@ final class VocabularyStudySession {
             duration: endedAt.timeIntervalSince(startedAt),
             totalCount: metrics.totalCount,
             correctCount: metrics.correctCount,
-            items: items
+            items: items,
+            testSelectionDescription: testSelectionDescription
         )
     }
 
     var items: [VocabularyStudySessionItem] {
-        VocabularyJSONStorage.decode([VocabularyStudySessionItem].self, from: itemsJSON, fallback: [])
+        if let payload = VocabularyJSONStorage.decodeOptional(
+            VocabularyStudySessionPayload.self,
+            from: itemsJSON
+        ) {
+            return payload.items
+        }
+        return VocabularyJSONStorage.decode(
+            [VocabularyStudySessionItem].self,
+            from: itemsJSON,
+            fallback: []
+        )
+    }
+
+    var testSelectionDescription: String? {
+        VocabularyJSONStorage.decodeOptional(
+            VocabularyStudySessionPayload.self,
+            from: itemsJSON
+        )?.testSelectionDescription
     }
 
     var accuracy: Double {

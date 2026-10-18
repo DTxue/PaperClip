@@ -9,6 +9,7 @@ enum VocabularyTestSessionCommitTransaction {
         batches: [VocabularyTestBatch],
         handwritingTestKind: VocabularyHandwritingTestKind,
         kind: String,
+        testSelectionDescription: String?,
         startedAt: Date,
         modelContext: ModelContext,
         drawingData: (VocabularyTestBatch, Int) -> Data
@@ -18,6 +19,7 @@ enum VocabularyTestSessionCommitTransaction {
             batches: batches,
             handwritingTestKind: handwritingTestKind,
             kind: kind,
+            testSelectionDescription: testSelectionDescription,
             startedAt: startedAt,
             modelContext: modelContext,
             drawingData: drawingData

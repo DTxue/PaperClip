@@ -9,20 +9,6 @@ enum VocabularyStudySessionItemFactory {
         direction == .termToDefinition ? card.definition : card.term
     }
 
-    static func makeFlashcardReview(
-        card: VocabularyCard,
-        direction: VocabularyDirection,
-        rating: VocabularyReviewRating
-    ) -> VocabularyStudySessionItem {
-        VocabularyStudySessionItem(
-            cardID: card.id,
-            prompt: prompt(for: card, direction: direction),
-            expectedAnswer: answer(for: card, direction: direction),
-            isCorrect: rating.isPassingRecall,
-            comment: rating.title
-        )
-    }
-
     static func makeWordBankAnswer(
         card: VocabularyCard,
         placedWords: [String],
@@ -44,15 +30,14 @@ enum VocabularyStudySessionItemFactory {
         expectedAnswer: String? = nil,
         isCorrect: Bool,
         recognizedText: String,
-        comment: String,
-        keepsRecognizedTextForCorrectAnswer: Bool = false
+        comment: String
     ) -> VocabularyStudySessionItem {
         VocabularyStudySessionItem(
             cardID: card.id,
             prompt: prompt ?? card.definition,
             expectedAnswer: expectedAnswer ?? card.term,
             isCorrect: isCorrect,
-            recognizedText: isCorrect && !keepsRecognizedTextForCorrectAnswer ? "" : recognizedText,
+            recognizedText: recognizedText,
             comment: comment
         )
     }

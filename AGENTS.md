@@ -8,7 +8,7 @@ PaperClip 仍处于快速迭代期。开发时优先保证：
 
 - 数据安全：不得丢失用户笔迹、试卷、错题、作文、词汇等数据；
 - 原 PDF 不变：答题、批改、框选、导出都应独立于源 PDF；
-- 原生交互稳定：优先保持 PDFKit、PencilKit、SwiftUI 的系统行为；
+- 原生交互稳定：优先保持 PencilKit、SwiftUI 和系统文档扫描的行为；
 - 模块边界清晰：新能力应落在合适的领域模块中；
 - 适度打磨：功能未稳定前，不做大范围视觉或架构重塑。
 
@@ -31,16 +31,14 @@ PaperClip 仍处于快速迭代期。开发时优先保证：
 
 目前允许保留自定义实现的方向：
 
-- PDF 页面坐标上的错题框选；
-- 不修改源 PDF 的答题图层；
-- 浮动草稿板；
-- 错题卡业务展示；
-- 错题集排版和 PDF 生成。
+- 相册／扫描图片上的单题框选；
+- 错题重做与词汇测验的独立手写记录；
+- 错题卡业务展示及题目公式排版。
 
 即使使用自定义实现，也应继续基于系统能力：
 
-- PDF 显示和坐标转换基于 PDFKit；
-- 手写和草稿基于 PencilKit；
+- 图片框选与图像输出基于系统图像能力，不覆盖相册或扫描源；
+- 手写基于 PencilKit；
 - 画笔工具基于 `PKToolPicker`；
 - 分享、导入、弹窗、菜单、导航优先使用 SwiftUI/系统组件。
 
@@ -59,14 +57,17 @@ PaperClip 仍处于快速迭代期。开发时优先保证：
 
 业务逻辑应放在对应领域模块中，View 只表达界面结构和用户意图。
 
-PDF 做题相关的大致边界：
+当前模块的大致边界：
 
-- `PDFWorkspaceSession` 管理当前工作区会话状态；
-- `PDFAnswerLayerStore` 管理答题图层持久化；
-- `PDFExam*` 管理考试 attempt、历史、提交和批阅；
-- `PDFKitCanvas*` 管理 PDFKit/PencilKit 桥接和画布交互。
+- `Diary*`／`HomeKnowledge*` 管理日记和知识点；
+- `MistakeLibraryPersistence`、`MistakeAttachmentStore`、`MistakeReviewEngine` 管理错题持久化、附件和复习规则；
+- `Vocabulary*` 管理学习集、导入、学习、测验与记忆调度；
+- `AIService*` 管理模型接入、请求与解码；
+- `SharedPencil*`／`VocabularyHandwriting*` 管理 PencilKit 桥接；
+- `Persistence/Compatibility` 集中已下线功能的历史模型、Schema 和迁移计划。
 
-避免把 SwiftData 写入、AI 请求、PDF 渲染、PencilKit 事件处理全部堆回单个 View。
+避免把 SwiftData 写入、AI 请求、图像渲染、PencilKit 事件处理全部堆回单个 View。
+PDF 做题、独立考试、词生文和作文已下线；历史数据及源 PDF 的保护要求继续适用。兼容声明不得因无页面调用而直接删除或改变存储身份。
 
 ## 6. 数据安全红线
 
@@ -87,7 +88,7 @@ PDF 做题相关的大致边界：
 - 纯逻辑优先用 Swift 测试覆盖；
 - SwiftData 写入、删除和事务优先用 in-memory 测试覆盖；
 - UI 和平台交互至少完成项目可支持 SDK 的完整构建；
-- PDFKit、PencilKit、滚动缩放、Apple Pencil/手指分流等真实交互，需要在 iPad 模拟器或真机上验证；
+- PencilKit、文档扫描、图片框选、Apple Pencil/手指分流等真实交互，需要在 iPad 模拟器或真机上验证；
 - 自动化无法覆盖的交互，应记录手工验证结果或未验证原因。
 
 ## 8. Git 与交付

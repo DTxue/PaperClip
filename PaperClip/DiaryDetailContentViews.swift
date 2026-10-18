@@ -18,7 +18,7 @@ struct DiaryEntryReadOnlyContent: View {
                     Divider()
                 }
 
-                DiaryEntryReadSections(entry: entry, includeAI: false)
+                DiaryEntryReadSections(entry: entry)
             }
             .frame(maxWidth: 800, alignment: .leading)
             .padding(.horizontal, 28)
@@ -49,7 +49,7 @@ struct DiaryEntryReadOnlyContent: View {
                 .tint(.orange)
             }
 
-            if entry.hasAIProcessableContent {
+            if entry.hasKnowledgeSourceContent {
                 Button(action: onStartDrafting) {
                     Label("AI 整理", systemImage: "brain")
                 }

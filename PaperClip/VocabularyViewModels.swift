@@ -6,6 +6,8 @@ extension VocabularyDeckKind {
         switch self {
         case .word: "词集"
         case .sentence: "句集"
+        case .dictationChinese: "语文默写集"
+        case .dictationOther: "其他默写集"
         }
     }
 
@@ -13,6 +15,8 @@ extension VocabularyDeckKind {
         switch self {
         case .word: "单词"
         case .sentence: "短语与句子"
+        case .dictationChinese: "语文"
+        case .dictationOther: "其他"
         }
     }
 
@@ -20,6 +24,8 @@ extension VocabularyDeckKind {
         switch self {
         case .word: "单词"
         case .sentence: "短语或句子"
+        case .dictationChinese: "默写内容"
+        case .dictationOther: "默写内容"
         }
     }
 
@@ -27,6 +33,8 @@ extension VocabularyDeckKind {
         switch self {
         case .word: "character.book.closed.fill"
         case .sentence: "text.quote"
+        case .dictationChinese: "character.book.closed"
+        case .dictationOther: "text.quote"
         }
     }
 
@@ -34,6 +42,8 @@ extension VocabularyDeckKind {
         switch self {
         case .word: "\(count) 个单词"
         case .sentence: "\(count) 条短语或句子"
+        case .dictationChinese: "\(count) 条默写内容"
+        case .dictationOther: "\(count) 条默写内容"
         }
     }
 
@@ -41,6 +51,7 @@ extension VocabularyDeckKind {
         switch self {
         case .word: "每日新词：\(count)"
         case .sentence: "每日新内容：\(count)"
+        case .dictationChinese, .dictationOther: "每日新内容：\(count)"
         }
     }
 }

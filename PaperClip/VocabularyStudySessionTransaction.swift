@@ -23,8 +23,4 @@ enum VocabularyStudySessionTransaction {
         return true
     }
 
-    @MainActor
-    static func saveProgress(in modelContext: ModelContext) throws {
-        try modelContext.saveOrRollbackIfNeeded()
-    }
 }

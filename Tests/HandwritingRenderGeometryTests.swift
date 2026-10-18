@@ -51,24 +51,11 @@ func testInkCropSpecRejectsInvalidInput() {
     )
 }
 
-func testFullCanvasSpecUsesCanvasSizeAndScale() {
-    let spec = HandwritingRenderGeometry.fullCanvasSpec(
-        canvasSize: CGSize(width: 820, height: 1500),
-        scale: 2
-    )
-
-    expect(spec != nil, "valid canvas should produce a render spec")
-    expect(spec!.sourceRect == CGRect(x: 0, y: 0, width: 820, height: 1500), "source rect should match canvas")
-    expect(spec!.outputSize == CGSize(width: 820, height: 1500), "logical output size should match canvas")
-    expectEqual(spec!.drawingScale, 2, "drawing scale should be preserved")
-}
-
 @main
 enum HandwritingRenderGeometryTestRunner {
     static func main() {
         testInkCropSpecAppliesPaddingAndScale()
         testInkCropSpecRejectsInvalidInput()
-        testFullCanvasSpecUsesCanvasSizeAndScale()
-        print("HandwritingRenderGeometryTests: 3 passed")
+        print("HandwritingRenderGeometryTests: 2 passed")
     }
 }

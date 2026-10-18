@@ -11,22 +11,6 @@ extension ModelContext {
         return try fetchFirst(descriptor)
     }
 
-    func fetchVocabularyStudySessions(
-        deckID: UUID,
-        limit: Int,
-        propertiesToFetch: [PartialKeyPath<VocabularyStudySession>] = []
-    ) throws -> [VocabularyStudySession] {
-        var descriptor = FetchDescriptor<VocabularyStudySession>(
-            predicate: #Predicate<VocabularyStudySession> { session in
-                session.deckID == deckID
-            },
-            sortBy: [SortDescriptor(\.endedAt, order: .reverse)]
-        )
-        descriptor.fetchLimit = limit
-        descriptor.propertiesToFetch = propertiesToFetch
-        return try fetch(descriptor)
-    }
-
     func fetchVocabularyScoreSessions(
         deckID: UUID,
         limit: Int,

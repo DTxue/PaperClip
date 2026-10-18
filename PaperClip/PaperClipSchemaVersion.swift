@@ -19,3 +19,6 @@ enum PaperClipSchemaV4 {}
 
 /// Removes the retired writing entities while keeping every active domain.
 enum PaperClipSchemaV5 {}
+
+/// Permanently retires the mistake library and removes its persisted entities.
+enum PaperClipSchemaV6 {}

@@ -4,7 +4,26 @@ import Foundation
 struct DiaryKnowledgeSnapshotTests {
     static func main() {
         testSnapshotGroupsDraftsConfirmedItemsAndAnalysisProgress()
-        print("DiaryKnowledgeSnapshotTests: 1 passed")
+        testKnowledgeExtractionUsesOnlyCurrentSources()
+        print("DiaryKnowledgeSnapshotTests: 2 passed")
+    }
+
+    private static func testKnowledgeExtractionUsesOnlyCurrentSources() {
+        let entry = DiaryEntry(date: .now)
+        entry.inspired = "只有灵感的日记"
+        entry.noted = "随手记录"
+        expect(entry.hasAnyContent, "inspiration and notes remain ordinary diary content")
+        expect(!entry.hasKnowledgeSourceContent, "retired inspiration analysis must not expose an empty knowledge action")
+
+        entry.learned = "待整理的学习内容"
+        expect(entry.hasKnowledgeSourceContent, "learned content still enables knowledge extraction")
+        var edit = DiaryEntryEditableContent(entry: entry)
+        edit.inspired = "修改灵感"
+        edit.noted = "修改随手记"
+        expect(edit.differs(from: entry), "ordinary edits remain saveable")
+        expect(!edit.knowledgeContentDiffers(from: entry), "ordinary edits must not invalidate learned/confused knowledge")
+        edit.confused = "新的困惑"
+        expect(edit.knowledgeContentDiffers(from: entry), "changing a current extraction source still invalidates its analysis")
     }
 
     private static func testSnapshotGroupsDraftsConfirmedItemsAndAnalysisProgress() {

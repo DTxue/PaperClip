@@ -24,7 +24,7 @@ struct AIKeySettingsSection: View {
                 isVisible: $isDeepSeekAPIKeyVisible
             )
         } header: { Text("API 密钥") } footer: {
-            Text("密钥仅保存在本机 Keychain，供日记、知识库和 ENG 功能使用。")
+            Text("密钥仅保存在本机 Keychain，供日记、知识库和英语学习功能使用。")
         }
     }
 }

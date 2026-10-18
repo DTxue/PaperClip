@@ -13,25 +13,16 @@ struct PencilDrawingCanvas: UIViewRepresentable {
     var isOpaque = false
     var accessibilityLabel: String
     var toolAutosaveName: String
-    var preferredTool: PKTool?
-    var preferredToolID: String?
-    var viewport: PencilCanvasViewport?
 
     func makeUIView(context: Context) -> PKCanvasView {
         let canvas = PKCanvasView()
         canvas.configureSharedPencilCanvas(
             backgroundColor: backgroundColor,
-            isOpaque: isOpaque,
-            viewport: viewport
+            isOpaque: isOpaque
         )
         canvas.delegate = context.coordinator
         canvas.drawing = drawing
         canvas.accessibilityLabel = accessibilityLabel
-        context.coordinator.lastViewport = viewport
-        if let preferredTool {
-            canvas.tool = preferredTool
-            context.coordinator.appliedPreferredToolID = preferredToolID
-        }
         context.coordinator.toolPickerController.register(canvas)
         return canvas
     }
@@ -40,9 +31,7 @@ struct PencilDrawingCanvas: UIViewRepresentable {
         canvas.isUserInteractionEnabled = isEnabled
         canvas.updateSharedPencilCanvas(
             backgroundColor: backgroundColor,
-            isOpaque: isOpaque,
-            viewport: viewport,
-            lastViewport: &context.coordinator.lastViewport
+            isOpaque: isOpaque
         )
         if context.coordinator.lastReloadToken != reloadToken {
             canvas.delegate = nil
@@ -50,12 +39,6 @@ struct PencilDrawingCanvas: UIViewRepresentable {
             canvas.delegate = context.coordinator
             context.coordinator.lastReloadToken = reloadToken
         }
-        if let preferredTool,
-           context.coordinator.appliedPreferredToolID != preferredToolID {
-            canvas.tool = preferredTool
-            context.coordinator.appliedPreferredToolID = preferredToolID
-        }
-
         context.coordinator.toolPickerController.updateVisibility(
             isEnabled: isEnabled,
             for: canvas
@@ -75,9 +58,7 @@ struct PencilDrawingCanvas: UIViewRepresentable {
     final class Coordinator: NSObject, PKCanvasViewDelegate {
         private var drawing: Binding<PKDrawing>
         let toolPickerController: SharedPencilToolPickerController
-        var appliedPreferredToolID: String?
         var lastReloadToken = 0
-        var lastViewport: PencilCanvasViewport?
 
         init(drawing: Binding<PKDrawing>, toolAutosaveName: String) {
             self.drawing = drawing

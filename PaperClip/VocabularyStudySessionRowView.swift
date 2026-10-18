@@ -24,6 +24,12 @@ struct VocabularyStudySessionRowView: View {
                 }
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+
+                if let selectionDescription = session.testSelectionDescription {
+                    Text(selectionDescription)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
             Spacer()
             Image(systemName: "chevron.right")

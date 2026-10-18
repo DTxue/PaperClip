@@ -23,12 +23,4 @@ enum DrawingDataSupport {
         !drawing.strokes.isEmpty
     }
 
-    static func visibleDrawing(from data: Data?) -> PKDrawing? {
-        guard let drawing = data.flatMap(drawing(from:)),
-              hasInk(drawing)
-        else {
-            return nil
-        }
-        return drawing
-    }
 }

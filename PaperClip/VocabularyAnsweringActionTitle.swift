@@ -1,8 +1,6 @@
 enum VocabularyAnsweringActionTitle {
-    static func title(isExam: Bool, isLastInBatch: Bool, isLastBatch: Bool) -> String {
-        guard isLastInBatch else { return "下一题" }
-        guard isExam else { return "提交答卷" }
-        return isLastBatch ? "提交全卷" : "提交并继续"
+    static func title(isLastInBatch: Bool) -> String {
+        isLastInBatch ? "提交答卷" : "下一题"
     }
 }
 
@@ -25,6 +23,24 @@ enum VocabularyAnswerAdvancePolicy {
             answeredQuestionIndex: answeredQuestionIndex,
             drawingIndex: drawingIndex
         )
+    }
+}
+
+enum VocabularyTestEarlyFinishPolicy {
+    static func completedAnswers<Answer>(
+        submittedAnswers: [Answer],
+        currentAnswer: Answer,
+        totalQuestionCount: Int,
+        blankAnswer: @autoclosure () -> Answer
+    ) -> [Answer] {
+        guard totalQuestionCount > 0 else { return [] }
+
+        var answers = Array(submittedAnswers.prefix(totalQuestionCount - 1))
+        answers.append(currentAnswer)
+        while answers.count < totalQuestionCount {
+            answers.append(blankAnswer())
+        }
+        return answers
     }
 }
 

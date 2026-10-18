@@ -10,16 +10,6 @@ extension AIService {
         .image(url: try makeImageDataURL(fromJPEGData: data))
     }
 
-    static func imageThenTextContent(
-        image: UIImage,
-        text: String
-    ) throws -> [ResponsesRequest.Content] {
-        [
-            try imageContent(from: image),
-            .text(text)
-        ]
-    }
-
     static func makeImageDataURL(from image: UIImage) throws -> String {
         let data = try encodedJPEGData(from: image)
         return try makeImageDataURL(fromJPEGData: data)

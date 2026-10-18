@@ -1,11 +1,11 @@
 import Foundation
 
 enum LegacyMistakeDataCleanup {
-    private static let completionKey = "paperClip.legacyMistakeCleanup.v1.completed"
-    private static let safetyBackupPathKey = "paperClip.legacyMistakeCleanup.v1.backupPath"
+    private static let completionKey = "paperClip.mistakeRetirement.v1.completed"
+    private static let safetyBackupPathKey = "paperClip.mistakeRetirement.v1.backupPath"
 
     /// Creates a recoverable snapshot before opening the persistent container,
-    /// because opening it performs the V1 -> V2 destructive migration.
+    /// because opening it performs the destructive migration to V6.
     @discardableResult
     static func prepareSafetyBackupIfNeeded(
         applicationSupport: URL = AppStorageDirectory.applicationSupport,
@@ -14,7 +14,7 @@ enum LegacyMistakeDataCleanup {
         fileManager: FileManager = .default
     ) throws -> URL? {
         let legacyRoot = applicationSupport.appendingPathComponent("PaperClip", isDirectory: true)
-        let legacyURLs = ["Cards", "Exports"].map {
+        let legacyURLs = ["Cards", "Exports", "MistakeAttachments"].map {
             legacyRoot.appendingPathComponent($0, isDirectory: true)
         }
         let hasLegacyFiles = legacyURLs.contains { fileManager.fileExists(atPath: $0.path) }

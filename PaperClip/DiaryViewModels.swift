@@ -47,10 +47,9 @@ struct DiaryEntryEditableContent {
             || inspired != entry.inspired
     }
 
-    func aiContentDiffers(from entry: DiaryEntry) -> Bool {
+    func knowledgeContentDiffers(from entry: DiaryEntry) -> Bool {
         learned != entry.learned
             || confused != entry.confused
-            || inspired != entry.inspired
     }
 
     func apply(to entry: DiaryEntry) {

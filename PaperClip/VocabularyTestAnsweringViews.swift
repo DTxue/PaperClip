@@ -6,8 +6,12 @@ extension VocabularyTestView {
     func regularSessionView(_ snapshot: VocabularyTestViewSnapshot) -> some View {
         if let batch = batches.first {
             switch batch.status {
-            case .grading, .retrying:
-                VocabularyTestGradingView(message: handwritingTestKind.gradingMessage)
+            case .grading:
+                VocabularyTestGradingView(
+                    message: deck.kind == .dictationChinese
+                        ? usesLocalChineseRecognition ? "正在本机识别中文笔迹…" : "AI 正在识别中文笔迹…"
+                        : handwritingTestKind.gradingMessage
+                )
             case .graded:
                 VocabularyTestResultsView(
                     title: sessionMode == .debug ? "调试完成" : handwritingTestKind.completionTitle,
@@ -17,30 +21,26 @@ extension VocabularyTestView {
                 )
             case .failed:
                 VocabularyTestErrorView(message: batch.errorMessage ?? "请稍后重试。") {
-                    startBatchGrading(batchIndex: 0, automaticRetry: false)
+                    startBatchGrading(batchIndex: 0)
                 }
             case .answering:
-                answeringView(snapshot)
+                answeringView()
             }
         } else {
             setupView(snapshot)
         }
     }
 
-    func answeringView(_ snapshot: VocabularyTestViewSnapshot) -> some View {
+    func answeringView() -> some View {
         VocabularyTestAnsweringContentView(
-            sessionMode: sessionMode,
             handwritingTestKind: handwritingTestKind,
-            snapshot: snapshot,
-            batches: batches,
+            usesChineseCharacterByCharacterRecognition: usesChineseCharacterByCharacterRecognition,
             activeBatch: activeBatch,
-            currentBatchIndex: currentBatchIndex,
             currentIndex: currentIndex,
             currentCard: currentCard,
             currentDrawing: $currentDrawing,
             answerCanvasSession: answerCanvasSession,
-            currentDrawingReloadToken: currentDrawingReloadToken,
-            didFinishAnswering: didFinishAnswering
+            currentDrawingReloadToken: currentDrawingReloadToken
         )
     }
 

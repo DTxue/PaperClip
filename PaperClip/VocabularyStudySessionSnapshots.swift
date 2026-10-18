@@ -44,6 +44,7 @@ struct VocabularyStudySessionRowData: Identifiable, Hashable {
     let duration: Double
     let totalCount: Int
     let correctCount: Int
+    let testSelectionDescription: String?
 
     init(session: VocabularyStudySession) {
         id = session.id
@@ -52,6 +53,7 @@ struct VocabularyStudySessionRowData: Identifiable, Hashable {
         duration = session.duration
         totalCount = session.totalCount
         correctCount = session.correctCount
+        testSelectionDescription = session.testSelectionDescription
     }
 
     var errorRate: Double { metrics.errorRate }
@@ -59,7 +61,7 @@ struct VocabularyStudySessionRowData: Identifiable, Hashable {
     var metrics: VocabularyStudySessionMetrics { VocabularyStudySessionMetrics(totalCount: totalCount, correctCount: correctCount) }
 
     static var propertiesToFetch: [PartialKeyPath<VocabularyStudySession>] {
-        [\.id, \.deckID, \.kind, \.endedAt, \.duration, \.totalCount, \.correctCount]
+        [\.id, \.deckID, \.kind, \.endedAt, \.duration, \.totalCount, \.correctCount, \.itemsJSON]
     }
 }
 

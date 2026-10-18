@@ -1,39 +1,20 @@
 import Foundation
 
 enum VocabularyTextImporter {
-    static func parse(_ text: String, format requested: VocabularyTextFormat = .automatic) -> VocabularyImportResult {
+    static func parse(_ text: String, format: VocabularyTextFormat) -> VocabularyImportResult {
         let normalized = text
             .replacingOccurrences(of: "\r\n", with: "\n")
             .replacingOccurrences(of: "\r", with: "\n")
-        let format = requested == .automatic ? detectFormat(normalized) : requested
         let rows: [VocabularyImportRow]
 
         switch format {
-        case .json:
-            rows = VocabularyTextParserSupport.parseJSON(normalized)
         case .pairedLines:
-            rows = VocabularyTextParserSupport.parsePairedLines(normalized)
-        case .markdown:
-            rows = VocabularyTextParserSupport.parseDelimited(normalized, delimiter: "|", markdown: true)
+            rows = VocabularyPairedLineTextParser.parse(normalized)
         case .tab:
-            rows = VocabularyTextParserSupport.parseDelimited(normalized, delimiter: "\t")
-        case .pipe:
-            rows = VocabularyTextParserSupport.parseDelimited(normalized, delimiter: "|")
-        case .equals:
-            rows = VocabularyTextParserSupport.parseDelimited(normalized, delimiter: "=")
-        case .colon:
-            rows = VocabularyTextParserSupport.parseColon(normalized)
-        case .dash:
-            rows = VocabularyTextParserSupport.parseDash(normalized)
+            rows = VocabularyDelimitedTextParser.parse(normalized, delimiter: "\t")
         case .comma:
-            rows = VocabularyTextParserSupport.parseCSV(normalized)
-        case .automatic:
-            rows = []
+            rows = VocabularyDelimitedTextParser.parseCSV(normalized)
         }
         return VocabularyImportResult(format: format, rows: rows)
-    }
-
-    static func detectFormat(_ text: String) -> VocabularyTextFormat {
-        VocabularyTextParserSupport.detectFormat(text)
     }
 }

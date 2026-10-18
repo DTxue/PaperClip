@@ -16,10 +16,10 @@ enum AppStorageDirectory {
         return url
     }()
 
-    static let mistakeAttachments = directory(named: "MistakeAttachments")
-
     static var legacyMistakeDataURLs: [URL] {
-        ["Cards", "Exports"].map { root.appendingPathComponent($0, isDirectory: true) }
+        ["Cards", "Exports", "MistakeAttachments"].map {
+            root.appendingPathComponent($0, isDirectory: true)
+        }
     }
 
     private static func directory(named name: String) -> URL {
@@ -403,14 +403,6 @@ enum PaperClipDataBackupService {
             .appendingPathComponent("PaperClipPendingRestore", isDirectory: true)
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         return root
-    }
-
-    private static func recreateDirectory(at url: URL) throws {
-        let fileManager = FileManager.default
-        if fileManager.fileExists(atPath: url.path) {
-            try fileManager.removeItem(at: url)
-        }
-        try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
     }
 
     private static func validateBackup(at backupURL: URL) throws {

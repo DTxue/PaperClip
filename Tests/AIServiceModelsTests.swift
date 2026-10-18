@@ -12,7 +12,6 @@ struct AIServiceModelsTests {
     static func main() throws {
         try testVocabularyGradingDefaults()
         try testVocabularyGradingOutputTokenBudgetScalesWithQuestionCount()
-        try testDiaryRequestConfiguration()
         try testKnowledgeRequestConfiguration()
         try testFixedProviderRequestConfiguration()
 
@@ -42,18 +41,6 @@ struct AIServiceModelsTests {
             VocabularyGradingOutputBudget.maxTokens(questionCount: 60) <= 8_192,
             "large grading batches should stay under the app's normal doubao answer token ceiling"
         )
-    }
-
-    private static func testDiaryRequestConfiguration() throws {
-        let doubao = AIRequestConfiguration.diary(model: .doubao)
-        expect(doubao.thinking == "disabled", "doubao diary requests should not enable thinking")
-        expect(doubao.maxOutputTokens == 2_048, "doubao diary token budget should preserve existing behavior")
-        expect(doubao.modelName == "豆包日记", "doubao diary model name should use short title")
-
-        let deepSeek = AIRequestConfiguration.diary(model: .deepSeek)
-        expect(deepSeek.thinking == "enabled", "deepSeek diary requests should enable thinking")
-        expect(deepSeek.maxOutputTokens == 4_096, "deepSeek diary token budget should preserve existing behavior")
-        expect(deepSeek.modelName == "DeepSeek日记", "deepSeek diary model name should use short title")
     }
 
     private static func testKnowledgeRequestConfiguration() throws {

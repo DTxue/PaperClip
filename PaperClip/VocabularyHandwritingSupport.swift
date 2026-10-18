@@ -2,35 +2,6 @@ import SwiftUI
 import PencilKit
 import UIKit
 
-struct VocabularyAnsweringProgressSnapshot {
-    let answeredQuestionCount: Int
-    let totalQuestionCount: Int
-
-    init(
-        batches: [VocabularyTestBatch],
-        currentBatchIndex: Int,
-        currentIndex: Int,
-        didFinishAnswering: Bool
-    ) {
-        var answered = 0
-        var total = 0
-
-        for batchIndex in batches.indices {
-            let count = batches[batchIndex].cards.count
-            total += count
-            if batchIndex < currentBatchIndex
-                || (didFinishAnswering && batchIndex == currentBatchIndex) {
-                answered += count
-            } else if batchIndex == currentBatchIndex {
-                answered += currentIndex
-            }
-        }
-
-        answeredQuestionCount = answered
-        totalQuestionCount = total
-    }
-}
-
 enum VocabularyHandwritingImageRenderer {
     static func render(_ drawings: [PKDrawing]) async -> [UIImage?] {
         await Task.detached(priority: .userInitiated) {
@@ -42,15 +13,6 @@ enum VocabularyHandwritingImageRenderer {
             }
             return images
         }.value
-    }
-
-    @MainActor
-    static func renderOnMainActor(_ drawings: [PKDrawing]) -> [UIImage?] {
-        drawings.map { drawing in
-            autoreleasepool {
-                renderSynchronously(drawing)
-            }
-        }
     }
 
     private static func renderForRecognition(_ drawing: PKDrawing) async -> UIImage? {
@@ -69,23 +31,6 @@ enum VocabularyHandwritingImageRenderer {
         )
 
         return visibleImage(from: bitmap)
-    }
-
-    private static func renderSynchronously(_ drawing: PKDrawing) -> UIImage? {
-        guard DrawingDataSupport.hasInk(drawing) else { return nil }
-        guard let spec = HandwritingRenderGeometry.inkCropSpec(inkBounds: drawing.bounds) else {
-            return nil
-        }
-        let image = ImageRenderSupport.opaqueImage(size: spec.outputSize) { context in
-            ImageRenderSupport.fillWhiteBackground(
-                in: CGRect(origin: .zero, size: spec.outputSize),
-                context: context
-            )
-            normalizedForRecognition(drawing)
-                .image(from: spec.sourceRect, scale: spec.drawingScale)
-                .draw(in: CGRect(origin: .zero, size: spec.outputSize))
-        }
-        return containsVisibleInk(image) ? image : nil
     }
 
     private static func normalizedForRecognition(_ drawing: PKDrawing) -> PKDrawing {
@@ -138,22 +83,6 @@ enum VocabularyHandwritingImageRenderer {
         return UIImage(cgImage: cgImage)
     }
 
-    private static func containsVisibleInk(_ image: UIImage) -> Bool {
-        guard let cgImage = image.cgImage,
-              let bitmap = makeBitmap(size: image.size)
-        else { return false }
-        fillWhite(bitmap.context, size: image.size)
-        bitmap.context.draw(
-            cgImage,
-            in: CGRect(origin: .zero, size: image.size)
-        )
-        return containsVisibleInk(
-            context: bitmap.context,
-            width: bitmap.width,
-            height: bitmap.height
-        )
-    }
-
     private static func containsVisibleInk(
         context: CGContext,
         width: Int,
@@ -181,10 +110,18 @@ enum VocabularyHandwritingImageRenderer {
 final class VocabularyAnswerCanvasSession {
     private weak var canvas: PKCanvasView?
     private var latestDrawing = PKDrawing()
+    private var latestCanvasSize = CGSize.zero
+    var canvasSize: CGSize { latestCanvasSize }
+
+    func updateCanvasSize(_ size: CGSize) {
+        guard size.width > 0, size.height > 0 else { return }
+        latestCanvasSize = size
+    }
 
     func attach(_ canvas: PKCanvasView) {
         self.canvas = canvas
         latestDrawing = canvas.drawing
+        updateCanvasSize(canvas.bounds.size)
     }
 
     func detach(_ canvas: PKCanvasView) {
@@ -216,14 +153,14 @@ struct VocabularyHandwritingCanvas: UIViewRepresentable {
     @Binding var drawing: PKDrawing
     let session: VocabularyAnswerCanvasSession
     let isEnabled: Bool
+    let usesChineseGridRecognition: Bool
     var reloadToken = 0
 
     func makeUIView(context: Context) -> PKCanvasView {
         let canvas = PKCanvasView()
         canvas.configureSharedPencilCanvas(
-            backgroundColor: .secondarySystemBackground,
-            isOpaque: true,
-            viewport: nil
+            backgroundColor: usesChineseGridRecognition ? .clear : .secondarySystemBackground,
+            isOpaque: !usesChineseGridRecognition
         )
         canvas.delegate = context.coordinator
         canvas.drawing = drawing
@@ -236,6 +173,10 @@ struct VocabularyHandwritingCanvas: UIViewRepresentable {
 
     func updateUIView(_ canvas: PKCanvasView, context: Context) {
         canvas.isUserInteractionEnabled = isEnabled
+        canvas.updateSharedPencilCanvas(
+            backgroundColor: usesChineseGridRecognition ? .clear : .secondarySystemBackground,
+            isOpaque: !usesChineseGridRecognition
+        )
         context.coordinator.toolPickerController.updateVisibility(
             isEnabled: isEnabled,
             for: canvas

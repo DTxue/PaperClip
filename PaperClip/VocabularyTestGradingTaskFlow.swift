@@ -1,7 +1,7 @@
 import Foundation
 
 extension VocabularyTestView {
-    func startBatchGrading(batchIndex: Int, automaticRetry: Bool) {
+    func startBatchGrading(batchIndex: Int) {
         guard batches.indices.contains(batchIndex) else { return }
         let batchID = batches[batchIndex].id
         let taskContext = gradingTaskStore.prepareTask(batchID: batchID)
@@ -9,7 +9,6 @@ extension VocabularyTestView {
         batches[batchIndex].errorMessage = nil
         batches[batchIndex].result = nil
         batches[batchIndex].renderedImages = []
-        batches[batchIndex].gradingAttempts = 0
 
         let task = VocabularyBatchGradingRunner.makeTask(
             request: VocabularyBatchGradingRequest(
@@ -17,6 +16,10 @@ extension VocabularyTestView {
                 batchID: batchID,
                 context: taskContext,
                 kind: handwritingTestKind,
+                isChinese: deck.kind == .dictationChinese,
+                usesChineseCharacterByCharacterRecognition: usesChineseCharacterByCharacterRecognition,
+                usesLocalChineseRecognition: usesLocalChineseRecognition,
+                canvasSize: answerCanvasSession.canvasSize,
                 cards: batches[batchIndex].cards.map {
                     VocabularyHandwritingGradingCard(
                         term: $0.term,
@@ -24,8 +27,7 @@ extension VocabularyTestView {
                         englishDefinition: $0.englishDefinition
                     )
                 },
-                drawings: batches[batchIndex].drawings,
-                automaticRetry: automaticRetry
+                drawings: batches[batchIndex].drawings
             ),
             callbacks: VocabularyBatchGradingCallbacks(
                 isCurrent: { context, batchID, batchIndex in
@@ -35,10 +37,6 @@ extension VocabularyTestView {
                         batchID: batchID,
                         batchIndex: batchIndex
                     )
-                },
-                markAttempt: { batchIndex, attempt, status in
-                    batches[batchIndex].status = status
-                    batches[batchIndex].gradingAttempts = attempt
                 },
                 finishSuccess: { batchIndex, images, result, context in
                     batches[batchIndex].renderedImages = images
@@ -93,9 +91,4 @@ extension VocabularyTestView {
         gradingTaskStore.clear(batchID: batchID, taskID: taskID)
     }
 
-    func retryFailedBatches() {
-        for index in VocabularyTestBatchProjection.failedBatchIndices(in: batches) {
-            startBatchGrading(batchIndex: index, automaticRetry: false)
-        }
-    }
 }

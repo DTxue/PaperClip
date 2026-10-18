@@ -43,18 +43,6 @@ extension ModelContext {
         return try fetch(descriptor)
     }
 
-    func fetchRecentDiaryEntries(
-        limit: Int,
-        propertiesToFetch: [PartialKeyPath<DiaryEntry>] = []
-    ) throws -> [DiaryEntry] {
-        var descriptor = FetchDescriptor<DiaryEntry>(
-            sortBy: [SortDescriptor(\.date, order: .reverse)]
-        )
-        descriptor.fetchLimit = limit
-        descriptor.propertiesToFetch = propertiesToFetch
-        return try fetch(descriptor)
-    }
-
     func fetchKnowledgeItem(id: UUID) throws -> KnowledgeItem? {
         let descriptor = FetchDescriptor<KnowledgeItem>(
             predicate: #Predicate<KnowledgeItem> { item in

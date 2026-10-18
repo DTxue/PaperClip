@@ -5,7 +5,6 @@ enum KeychainKey: String {
     case doubaoAPIKey = "com.paperclip.doubao-api-key"
     case doubaoModelID = "com.paperclip.doubao-model-id"
     case deepSeekAPIKey = "com.paperclip.deepseek-api-key"
-    case deepSeekModelID = "com.paperclip.deepseek-model-id"
     // 旧版本视觉接入点键仅用于首次读取迁移，新的 AI 实现不再写入。
     case doubaoVisionEndpoint = "com.paperclip.doubao-vision-endpoint"
 }

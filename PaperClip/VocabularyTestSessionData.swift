@@ -55,7 +55,30 @@ extension VocabularyTestView {
                 }
                 return
             }
-            selectionStrategy = .prioritized
+            if selectedMode == .debug {
+                selectionStrategy = .prioritized
+            } else {
+                switch selectedQuestionSelectionMode {
+                case .ordered:
+                    guard let range = VocabularyTestQuestionRange.validated(
+                        startQuestion: Int(orderedStartQuestionText) ?? 0,
+                        questionCount: Int(orderedQuestionCountText) ?? 0,
+                        maximumQuestionCount: allCards.count
+                    ) else {
+                        alert = AppAlert(
+                            title: "选题范围无效",
+                            message: "当前 \(deck.kind.collectionName)共有 \(allCards.count) 题，请输入有效的起始题号和测验题数。"
+                        )
+                        return
+                    }
+                    selectionStrategy = .orderedRange(
+                        startQuestion: range.lowerBound,
+                        endQuestion: range.upperBound
+                    )
+                case .random:
+                    selectionStrategy = .randomStandard
+                }
+            }
         }
 
         restartGradingSession()
@@ -75,6 +98,7 @@ extension VocabularyTestView {
         )
         questionCount = plan.questionCount
         batches = plan.batches
+        activeTestSelectionDescription = testSelectionDescription(for: selectionStrategy)
         draftDrawingDataCache.removeAll()
         sessionMode = plan.mode
         currentBatchIndex = 0
@@ -82,7 +106,20 @@ extension VocabularyTestView {
         replaceCurrentDrawing(with: PKDrawing())
         startedAt = .now
         didRecordSession = false
-        didFinishAnswering = false
+    }
+
+    private func testSelectionDescription(
+        for strategy: VocabularyTestQuestionSelectionStrategy
+    ) -> String? {
+        guard handwritingTestKind == .spelling, selectedMode != .debug else { return nil }
+        switch strategy {
+        case .randomStandard:
+            return "随机"
+        case let .orderedRange(startQuestion, endQuestion):
+            return "按顺序 · 第 \(startQuestion)–\(endQuestion) 题"
+        default:
+            return nil
+        }
     }
 
     func fetchSessionData() {

@@ -10,6 +10,7 @@ final class DiaryEntry {
     var confused: String
     var noted: String
     var inspired: String
+    // Legacy whole-entry AI results: retained unchanged for V1–V5 store compatibility.
     var aiLearned: String
     var aiConfused: String
     var aiInspired: String
@@ -38,8 +39,8 @@ final class DiaryEntry {
         contentPresence.hasAnyContent
     }
 
-    var hasAIProcessableContent: Bool {
-        contentPresence.hasAIProcessableContent
+    var hasKnowledgeSourceContent: Bool {
+        contentPresence.hasKnowledgeSourceContent
     }
 
     var contentPresence: DiaryEntryContentPresence {
@@ -62,6 +63,7 @@ final class KnowledgeItem {
     var diaryDate: Date
     var aiEssence: String = ""        // 理解层：本质理解
     var aiFormula: String = ""        // 理解层：公式/规律
+    // Retired analysis field; preserve existing store data without exposing it in current UI.
     var aiExamPattern: String = ""    // 应试层：命题规律
     var aiSolutionPath: String = ""   // 应试层：解题路径
     var aiTrap: String = ""           // 应试层：易错陷阱

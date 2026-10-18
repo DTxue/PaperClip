@@ -6,6 +6,7 @@ enum VocabularyGradingPolicyTests {
         try testBlankAnswersCannotBeMarkedCorrect()
         try testRecognizedAnswerDeterminesCorrectness()
         try testRecognizedSpellingErrorOverridesContradictoryAIResult()
+        try testSpellingIgnoresFormattingPunctuationButPreservesApostrophes()
         try testEnglishDefinitionUsesOnlyAllowedNormalization()
         try testEnglishDefinitionRejectsOtherDifferences()
         testMissingAIItemsAreErrors()
@@ -61,7 +62,7 @@ enum VocabularyGradingPolicyTests {
                       "index": 1,
                       "isCorrect": true,
                       "comment": "正确",
-                      "recognizedText": "pen"
+                      "recognizedText": "  pen  "
                     },
                     {
                       "index": 2,
@@ -83,7 +84,7 @@ enum VocabularyGradingPolicyTests {
 
         expect(result.items.count == 2)
         expect(result.items[0].isCorrect)
-        expect(result.items[0].recognizedText == "pen")
+        expect(result.items[0].recognizedText == "  pen  ")
         expect(!result.items[1].isCorrect)
         expect(result.items[1].comment == "未作答")
     }
@@ -98,7 +99,7 @@ enum VocabularyGradingPolicyTests {
                     {
                       "index": 1,
                       "isCorrect": true,
-                      "comment": "答案应为 lie，此处拼写错误",
+                      "comment": "可以接受",
                       "recognizedText": "lier"
                     }
                   ]
@@ -116,7 +117,42 @@ enum VocabularyGradingPolicyTests {
         expect(result.items.count == 1)
         expect(!result.items[0].isCorrect)
         expect(result.items[0].recognizedText == "lier")
-        expect(result.items[0].comment.contains("lie"))
+        expect(result.items[0].comment == "答案应为 lie")
+    }
+
+    private static func testSpellingIgnoresFormattingPunctuationButPreservesApostrophes() throws {
+        let acceptedPairs = [
+            (recognized: "sb", expected: "sb."),
+            (recognized: "sth", expected: "sth."),
+            (recognized: "1.8 meter tall", expected: "1.8-meter-tall"),
+            (recognized: "well known", expected: "well-known"),
+            (recognized: "can’t", expected: "can't")
+        ]
+
+        for pair in acceptedPairs {
+            let result = VocabularyGradingPolicy.validated(
+                try gradingResult(recognizedText: pair.recognized, aiIsCorrect: false),
+                expectedAnswers: [pair.expected],
+                hasVisibleAnswers: [true]
+            )
+            expect(result.items[0].isCorrect)
+            expect(result.items[0].recognizedText == pair.recognized)
+        }
+
+        let missingApostrophe = VocabularyGradingPolicy.validated(
+            try gradingResult(recognizedText: "cant", aiIsCorrect: true),
+            expectedAnswers: ["can't"],
+            hasVisibleAnswers: [true]
+        )
+        expect(!missingApostrophe.items[0].isCorrect)
+        expect(missingApostrophe.items[0].recognizedText == "cant")
+
+        let changedDigit = VocabularyGradingPolicy.validated(
+            try gradingResult(recognizedText: "1.9 meter tall", aiIsCorrect: true),
+            expectedAnswers: ["1.8-meter-tall"],
+            hasVisibleAnswers: [true]
+        )
+        expect(!changedDigit.items[0].isCorrect)
     }
 
     private static func testEnglishDefinitionUsesOnlyAllowedNormalization() throws {
